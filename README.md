@@ -1,33 +1,40 @@
-# 📄 DocFlow
+# 📄 DocFlow — Gestão & Guarda Continuada de Documentos Acadêmicos
 
-> **Central de Gestão, Armazenamento e Validação de Documentos Acadêmicos.**
-
-O **DocFlow** é uma solução SaaS projetada para automatizar e organizar o fluxo de entrega, auditoria e custódia de documentos de alunos em instituições de ensino. O sistema conecta a secretaria acadêmica aos estudantes, garantindo integridade, controle de prazos e conformidade regulatória.
+> **Plataforma B2B SaaS para centralização, auditoria e guarda segura de documentos de aprendizes e estagiários, projetada sob a arquitetura DDD Lite e estrita conformidade com a LGPD.**
 
 ---
 
-## 🎯 Proposta do Sistema
+## 🎯 1. Visão Geral & Proposta de Valor
 
-As instituições de ensino lidam diariamente com um alto volume de documentos físicos e digitais desorganizados. O DocFlow centraliza esse processo através de um fluxo estruturado de envio, análise e aprovação.
+No ciclo de vida pós-contratação de aprendizes e estagiários, a gestão documental enfrenta gargalos operacionais e riscos jurídicos severos:
 
-A plataforma atua em três níveis independentes de acesso:
+* **Riscos e Sanções LGPD:** Exposição indevida de dados pessoais sensíveis (filiação, biometria) em canais desprotegidos.
+* **Cancelamento Indevido de Contratos:** Perda de prazos na renovação de comprovantes de matrícula semestrais, resultando na anulação do vínculo de estágio.
+* **Ausência de Trilha de Auditoria:** Falta de rastreabilidade sobre quem visualizou, aprovou, baixou ou rejeitou documentos operacionais.
+* **Ameaças Digitais:** Upload de scripts maliciosos camuflados em extensões de arquivo comuns (PDF, PNG, JPG).
 
-* **Administração DocFlow (Master):** Gestão global do SaaS, acompanhamento de métricas de recebimento, onboarding de novas instituições e controle de licenças.
-* **Coordenadores Locais (Instituição):** Painel de auditoria para visualização, validação, aprovação ou rejeição de documentos enviados pelos alunos da sua unidade.
-* **Alunos:** Interface simples para upload de arquivos solicitados, acompanhamento do status de análise em tempo real e reenvio de pendências.
-
----
-
-## 🚀 Principais Módulos
-
-* **Gestão Multitenant:** Isolamento completo de dados entre diferentes instituições de ensino.
-* **Esteira de Validação:** Fila de trabalho otimizada para o coordenador validar a veracidade e legibilidade dos documentos.
-* **Histórico e Auditoria:** Registro detalhado de logs de envio, aprovação e recusa para conformidade institucional.
-* **Notificações em Tempo Real:** Alertas de pendências e atualizações de status para os alunos.
+O **DocFlow** resolve essas vulnerabilidades combinando isolamento arquitetural por camadas (**DDD Lite**), guard-rails automáticos de segurança e dashboards analíticos por turma.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 🏗️ 2. Arquitetura de Software: Padrão DDD Lite
 
-* **Frontend & Interface:** Next.js (App Router), TypeScript e Tailwind CSS para uma experiência visual responsiva e de alta performance.
-* **Backend & Processamento de Dados:** Python para criação dos serviços de backend, regras de negócio, manipulação segura de arquivos e automação no tratamento de documentos. 
+O sistema adota a abordagem **DDD Lite (Domain-Driven Design Lite)**, desacoplando completamente as regras puras de negócio dos frameworks web e mecanismos de persistência.
+
+```text
+┌────────────────────────────────────────────────────────┐
+│                INFRASTRUCTURE LAYER                    │
+│  FastAPI (Web API v1) • SQLAlchemy ORM • Storage UUID  │
+│  Append-Only Audit Logger • Middlewares & CORS         │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │                APPLICATION LAYER                 │  │
+│  │  Casos de Uso: UploadDoc, ValidateDoc, Redact    │  │
+│  │  TurmaMetricsService • DTOs & Schemas Pydantic   │  │
+│  │  ┌────────────────────────────────────────────┐  │  │
+│  │  │                DOMAIN LAYER                │  │  │
+│  │  │  Entidades: Student, Document, AuditLog    │  │  │
+│  │  │  Value Objects: CPF, DocumentValidity      │  │  │
+│  │  │  Interfaces de Repositório (Contratos)     │  │  │
+│  │  └────────────────────────────────────────────┘  │  │
+│  └──────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────┘

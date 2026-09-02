@@ -1,4 +1,4 @@
-export type UserRole = 'ESTUDANTE' | 'COORDENADOR' | 'GESTOR_RH' | 'DPO';
+export type UserRole = 'ESTUDANTE' | 'COORDENADOR' | 'SUPERADMIN';
 
 export type TipoDocumento =
   | 'RG'
@@ -76,6 +76,16 @@ export interface Turma {
   alunosRegulares: number;
 }
 
+export interface SystemUser {
+  id: string;
+  nome: string;
+  email: string;
+  role: UserRole;
+  cargo: string;
+  status: 'ATIVO' | 'INATIVO';
+  ultimoAcesso: string;
+}
+
 export type AuditAction =
   | 'DOCUMENT_UPLOAD'
   | 'DOCUMENT_APPROVAL'
@@ -83,7 +93,8 @@ export type AuditAction =
   | 'DOCUMENT_VIEW_REDACTED'
   | 'DOCUMENT_VIEW_UNMASKED'
   | 'DOSSIER_BULK_DOWNLOAD'
-  | 'LGPD_CONSENT_REGISTER'
+  | 'USER_ROLE_CHANGED'
+  | 'SYSTEM_CONFIG_UPDATED'
   | 'SYSTEM_MAGIC_BYTES_VALIDATION';
 
 export interface AuditLog {

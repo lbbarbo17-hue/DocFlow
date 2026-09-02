@@ -8,12 +8,14 @@ import {
   AuditLog,
   DocumentItem,
   StatusDocumento,
+  SystemUser,
 } from '@/lib/types';
 import {
   CURRENT_STUDENT,
   INITIAL_STUDENTS,
   INITIAL_TURMAS,
   INITIAL_AUDIT_LOGS,
+  INITIAL_SYSTEM_USERS,
 } from '@/lib/mockData';
 import { computeSHA256, generateStorageUUID } from '@/lib/utils';
 
@@ -23,6 +25,7 @@ interface AppContextType {
   student: Student;
   studentsList: Student[];
   turmas: Turma[];
+  systemUsers: SystemUser[];
   auditLogs: AuditLog[];
   isLgpdRedactionActive: boolean;
   setIsLgpdRedactionActive: (active: boolean) => void;
@@ -36,6 +39,8 @@ interface AppContextType {
     justificativa?: string
   ) => void;
   addAuditEntry: (entry: Omit<AuditLog, 'id' | 'timestampUtc'>) => void;
+  updateUserRole: (userId: string, newRole: UserRole) => void;
+  addNewTurma: (turma: Turma) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -44,7 +49,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [currentRole, setCurrentRole] = useState<UserRole>('ESTUDANTE');
   const [student, setStudent] = useState<Student>(CURRENT_STUDENT);
   const [studentsList, setStudentsList] = useState<Student[]>(INITIAL_STUDENTS);
-  const [turmas] = useState<Turma[]>(INITIAL_TURMAS);
+  const [turmas, setTurmas] = useState<Turma[]>(INITIAL_TURMAS);
+  const [systemUsers, setSystemUsers] = useState<SystemUser[]>(INITIAL_SYSTEM_USERS);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
   const [isLgpdRedactionActive, setIsLgpdRedactionActive] = useState<boolean>(true);
   const [toastMessage, setToastMessage] = useState<{
@@ -157,14 +163,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       resourceTipo: `Documento: ${file.name}`,
       ipAddress: '177.132.89.201',
       status: 'SUCCESS',
-      detalhes: `Upload com inspeção de Magic Bytes aprovada. Armazenado sob UUID ${storageUuid}.`,
+      detalhes: `Upload com validação de formato e segurança. Armazenado sob UUID ${storageUuid}.`,
       sha256Hash: sha256,
       storageUuid,
     });
 
     setToastMessage({
       title: 'Documento Enviado com Sucesso!',
-      desc: `Magic Bytes validados e hash SHA-256 gerado (${sha256.substring(0, 12)}...).`,
+      desc: `Arquivo validado e registrado sob hash SHA-256 (${sha256.substring(0, 12)}...).`,
       type: 'success',
     });
 
@@ -186,7 +192,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 ...d,
                 status: newStatus,
                 justificativaRecusa: newStatus === 'RECUSADO' ? justificativa : undefined,
-                aprovadoPor: currentRole === 'COORDENADOR' ? 'Coordenação de Curso' : 'Gestão de RH',
+                aprovadoPor: currentRole === 'COORDENADOR' ? 'Coordenação / RH' : 'Super Admin',
                 dataAvaliacao: new Date().toISOString(),
               };
             }
@@ -223,7 +229,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     addAuditEntry({
       userId: 'usr-evaluator',
-      userNome: currentRole === 'COORDENADOR' ? 'Coordenação Acadêmica' : 'Gestão Corporativa RH',
+      userNome: currentRole === 'COORDENADOR' ? 'Coordenação de Curso / RH' : 'Super Administrador',
       userRole: currentRole,
       action: newStatus === 'APROVADO' ? 'DOCUMENT_APPROVAL' : 'DOCUMENT_REJECTION',
       resourceId: docId,
@@ -248,6 +254,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const updateUserRole = (userId: string, newRole: UserRole) => {
+    setSystemUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
+    );
+    addAuditEntry({
+      userId: 'usr-admin',
+      userNome: 'Super Administrador',
+      userRole: 'SUPERADMIN',
+      action: 'USER_ROLE_CHANGED',
+      resourceId: userId,
+      resourceTipo: `Usuário do Sistema: ${userId}`,
+      ipAddress: '200.180.99.12',
+      status: 'SUCCESS',
+      detalhes: `Perfil de acesso alterado para ${newRole}.`,
+      sha256Hash: 'HASH-ALTERACAO-PERFIL',
+    });
+    setToastMessage({
+      title: 'Perfil de Usuário Atualizado',
+      desc: `O usuário agora possui acesso como ${newRole}.`,
+      type: 'success',
+    });
+  };
+
+  const addNewTurma = (turma: Turma) => {
+    setTurmas((prev) => [turma, ...prev]);
+    setToastMessage({
+      title: 'Turma Criada com Sucesso',
+      desc: `Turma ${turma.codigo} cadastrada no sistema.`,
+      type: 'success',
+    });
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -256,6 +294,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         student,
         studentsList,
         turmas,
+        systemUsers,
         auditLogs,
         isLgpdRedactionActive,
         setIsLgpdRedactionActive,
@@ -264,6 +303,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         uploadStudentDocument,
         evaluateDocument,
         addAuditEntry,
+        updateUserRole,
+        addNewTurma,
       }}
     >
       {children}

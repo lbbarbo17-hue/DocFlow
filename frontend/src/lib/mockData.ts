@@ -1,4 +1,4 @@
-import { Student, Turma, AuditLog } from './types';
+import { Student, Turma, AuditLog, SystemUser } from './types';
 
 export const INITIAL_TURMAS: Turma[] = [
   {
@@ -30,6 +30,45 @@ export const INITIAL_TURMAS: Turma[] = [
     conformidadeMedia: 94,
     alunosEmRisco: 1,
     alunosRegulares: 22,
+  },
+];
+
+export const INITIAL_SYSTEM_USERS: SystemUser[] = [
+  {
+    id: 'usr-001',
+    nome: 'Lucas Gabriel da Silva',
+    email: 'lucas.gabriel@empresa-tech.com.br',
+    role: 'ESTUDANTE',
+    cargo: 'Aprendiz Desenvolvedor Frontend',
+    status: 'ATIVO',
+    ultimoAcesso: 'Hoje às 14:30',
+  },
+  {
+    id: 'usr-002',
+    nome: 'Profª. Mariana Alcantara',
+    email: 'mariana.coordenacao@etec.sp.gov.br',
+    role: 'COORDENADOR',
+    cargo: 'Coordenadora Acadêmica de Cursos Técnicos',
+    status: 'ATIVO',
+    ultimoAcesso: 'Hoje às 15:10',
+  },
+  {
+    id: 'usr-003',
+    nome: 'Camila Peixoto',
+    email: 'camila.rh@techcorp.com.br',
+    role: 'COORDENADOR',
+    cargo: 'Gestora de RH & Contratos de Estágio',
+    status: 'ATIVO',
+    ultimoAcesso: 'Ontem às 17:40',
+  },
+  {
+    id: 'usr-004',
+    nome: 'Administrador Geral DocFlow',
+    email: 'admin@docflow.security',
+    role: 'SUPERADMIN',
+    cargo: 'Super Administrador do Sistema',
+    status: 'ATIVO',
+    ultimoAcesso: 'Agora mesmo',
   },
 ];
 
@@ -360,15 +399,15 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
   {
     id: 'log-004',
     timestampUtc: '2026-09-01T09:30:15Z',
-    userId: 'usr-dpo-01',
-    userNome: 'Dr. Roberto Meirelles (DPO)',
-    userRole: 'DPO',
+    userId: 'usr-adm-01',
+    userNome: 'Super Administrador DocFlow',
+    userRole: 'SUPERADMIN',
     action: 'DOCUMENT_VIEW_REDACTED',
     resourceId: 'doc-rg-01',
-    resourceTipo: 'Visualização Segura: RG com Tarja LGPD',
+    resourceTipo: 'Visualização Segura: RG com Tarja Protetora',
     ipAddress: '200.180.99.12',
     status: 'SUCCESS',
-    detalhes: 'Visualização com minimização ativa (filiação e biometria tarjadas conforme Art. 6º, III).',
+    detalhes: 'Inspeção de conformidade de armazenamento e integridade de chave.',
     sha256Hash: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
   },
   {
@@ -376,13 +415,13 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
     timestampUtc: '2026-08-31T17:10:00Z',
     userId: 'usr-rh-01',
     userNome: 'Camila Peixoto (RH TechCorp)',
-    userRole: 'GESTOR_RH',
+    userRole: 'COORDENADOR',
     action: 'DOSSIER_BULK_DOWNLOAD',
     resourceId: 'batch-turma-ti-01',
     resourceTipo: 'Lote de Dossiês: Turma DS-2026.1-A',
     ipAddress: '187.55.201.88',
     status: 'SUCCESS',
-    detalhes: 'Exportação autorizada de 24 dossiês com status regular para auditoria trabalhista.',
+    detalhes: 'Exportação autorizada de 24 dossiês com status regular para arquivo corporativo.',
     sha256Hash: 'c7d2e3f4a5b67890123456789abcdef0123456789abcdef0123456789abcdef0',
   },
 ];

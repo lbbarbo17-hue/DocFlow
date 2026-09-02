@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Clock, ShieldAlert, ArrowRight } from 'lucide-react';
+import { Clock, ShieldAlert, ArrowRight, AlertTriangle } from 'lucide-react';
 import { DocumentItem } from '@/lib/types';
 
 interface ExpirationAlertProps {
@@ -10,7 +10,6 @@ interface ExpirationAlertProps {
 }
 
 export default function ExpirationAlert({ documents, onUploadClick }: ExpirationAlertProps) {
-  // Find documents expiring in <= 30 days or already expired
   const expiringDocs = documents.filter(
     (d) =>
       d.status === 'EXPIRADO' ||
@@ -22,63 +21,74 @@ export default function ExpirationAlert({ documents, onUploadClick }: Expiration
   return (
     <div className="space-y-3">
       {expiringDocs.map((doc) => {
-        const isExpired = doc.status === 'EXPIRADO' || (doc.diasParaVencer !== undefined && doc.diasParaVencer < 0);
+        const isExpired =
+          doc.status === 'EXPIRADO' ||
+          (doc.diasParaVencer !== undefined && doc.diasParaVencer < 0);
+
         return (
           <div
             key={doc.id}
-            className={`p-4 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm transition-all ${
+            className={`rounded-2xl border-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 overflow-hidden ${
               isExpired
-                ? 'bg-rose-50/80 border-rose-200 text-rose-950'
-                : 'bg-amber-50/80 border-amber-200 text-amber-950'
+                ? 'border-rose-400 bg-rose-50'
+                : 'border-amber-400 bg-amber-50'
             }`}
           >
-            <div className="flex items-start gap-3.5">
+            {/* Colored accent strip */}
+            <div
+              className={`flex-1 p-4 flex items-start sm:items-center gap-4 ${
+                isExpired ? 'bg-rose-50' : 'bg-amber-50'
+              }`}
+            >
               <div
-                className={`p-2.5 rounded-lg shrink-0 ${
-                  isExpired ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
+                className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${
+                  isExpired
+                    ? 'bg-rose-600 text-white'
+                    : 'bg-amber-500 text-white'
                 }`}
               >
                 {isExpired ? (
                   <ShieldAlert className="w-5 h-5 animate-bounce" />
                 ) : (
-                  <Clock className="w-5 h-5" />
+                  <AlertTriangle className="w-5 h-5 animate-pulse" />
                 )}
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-sm">
-                    {isExpired ? '🚨 Atenção Crítica: Documento Expirado' : '⏳ Alerta de Renovação Semestral'}
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`font-extrabold text-sm ${isExpired ? 'text-rose-900' : 'text-amber-900'}`}>
+                    {isExpired ? 'Documento Vencido' : 'Renovação Necessária'}
                   </span>
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
-                      isExpired ? 'bg-rose-200 text-rose-800' : 'bg-amber-200 text-amber-800'
+                    className={`text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
+                      isExpired
+                        ? 'bg-rose-600 text-white'
+                        : 'bg-amber-500 text-white'
                     }`}
                   >
-                    {isExpired ? 'Vencido' : `Vence em ${doc.diasParaVencer} dias`}
+                    {isExpired ? 'VENCIDO' : `${doc.diasParaVencer} dias`}
                   </span>
                 </div>
-                <p className="text-xs text-slate-700 mt-1">
-                  O documento <strong className="text-slate-900">{doc.nomeExibicao}</strong> precisa ser regularizado com urgência para evitar a penalização ou anulação do vínculo contratual de estágio/aprendizagem.
+                <p className={`text-xs mt-0.5 font-medium ${isExpired ? 'text-rose-800' : 'text-amber-800'}`}>
+                  <strong>{doc.nomeExibicao}</strong> precisa ser atualizado para não perder o estágio.
                 </p>
-                {doc.validadeAte && (
-                  <p className="text-[11px] font-mono text-slate-500 mt-0.5">
-                    Data Limite Registrada: {doc.validadeAte}
-                  </p>
-                )}
               </div>
             </div>
 
-            <button
-              onClick={() => onUploadClick(doc)}
-              className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm ${
-                isExpired
-                  ? 'bg-rose-600 hover:bg-rose-700 text-white'
-                  : 'bg-amber-600 hover:bg-amber-700 text-white'
-              }`}
-            >
-              <span>Renovar Agora</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            <div className={`sm:pr-4 pb-4 sm:pb-0 px-4 sm:px-0 shrink-0`}>
+              <button
+                onClick={() => onUploadClick(doc)}
+                className={`w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all shadow-md active:scale-95 ${
+                  isExpired
+                    ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-200'
+                    : 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-200'
+                }`}
+              >
+                <Clock className="w-3.5 h-3.5" />
+                <span>Renovar Agora</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         );
       })}

@@ -9,11 +9,11 @@ import {
   UserCheck,
   BarChart3,
   ShieldCheck,
-  GraduationCap,
   Sparkles,
   LogOut,
-  Clock,
   Shield,
+  LayoutDashboard,
+  FileCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -36,16 +36,16 @@ export default function Sidebar() {
     if (currentRole === 'ESTUDANTE') {
       return [
         {
-          label: 'Meu Checklist',
+          label: 'Dashboard',
           href: '/estudante',
-          icon: GraduationCap,
-          badge: pendingStudentDocs > 0 ? `${pendingStudentDocs} pendente${pendingStudentDocs > 1 ? 's' : ''}` : '100% OK',
-          badgeColor: pendingStudentDocs > 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800',
+          icon: LayoutDashboard,
         },
         {
-          label: 'Prazos & Alertas',
-          href: '/estudante',
-          icon: Clock,
+          label: 'Checklist de Documentos',
+          href: '/estudante/checklist',
+          icon: FileCheck,
+          badge: pendingStudentDocs > 0 ? `${pendingStudentDocs} pendente${pendingStudentDocs > 1 ? 's' : ''}` : '100% OK',
+          badgeColor: pendingStudentDocs > 0 ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300',
         },
       ];
     }

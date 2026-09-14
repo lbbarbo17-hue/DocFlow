@@ -1,8 +1,15 @@
 'use client';
 
 import React from 'react';
-import { Clock, ShieldAlert, ArrowRight, AlertTriangle } from 'lucide-react';
+import {
+  Clock,
+  ShieldAlert,
+  ArrowRight,
+  RefreshCw,
+  Calendar,
+} from 'lucide-react';
 import { DocumentItem } from '@/lib/types';
+import { formatDateBr } from '@/lib/utils';
 
 interface ExpirationAlertProps {
   documents: DocumentItem[];
@@ -10,84 +17,151 @@ interface ExpirationAlertProps {
 }
 
 export default function ExpirationAlert({ documents, onUploadClick }: ExpirationAlertProps) {
-  const expiringDocs = documents.filter(
+  // Find documents that need urgent attention (recurring near expiry, expired, or rejected)
+  const urgentDocs = documents.filter(
     (d) =>
       d.status === 'EXPIRADO' ||
-      (d.diasParaVencer !== undefined && d.diasParaVencer <= 30)
+      d.status === 'RECUSADO' ||
+      (d.diasParaVencer !== undefined && d.diasParaVencer <= 30) ||
+      (d.recorrente && d.status !== 'APROVADO')
   );
 
-  if (expiringDocs.length === 0) return null;
+  if (urgentDocs.length === 0) return null;
 
   return (
     <div className="space-y-3">
-      {expiringDocs.map((doc) => {
+      {urgentDocs.map((doc) => {
         const isExpired =
           doc.status === 'EXPIRADO' ||
           (doc.diasParaVencer !== undefined && doc.diasParaVencer < 0);
+        const isRejected = doc.status === 'RECUSADO';
+        const isRecurring = doc.recorrente;
+
+        // Custom action button text as specifically requested
+        const actionButtonLabel = isRecurring
+          ? 'Atualizar Matrícula Agora'
+          : isRejected
+          ? 'Corrigir e Reenviar'
+          : isExpired
+          ? 'Regularizar Imediatamente'
+          : 'Renovar Documento Agora';
 
         return (
           <div
             key={doc.id}
-            className={`rounded-2xl border-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 overflow-hidden ${
-              isExpired
-                ? 'border-rose-400 bg-rose-50'
-                : 'border-amber-400 bg-amber-50'
+            className={`rounded-2xl sm:rounded-3xl border-2 shadow-sm transition-all overflow-hidden ${
+              isExpired || isRejected
+                ? 'border-rose-300 dark:border-rose-800/60 bg-gradient-to-r from-rose-50 via-rose-50/80 to-white dark:from-rose-950/40 dark:via-slate-900 dark:to-slate-900'
+                : 'border-amber-300 dark:border-amber-800/60 bg-gradient-to-r from-amber-50 via-amber-50/80 to-white dark:from-amber-950/40 dark:via-slate-900 dark:to-slate-900'
             }`}
           >
-            {/* Colored accent strip */}
-            <div
-              className={`flex-1 p-4 flex items-start sm:items-center gap-4 ${
-                isExpired ? 'bg-rose-50' : 'bg-amber-50'
-              }`}
-            >
-              <div
-                className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${
-                  isExpired
-                    ? 'bg-rose-600 text-white'
-                    : 'bg-amber-500 text-white'
-                }`}
-              >
-                {isExpired ? (
-                  <ShieldAlert className="w-5 h-5 animate-bounce" />
-                ) : (
-                  <AlertTriangle className="w-5 h-5 animate-pulse" />
-                )}
-              </div>
+            <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              {/* Left Side: Alert Icon & Information */}
+              <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
+                <div
+                  className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${
+                    isExpired || isRejected
+                      ? 'bg-rose-600 text-white shadow-rose-200 dark:shadow-none'
+                      : 'bg-amber-500 text-white shadow-amber-200 dark:shadow-none'
+                  }`}
+                >
+                  {isExpired || isRejected ? (
+                    <ShieldAlert className="w-6 h-6 animate-pulse" />
+                  ) : (
+                    <Clock className="w-6 h-6 animate-pulse" />
+                  )}
+                </div>
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`font-extrabold text-sm ${isExpired ? 'text-rose-900' : 'text-amber-900'}`}>
-                    {isExpired ? 'Documento Vencido' : 'Renovação Necessária'}
-                  </span>
-                  <span
-                    className={`text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
-                      isExpired
-                        ? 'bg-rose-600 text-white'
-                        : 'bg-amber-500 text-white'
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`font-black text-xs sm:text-sm tracking-tight ${
+                        isExpired || isRejected
+                          ? 'text-rose-950 dark:text-rose-200'
+                          : 'text-amber-950 dark:text-amber-200'
+                      }`}
+                    >
+                      {isRejected
+                        ? 'Correção Solicitada pela Coordenação'
+                        : isExpired
+                        ? 'Documento Expirado — Ação Imediata Necessária'
+                        : isRecurring
+                        ? 'Aviso de Renovação Semestral Obrigatória'
+                        : 'Prazo de Validade Próximo do Fim'}
+                    </span>
+
+                    {/* Badge */}
+                    <span
+                      className={`text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
+                        isExpired || isRejected
+                          ? 'bg-rose-600 text-white'
+                          : 'bg-amber-500 text-white'
+                      }`}
+                    >
+                      {isRejected
+                        ? 'REPROVADO'
+                        : isExpired
+                        ? 'VENCIDO'
+                        : doc.diasParaVencer !== undefined
+                        ? `Vence em ${doc.diasParaVencer} dias`
+                        : 'RENOVAÇÃO'}
+                    </span>
+
+                    {isRecurring && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-950/60 text-[#065373] dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/60 flex items-center gap-1">
+                        <RefreshCw className="w-3 h-3" />
+                        Semestral
+                      </span>
+                    )}
+                  </div>
+
+                  <p
+                    className={`text-xs mt-1 font-medium leading-relaxed ${
+                      isExpired || isRejected
+                        ? 'text-rose-800 dark:text-rose-300'
+                        : 'text-amber-900 dark:text-amber-300'
                     }`}
                   >
-                    {isExpired ? 'VENCIDO' : `${doc.diasParaVencer} dias`}
-                  </span>
-                </div>
-                <p className={`text-xs mt-0.5 font-medium ${isExpired ? 'text-rose-800' : 'text-amber-800'}`}>
-                  <strong>{doc.nomeExibicao}</strong> precisa ser atualizado para não perder o estágio.
-                </p>
-              </div>
-            </div>
+                    {isRejected ? (
+                      <>
+                        <strong>{doc.nomeExibicao}</strong>: {doc.justificativaRecusa || 'Requer novo envio corrigido.'}
+                      </>
+                    ) : isRecurring ? (
+                      <>
+                        O seu <strong>{doc.nomeExibicao}</strong> precisa ser renovado periodicamente para manter a conformidade do seu contrato de estágio/aprendizagem ativo.
+                      </>
+                    ) : (
+                      <>
+                        Envie uma nova via atualizada de <strong>{doc.nomeExibicao}</strong> para evitar pendências no seu contrato.
+                      </>
+                    )}
+                  </p>
 
-            <div className={`sm:pr-4 pb-4 sm:pb-0 px-4 sm:px-0 shrink-0`}>
-              <button
-                onClick={() => onUploadClick(doc)}
-                className={`w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all shadow-md active:scale-95 ${
-                  isExpired
-                    ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-200'
-                    : 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-200'
-                }`}
-              >
-                <Clock className="w-3.5 h-3.5" />
-                <span>Renovar Agora</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+                  {doc.validadeAte && (
+                    <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-mono">
+                      <Calendar className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+                      <span>Prazo Limite: {formatDateBr(doc.validadeAte).split(' ')[0]}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Side: Direct Action Button */}
+              <div className="shrink-0 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => onUploadClick(doc)}
+                  className={`w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-extrabold transition-all shadow-md active:scale-95 ${
+                    isExpired || isRejected
+                      ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-200'
+                      : 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-200'
+                  }`}
+                >
+                  <RefreshCw className="w-4 h-4 shrink-0" />
+                  <span className="truncate">{actionButtonLabel}</span>
+                  <ArrowRight className="w-4 h-4 shrink-0 hidden sm:inline" />
+                </button>
+              </div>
             </div>
           </div>
         );

@@ -29,6 +29,9 @@ interface AppContextType {
   auditLogs: AuditLog[];
   isLgpdRedactionActive: boolean;
   setIsLgpdRedactionActive: (active: boolean) => void;
+  theme: 'light' | 'dark';
+  setTheme: (theme: 'light' | 'dark') => void;
+  toggleTheme: () => void;
   toastMessage: { title: string; desc: string; type: 'success' | 'error' | 'info' } | null;
   setToastMessage: (msg: { title: string; desc: string; type: 'success' | 'error' | 'info' } | null) => void;
   uploadStudentDocument: (docId: string, file: File) => Promise<boolean>;
@@ -41,6 +44,7 @@ interface AppContextType {
   addAuditEntry: (entry: Omit<AuditLog, 'id' | 'timestampUtc'>) => void;
   updateUserRole: (userId: string, newRole: UserRole) => void;
   addNewTurma: (turma: Turma) => void;
+  selectStudent: (studentId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -53,11 +57,50 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [systemUsers, setSystemUsers] = useState<SystemUser[]>(INITIAL_SYSTEM_USERS);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
   const [isLgpdRedactionActive, setIsLgpdRedactionActive] = useState<boolean>(true);
+  const [theme, setThemeState] = useState<'light' | 'dark'>('light');
   const [toastMessage, setToastMessage] = useState<{
     title: string;
     desc: string;
     type: 'success' | 'error' | 'info';
   } | null>(null);
+
+  // Initialize theme from localStorage / system preference
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('docflow_theme') as 'light' | 'dark' | null;
+      if (saved === 'dark' || saved === 'light') {
+        setThemeState(saved);
+        if (saved === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        setThemeState('dark');
+        document.documentElement.classList.add('dark');
+      }
+    } catch {
+      // Ignore if localStorage unavailable
+    }
+  }, []);
+
+  const setTheme = (newTheme: 'light' | 'dark') => {
+    setThemeState(newTheme);
+    try {
+      localStorage.setItem('docflow_theme', newTheme);
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    } catch {
+      // Ignore
+    }
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
 
   // Auto clear toast after 4s
   useEffect(() => {
@@ -286,6 +329,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const selectStudent = (studentId: string) => {
+    const target = studentsList.find((s) => s.id === studentId);
+    if (target) {
+      setStudent(target);
+      setToastMessage({
+        title: `Perfil Selecionado: ${target.nome}`,
+        desc: `Visualizando como ${target.tipoVinculo === 'APRENDIZ' ? 'Jovem Aprendiz' : 'Estagiário'}.`,
+        type: 'info',
+      });
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -298,6 +353,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         auditLogs,
         isLgpdRedactionActive,
         setIsLgpdRedactionActive,
+        theme,
+        setTheme,
+        toggleTheme,
         toastMessage,
         setToastMessage,
         uploadStudentDocument,
@@ -305,6 +363,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addAuditEntry,
         updateUserRole,
         addNewTurma,
+        selectStudent,
       }}
     >
       {children}

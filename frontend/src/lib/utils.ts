@@ -50,40 +50,67 @@ export function getStatusBadgeConfig(status: StatusDocumento) {
   switch (status) {
     case 'APROVADO':
       return {
-        label: 'Aprovado',
+        label: 'Aprovado / Válido',
+        shortLabel: 'Aprovado',
         bg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        badgeColor: 'text-emerald-700 bg-emerald-50 border-emerald-200',
         dot: 'bg-emerald-500',
+        iconColor: 'text-emerald-600',
       };
     case 'EM_ANALISE':
       return {
-        label: 'Em Análise',
-        bg: 'bg-sky-50 text-sky-800 border-sky-200',
-        dot: 'bg-sky-500',
-      };
-    case 'PENDENTE':
-      return {
-        label: 'Pendente',
-        bg: 'bg-amber-50 text-amber-800 border-amber-200',
-        dot: 'bg-amber-500',
+        label: 'Pendente de Análise',
+        shortLabel: 'Em Análise',
+        bg: 'bg-orange-50 text-orange-700 border-orange-200',
+        badgeColor: 'text-orange-700 bg-orange-50 border-orange-200',
+        dot: 'bg-orange-500',
+        iconColor: 'text-orange-600',
       };
     case 'RECUSADO':
       return {
-        label: 'Recusado',
+        label: 'Recusado / Precisa de Correção',
+        shortLabel: 'Recusado',
         bg: 'bg-rose-50 text-rose-700 border-rose-200',
+        badgeColor: 'text-rose-700 bg-rose-50 border-rose-200',
         dot: 'bg-rose-500',
+        iconColor: 'text-rose-600',
       };
     case 'EXPIRADO':
+    case 'VENCENDO':
       return {
-        label: 'Expirado',
-        bg: 'bg-red-100 text-red-800 border-red-300',
-        dot: 'bg-red-600',
+        label: 'Vencendo / Requer Renovação',
+        shortLabel: 'Vencendo / Renovação',
+        bg: 'bg-amber-50 text-amber-800 border-amber-300',
+        badgeColor: 'text-amber-800 bg-amber-50 border-amber-300',
+        dot: 'bg-amber-500',
+        iconColor: 'text-amber-600',
       };
+    case 'PENDENTE':
     default:
       return {
-        label: status,
-        bg: 'bg-slate-100 text-slate-700 border-slate-200',
+        label: 'Pendente de Envio',
+        shortLabel: 'Pendente',
+        bg: 'bg-slate-100 text-slate-600 border-slate-200',
+        badgeColor: 'text-slate-600 bg-slate-100 border-slate-200',
         dot: 'bg-slate-400',
+        iconColor: 'text-slate-500',
       };
+  }
+}
+
+export function formatDateBr(isoDate?: string): string {
+  if (!isoDate) return 'Não enviado';
+  try {
+    const d = new Date(isoDate);
+    return new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(d);
+  } catch {
+    return isoDate;
   }
 }
 

@@ -1,5 +1,7 @@
 export type UserRole = 'ESTUDANTE' | 'COORDENADOR' | 'SUPERADMIN';
 
+export type TipoVinculo = 'ESTAGIARIO' | 'APRENDIZ';
+
 export type TipoDocumento =
   | 'RG'
   | 'CPF'
@@ -12,7 +14,8 @@ export type StatusDocumento =
   | 'EM_ANALISE'
   | 'APROVADO'
   | 'RECUSADO'
-  | 'EXPIRADO';
+  | 'EXPIRADO'
+  | 'VENCENDO';
 
 export type NivelRisco = 'BAIXO' | 'MEDIO' | 'CRITICO';
 
@@ -23,6 +26,9 @@ export interface DocumentItem {
   descricao: string;
   obrigatorio: boolean;
   status: StatusDocumento;
+  recorrente?: boolean; // Para documentos periódicos (ex: Matrícula semestral)
+  protecaoLgpd?: boolean; // Indicador de dados sensíveis e anonimização
+  observacaoValidade?: string;
   nomeArquivoOriginal?: string;
   storageUuid?: string;
   tamanhoBytes?: number;
@@ -54,6 +60,8 @@ export interface Student {
   cpf: string;
   email: string;
   matricula: string;
+  tipoVinculo: TipoVinculo;
+  dataAdmissao?: string;
   turmaId: string;
   turmaNome: string;
   curso: string;

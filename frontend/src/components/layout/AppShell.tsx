@@ -34,7 +34,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     : 'Super Administrador';
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f8fafc]">
+    <div className="flex h-screen overflow-hidden bg-[#DDDDDD] dark:bg-slate-950 transition-colors duration-200">
       {/* Sidebar: fixed height, does not scroll with content */}
       <div className="h-screen sticky top-0 shrink-0">
         <Sidebar />

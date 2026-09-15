@@ -9,11 +9,11 @@ import {
   UserCheck,
   BarChart3,
   ShieldCheck,
-  Sparkles,
   LogOut,
   Shield,
   LayoutDashboard,
   FileCheck,
+  UploadCloud,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -46,6 +46,11 @@ export default function Sidebar() {
           icon: FileCheck,
           badge: pendingStudentDocs > 0 ? `${pendingStudentDocs} pendente${pendingStudentDocs > 1 ? 's' : ''}` : '100% OK',
           badgeColor: pendingStudentDocs > 0 ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300',
+        },
+        {
+          label: 'Adicionar Documentos',
+          href: '/estudante/enviar',
+          icon: UploadCloud,
         },
       ];
     }
@@ -162,23 +167,6 @@ export default function Sidebar() {
             </Link>
           );
         })}
-
-        {/* Security / System isolation badge */}
-        <div className="mt-8 px-2">
-          <div className="p-3.5 rounded-xl bg-[#043c53]/80 border border-[#226a8b]/60 text-xs text-[#eef6fa]/90 space-y-2">
-            <div className="flex items-center gap-2 font-semibold text-[#77afd3]">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Sessão Isolada</span>
-            </div>
-            <p className="text-[11px] text-[#cbd5e1] leading-relaxed">
-              Você está autenticado em uma interface segura com permissões exclusivas.
-            </p>
-            <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-mono bg-[#065373]/90 px-2 py-1 rounded">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Acesso Autorizado</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Footer Profile & Logout Button */}

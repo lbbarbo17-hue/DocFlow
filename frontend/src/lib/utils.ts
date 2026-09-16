@@ -80,10 +80,10 @@ export function getStatusBadgeConfig(status: StatusDocumento) {
       return {
         label: 'Vencendo / Requer Renovação',
         shortLabel: 'Vencendo / Renovação',
-        bg: 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/60',
-        badgeColor: 'text-amber-800 bg-amber-50 border-amber-300 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/60',
-        dot: 'bg-amber-500',
-        iconColor: 'text-amber-600 dark:text-amber-400',
+        bg: 'bg-[#eac652]/15 text-[#8a6e14] border-[#eac652]/40',
+        badgeColor: 'text-[#8a6e14] bg-[#eac652]/15 border-[#eac652]/40',
+        dot: 'bg-[#eac652]',
+        iconColor: 'text-[#8a6e14]',
       };
     case 'PENDENTE':
     default:

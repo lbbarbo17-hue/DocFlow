@@ -365,7 +365,7 @@ export default function AdicionarDocumentoPage() {
                                 : isRejected
                                 ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300'
                                 : isExpiring
-                                ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300'
+                                ? 'bg-[#eac652] text-slate-950 font-bold'
                                 : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
                             }`}
                           >
@@ -618,7 +618,7 @@ export default function AdicionarDocumentoPage() {
                       <div className="flex items-center justify-between text-[11px]">
                         <span className="text-slate-400">1. Inspeção de Magic Bytes:</span>
                         {magicBytesStatus === 'CHECKING' && (
-                          <span className="text-amber-400 flex items-center gap-1">
+                          <span className="text-[#eac652] flex items-center gap-1">
                             <Loader2 className="w-3 h-3 animate-spin" /> Verificando assinatura...
                           </span>
                         )}

@@ -173,7 +173,7 @@ export default function DocumentChecklist() {
                   isRejected
                     ? 'border-rose-300 dark:border-rose-800/60 bg-rose-50/20 dark:bg-rose-950/20'
                     : isExpiringOrExpired
-                    ? 'border-amber-300 dark:border-amber-800/60 bg-amber-50/20 dark:bg-amber-950/20'
+                    ? 'border-[#eac652]/50 dark:border-[#eac652]/30 bg-[#eac652]/10 dark:bg-[#eac652]/15'
                     : isInReview
                     ? 'border-orange-200 dark:border-orange-800/50 bg-orange-50/10 dark:bg-orange-950/10'
                     : isApproved
@@ -194,7 +194,7 @@ export default function DocumentChecklist() {
                           : isRejected
                           ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300'
                           : isExpiringOrExpired
-                          ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
+                          ? 'bg-[#eac652]/20 dark:bg-[#eac652]/20 text-[#8a6e14] dark:text-[#eac652]'
                           : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                       }`}
                     >
@@ -229,7 +229,7 @@ export default function DocumentChecklist() {
                               : isRejected
                               ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/60'
                               : isExpiringOrExpired
-                              ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800/60'
+                              ? 'bg-[#eac652]/15 dark:bg-[#eac652]/20 text-[#8a6e14] dark:text-[#fef08a] border-[#eac652]/40 dark:border-[#eac652]/40'
                               : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                           }`}
                         >

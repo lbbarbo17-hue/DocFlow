@@ -35,6 +35,7 @@ interface AppContextType {
   toastMessage: { title: string; desc: string; type: 'success' | 'error' | 'info' } | null;
   setToastMessage: (msg: { title: string; desc: string; type: 'success' | 'error' | 'info' } | null) => void;
   uploadStudentDocument: (docId: string, file: File) => Promise<boolean>;
+  addNewDocumentToStudent: (newDoc: Omit<DocumentItem, 'id'>, file: File) => Promise<boolean>;
   evaluateDocument: (
     studentId: string,
     docId: string,
@@ -220,6 +221,80 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return true;
   };
 
+  const addNewDocumentToStudent = async (
+    newDocData: Omit<DocumentItem, 'id'>,
+    file: File
+  ): Promise<boolean> => {
+    // 1. Check size (< 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setToastMessage({
+        title: 'Bloqueio de Segurança (Payload Limit)',
+        desc: 'O arquivo excede o limite máximo permitido de 10 MB.',
+        type: 'error',
+      });
+      return false;
+    }
+
+    const sha256 = await computeSHA256(file);
+    const ext = file.name.split('.').pop() || 'pdf';
+    const storageUuid = generateStorageUUID(ext);
+    const newDocId = `doc-${Date.now()}`;
+
+    const createdDoc: DocumentItem = {
+      ...newDocData,
+      id: newDocId,
+      status: 'EM_ANALISE' as StatusDocumento,
+      nomeArquivoOriginal: file.name,
+      storageUuid,
+      tamanhoBytes: file.size,
+      mimeType: file.type || 'application/pdf',
+      fileHashSha256: sha256,
+      dataEnvio: new Date().toISOString(),
+      justificativaRecusa: undefined,
+    };
+
+    const updatedDocs = [...student.documentos, createdDoc];
+    const approvedOrReview = updatedDocs.filter(
+      (d) => d.status === 'APROVADO' || d.status === 'EM_ANALISE'
+    ).length;
+    const newPercent = Math.round((approvedOrReview / updatedDocs.length) * 100);
+
+    const updatedStudent: Student = {
+      ...student,
+      documentos: updatedDocs,
+      percentualConformidade: newPercent,
+      statusGeral: newPercent === 100 ? 'REGULAR' : 'PENDENTE',
+      nivelRisco: newPercent === 100 ? 'BAIXO' : newPercent >= 60 ? 'MEDIO' : 'CRITICO',
+    };
+
+    setStudent(updatedStudent);
+    setStudentsList((prev) =>
+      prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s))
+    );
+
+    addAuditEntry({
+      userId: student.id,
+      userNome: student.nome,
+      userRole: 'ESTUDANTE',
+      action: 'DOCUMENT_UPLOAD',
+      resourceId: newDocId,
+      resourceTipo: `Novo Documento Adicionado: ${createdDoc.nomeExibicao}`,
+      ipAddress: '177.132.89.201',
+      status: 'SUCCESS',
+      detalhes: `Novo documento '${createdDoc.nomeExibicao}' adicionado ao dossiê. Hash SHA-256: ${sha256}.`,
+      sha256Hash: sha256,
+      storageUuid,
+    });
+
+    setToastMessage({
+      title: 'Novo Documento Adicionado!',
+      desc: `'${createdDoc.nomeExibicao}' foi registrado e enviado para análise da coordenação.`,
+      type: 'success',
+    });
+
+    return true;
+  };
+
   const evaluateDocument = (
     studentId: string,
     docId: string,
@@ -359,6 +434,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toastMessage,
         setToastMessage,
         uploadStudentDocument,
+        addNewDocumentToStudent,
         evaluateDocument,
         addAuditEntry,
         updateUserRole,

@@ -58,11 +58,18 @@ export default function Sidebar() {
     if (currentRole === 'COORDENADOR') {
       return [
         {
-          label: 'Dossiês de Aprendizes',
+          label: 'Dashboard de Urgências',
           href: '/coordenador',
+          icon: LayoutDashboard,
+          badge: criticalStudents > 0 ? `${criticalStudents} em risco` : undefined,
+          badgeColor: 'bg-rose-100 text-rose-800',
+        },
+        {
+          label: 'Dossiês de Aprendizes',
+          href: '/coordenador/dossies',
           icon: UserCheck,
-          badge: criticalStudents > 0 ? `${criticalStudents} em risco` : `${studentsList.length} alunos`,
-          badgeColor: criticalStudents > 0 ? 'bg-rose-100 text-rose-800' : 'bg-cyan-100 text-cyan-800',
+          badge: `${studentsList.length} alunos`,
+          badgeColor: 'bg-cyan-100 text-cyan-800',
         },
         {
           label: 'Dashboard de Turmas',
@@ -84,6 +91,23 @@ export default function Sidebar() {
         badgeColor: 'bg-purple-100 text-purple-800',
       },
       {
+        label: 'Dashboard do Coordenador',
+        href: '/coordenador',
+        icon: LayoutDashboard,
+        badge: criticalStudents > 0 ? `${criticalStudents} urgências` : undefined,
+        badgeColor: 'bg-rose-100 text-rose-800',
+      },
+      {
+        label: 'Dossiês de Aprendizes',
+        href: '/coordenador/dossies',
+        icon: UserCheck,
+      },
+      {
+        label: 'Dashboard de Turmas',
+        href: '/analytics',
+        icon: BarChart3,
+      },
+      {
         label: 'Trilha de Auditoria',
         href: '/auditoria',
         icon: ShieldCheck,
@@ -94,13 +118,6 @@ export default function Sidebar() {
   };
 
   const navItems = getNavItemsForRole();
-
-  const interfaceTitle =
-    currentRole === 'ESTUDANTE'
-      ? 'Portal do Aprendiz'
-      : currentRole === 'COORDENADOR'
-      ? 'Portal da Coordenação & RH'
-      : 'Painel do Super Admin';
 
   return (
     <aside className="w-64 bg-[#065373] text-white flex flex-col shrink-0 border-r border-[#043c53] shadow-xl z-30 min-h-screen">
@@ -116,11 +133,11 @@ export default function Sidebar() {
             priority
           />
         </div>
-        <div className="truncate">
-          <span className="font-extrabold text-base tracking-tight text-white block leading-tight">
-            DocFlow
+        <div className="truncate flex items-baseline">
+          <span className="font-black text-2xl tracking-tight text-white font-[family-name:var(--font-outfit)]">
+            Doc<span className="text-cyan-300 font-medium">Flow</span>
           </span>
-          <p className="text-[11px] text-[#77afd3] truncate">{interfaceTitle}</p>
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 ml-1 shadow-xs animate-pulse" />
         </div>
       </div>
 
@@ -131,7 +148,9 @@ export default function Sidebar() {
         </div>
 
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive =
+            pathname === item.href ||
+            (item.href === '/coordenador' && pathname === '/coordenador/dashboard');
           const Icon = item.icon;
 
           return (

@@ -23,8 +23,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/auditoria');
 
   const isDenied =
-    (isEstudanteRoute && currentRole !== 'ESTUDANTE') ||
-    (isCoordenadorRoute && currentRole !== 'COORDENADOR') ||
+    (isEstudanteRoute && currentRole !== 'ESTUDANTE' && currentRole !== 'SUPERADMIN') ||
+    (isCoordenadorRoute && currentRole !== 'COORDENADOR' && currentRole !== 'SUPERADMIN') ||
     (isAdminRoute && currentRole !== 'SUPERADMIN');
 
   const requiredRoleLabel = isEstudanteRoute

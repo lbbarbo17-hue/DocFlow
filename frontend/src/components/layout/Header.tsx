@@ -51,22 +51,14 @@ export default function Header() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Left Side: Active Portal Title */}
         <div className="flex items-center gap-3">
-          <div className="h-8 w-1.5 bg-[#065373] dark:bg-cyan-400 rounded-full" />
-          <div>
-            <h1 className="text-base font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-              DocFlow
-              <span className="text-xs font-semibold text-[#065373] dark:text-cyan-300 bg-[#065373]/10 dark:bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-[#065373]/20 dark:border-cyan-500/30">
-                {currentRole === 'ESTUDANTE'
-                  ? 'Portal do Aprendiz'
-                  : currentRole === 'COORDENADOR'
-                  ? 'Portal da Coordenação & RH'
-                  : 'Painel do Super Administrador'}
-              </span>
-            </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Ambiente de acesso seguro e exclusivo
-            </p>
-          </div>
+          <div className="h-7 w-1.5 bg-[#065373] dark:bg-cyan-400 rounded-full" />
+          <h1 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
+            {currentRole === 'ESTUDANTE'
+              ? 'Portal do Aprendiz'
+              : currentRole === 'COORDENADOR'
+              ? 'Portal da Coordenação & RH'
+              : 'Painel do Super Administrador'}
+          </h1>
         </div>
 
         {/* Right Side: Theme Toggle, User Profile & Actions */}

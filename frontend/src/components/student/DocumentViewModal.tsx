@@ -94,7 +94,7 @@ export default function DocumentViewModal({
           )}
 
           {/* Simulated Document Preview Canvas */}
-          <div className="border border-slate-200 dark:border-slate-700 rounded-2xl bg-gradient-to-b from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-850 p-4 sm:p-6 relative overflow-hidden shadow-inner">
+          <div className="border border-slate-200 dark:border-slate-700 rounded-2xl bg-gradient-to-b from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900 p-4 sm:p-6 relative overflow-hidden shadow-inner">
             {/* Watermark/Security Badge */}
             <div className="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-sm text-cyan-300 text-[10px] font-mono px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-cyan-400/20 shadow-sm">
               <ShieldCheck className="w-3 h-3 text-cyan-400" />

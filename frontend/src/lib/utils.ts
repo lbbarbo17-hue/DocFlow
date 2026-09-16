@@ -52,28 +52,28 @@ export function getStatusBadgeConfig(status: StatusDocumento) {
       return {
         label: 'Aprovado / Válido',
         shortLabel: 'Aprovado',
-        bg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-        badgeColor: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+        bg: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/60',
+        badgeColor: 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/60',
         dot: 'bg-emerald-500',
-        iconColor: 'text-emerald-600',
+        iconColor: 'text-emerald-600 dark:text-emerald-400',
       };
     case 'EM_ANALISE':
       return {
         label: 'Pendente de Análise',
         shortLabel: 'Em Análise',
-        bg: 'bg-orange-50 text-orange-700 border-orange-200',
-        badgeColor: 'text-orange-700 bg-orange-50 border-orange-200',
-        dot: 'bg-orange-500',
-        iconColor: 'text-orange-600',
+        bg: 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/60',
+        badgeColor: 'text-sky-700 bg-sky-50 border-sky-200 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/60',
+        dot: 'bg-sky-500',
+        iconColor: 'text-sky-600 dark:text-sky-400',
       };
     case 'RECUSADO':
       return {
         label: 'Recusado / Precisa de Correção',
         shortLabel: 'Recusado',
-        bg: 'bg-rose-50 text-rose-700 border-rose-200',
-        badgeColor: 'text-rose-700 bg-rose-50 border-rose-200',
+        bg: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/60',
+        badgeColor: 'text-rose-700 bg-rose-50 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/60',
         dot: 'bg-rose-500',
-        iconColor: 'text-rose-600',
+        iconColor: 'text-rose-600 dark:text-rose-400',
       };
     case 'EXPIRADO':
     case 'VENCENDO':
@@ -90,10 +90,10 @@ export function getStatusBadgeConfig(status: StatusDocumento) {
       return {
         label: 'Pendente de Envio',
         shortLabel: 'Pendente',
-        bg: 'bg-slate-100 text-slate-600 border-slate-200',
-        badgeColor: 'text-slate-600 bg-slate-100 border-slate-200',
+        bg: 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
+        badgeColor: 'text-slate-600 bg-slate-100 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
         dot: 'bg-slate-400',
-        iconColor: 'text-slate-500',
+        iconColor: 'text-slate-500 dark:text-slate-400',
       };
   }
 }
@@ -119,20 +119,20 @@ export function getRiskBadgeConfig(risk: NivelRisco) {
     case 'CRITICO':
       return {
         label: 'Risco Crítico',
-        bg: 'bg-red-50 text-red-700 border-red-200',
-        text: 'text-red-700',
+        bg: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/60',
+        text: 'text-rose-700 dark:text-rose-300',
       };
     case 'MEDIO':
       return {
         label: 'Atenção / Médio',
-        bg: 'bg-amber-50 text-amber-700 border-amber-200',
-        text: 'text-amber-700',
+        bg: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/60',
+        text: 'text-amber-700 dark:text-amber-300',
       };
     case 'BAIXO':
       return {
         label: 'Regular / Baixo',
-        bg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-        text: 'text-emerald-700',
+        bg: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/60',
+        text: 'text-emerald-700 dark:text-emerald-300',
       };
   }
 }

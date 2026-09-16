@@ -53,17 +53,29 @@ export default function Sidebar() {
           href: '/estudante/enviar',
           icon: UploadCloud,
         },
+        {
+          label: 'Adicionar Documentos',
+          href: '/estudante/enviar',
+          icon: UploadCloud,
+        },
       ];
     }
 
     if (currentRole === 'COORDENADOR') {
       return [
         {
-          label: 'Dossiês de Aprendizes',
+          label: 'Dashboard de Urgências',
           href: '/coordenador',
+          icon: LayoutDashboard,
+          badge: criticalStudents > 0 ? `${criticalStudents} em risco` : undefined,
+          badgeColor: 'bg-rose-100 text-rose-800',
+        },
+        {
+          label: 'Dossiês de Aprendizes',
+          href: '/coordenador/dossies',
           icon: UserCheck,
-          badge: criticalStudents > 0 ? `${criticalStudents} em risco` : `${studentsList.length} alunos`,
-          badgeColor: criticalStudents > 0 ? 'bg-rose-100 text-rose-800' : 'bg-cyan-100 text-cyan-800',
+          badge: `${studentsList.length} alunos`,
+          badgeColor: 'bg-cyan-100 text-cyan-800',
         },
         {
           label: 'Dashboard de Turmas',
@@ -83,6 +95,23 @@ export default function Sidebar() {
         icon: Shield,
         badge: 'Admin',
         badgeColor: 'bg-purple-100 text-purple-800',
+      },
+      {
+        label: 'Dashboard do Coordenador',
+        href: '/coordenador',
+        icon: LayoutDashboard,
+        badge: criticalStudents > 0 ? `${criticalStudents} urgências` : undefined,
+        badgeColor: 'bg-rose-100 text-rose-800',
+      },
+      {
+        label: 'Dossiês de Aprendizes',
+        href: '/coordenador/dossies',
+        icon: UserCheck,
+      },
+      {
+        label: 'Dashboard de Turmas',
+        href: '/analytics',
+        icon: BarChart3,
       },
       {
         label: 'Trilha de Auditoria',
@@ -158,7 +187,9 @@ export default function Sidebar() {
         </div>
 
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive =
+            pathname === item.href ||
+            (item.href === '/coordenador' && pathname === '/coordenador/dashboard');
           const Icon = item.icon;
 
           return (

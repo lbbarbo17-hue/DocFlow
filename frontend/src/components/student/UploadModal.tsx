@@ -360,8 +360,8 @@ export default function UploadModal({ document, onClose }: UploadModalProps) {
                 </div>
 
                 {/* Legibility Advice Card */}
-                <div className="p-3 bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div className="p-3 bg-[#eac652]/15 dark:bg-[#eac652]/15 border border-[#eac652]/40 dark:border-[#eac652]/30 rounded-xl text-xs text-[#735a0f] dark:text-[#fef08a] flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-[#8a6e14] dark:text-[#eac652] shrink-0 mt-0.5" />
                   <p className="leading-tight">
                     <strong>Confira a legibilidade:</strong> Certifique-se de que números de documentos,
                     datas, carimbos e assinaturas estão 100% visíveis e nítidos para evitar recusa pela coordenação.
@@ -384,7 +384,7 @@ export default function UploadModal({ document, onClose }: UploadModalProps) {
                   <div className="flex items-center justify-between text-[11px]">
                     <span className="text-slate-400">1. Inspeção de Magic Bytes:</span>
                     {magicBytesStatus === 'CHECKING' && (
-                      <span className="text-amber-400 flex items-center gap-1">
+                      <span className="text-[#eac652] flex items-center gap-1">
                         <Loader2 className="w-3 h-3 animate-spin" /> Verificando assinatura binária...
                       </span>
                     )}

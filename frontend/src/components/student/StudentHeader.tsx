@@ -6,7 +6,6 @@ import {
   BookOpen,
   GraduationCap,
   Briefcase,
-  Calendar,
   ShieldCheck,
   ChevronDown,
 } from 'lucide-react';
@@ -74,28 +73,48 @@ export default function StudentHeader() {
               </span>
             </div>
 
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">
-              {student.nome} • Matrícula: <span className="font-mono font-bold text-slate-700 dark:text-slate-200">{student.matricula}</span>
-            </p>
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mt-1">
+              <span className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+                {student.nome}
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-[11px] font-mono border border-slate-200/80 dark:border-slate-700">
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Matrícula:</span>
+                <span className="font-bold text-slate-800 dark:text-slate-100">{student.matricula}</span>
+              </span>
+            </div>
 
             {/* Contract & Course Badges */}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2.5">
-              <span className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-slate-700">
-                <BookOpen className="w-3.5 h-3.5 text-[#065373] dark:text-cyan-400" />
-                <span className="truncate max-w-[200px] sm:max-w-none">{student.curso}</span>
-              </span>
+            <div className="flex flex-wrap items-center gap-2.5 mt-3">
+              {/* Instituição & Curso */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-xs shadow-2xs">
+                <div className="w-5 h-5 rounded-lg bg-[#065373]/10 dark:bg-cyan-400/10 flex items-center justify-center text-[#065373] dark:text-cyan-300 shrink-0">
+                  <BookOpen className="w-3.5 h-3.5" />
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{student.curso}</span>
+                  {student.instituicao && (
+                    <>
+                      <span className="text-slate-300 dark:text-slate-600 hidden sm:inline">•</span>
+                      <span className="text-slate-500 dark:text-slate-400 font-medium hidden sm:inline">
+                        {student.instituicao}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
 
-              <span className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-slate-700">
-                <Building2 className="w-3.5 h-3.5 text-[#065373] dark:text-cyan-400" />
-                <span className="truncate max-w-[200px] sm:max-w-none">{student.empresa}</span>
-              </span>
-
-              {student.dataAdmissao && (
-                <span className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                  <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                  Início: {student.dataAdmissao.split('-').reverse().join('/')}
-                </span>
-              )}
+              {/* Empresa Concedente */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-xs shadow-2xs">
+                <div className="w-5 h-5 rounded-lg bg-[#065373]/10 dark:bg-cyan-400/10 flex items-center justify-center text-[#065373] dark:text-cyan-300 shrink-0">
+                  <Building2 className="w-3.5 h-3.5" />
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider">Empresa:</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[200px] sm:max-w-none">
+                    {student.empresa}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -32,6 +32,10 @@ interface AppContextType {
   theme: 'light' | 'dark';
   setTheme: (theme: 'light' | 'dark') => void;
   toggleTheme: () => void;
+  isSidebarOpen: boolean;
+  setIsSidebarOpen: (open: boolean) => void;
+  toggleSidebar: () => void;
+  closeSidebar: () => void;
   toastMessage: { title: string; desc: string; type: 'success' | 'error' | 'info' } | null;
   setToastMessage: (msg: { title: string; desc: string; type: 'success' | 'error' | 'info' } | null) => void;
   uploadStudentDocument: (docId: string, file: File) => Promise<boolean>;
@@ -59,11 +63,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
   const [isLgpdRedactionActive, setIsLgpdRedactionActive] = useState<boolean>(true);
   const [theme, setThemeState] = useState<'light' | 'dark'>('light');
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
   const [toastMessage, setToastMessage] = useState<{
     title: string;
     desc: string;
     type: 'success' | 'error' | 'info';
   } | null>(null);
+
+  // Responsive sidebar initialization
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (window.innerWidth < 1024) {
+        setIsSidebarOpen(false);
+      }
+    }
+  }, []);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
 
   // Initialize theme from localStorage / system preference
   useEffect(() => {
@@ -431,6 +453,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         theme,
         setTheme,
         toggleTheme,
+        isSidebarOpen,
+        setIsSidebarOpen,
+        toggleSidebar,
+        closeSidebar,
         toastMessage,
         setToastMessage,
         uploadStudentDocument,

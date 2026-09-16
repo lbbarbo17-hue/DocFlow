@@ -196,7 +196,7 @@ export default function DocumentViewModal({
                     <span
                       className={`font-bold ${
                         document.diasParaVencer !== undefined && document.diasParaVencer <= 30
-                          ? 'text-amber-700 dark:text-amber-400'
+                          ? 'text-[#8a6e14] dark:text-[#eac652]'
                           : 'text-emerald-700 dark:text-emerald-400'
                       }`}
                     >

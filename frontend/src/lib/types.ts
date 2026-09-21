@@ -66,6 +66,7 @@ export interface Student {
   turmaNome: string;
   curso: string;
   empresa: string;
+  instituicao?: string;
   avatarUrl?: string;
   documentos: DocumentItem[];
   percentualConformidade: number; // 0 - 100

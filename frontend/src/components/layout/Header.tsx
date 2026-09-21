@@ -4,17 +4,18 @@ import React from 'react';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
 import {
-  UserCheck,
-  GraduationCap,
-  Shield,
   CheckCircle2,
   AlertCircle,
   Info,
   X,
   Lock,
-  LogOut,
   Sun,
   Moon,
+  Menu,
+  LogOut,
+  GraduationCap,
+  ShieldCheck,
+  Shield,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -28,34 +29,56 @@ export default function Header() {
     setIsLgpdRedactionActive,
     theme,
     toggleTheme,
+    isSidebarOpen,
+    toggleSidebar,
   } = useApp();
 
   const userDisplayName =
     currentRole === 'ESTUDANTE'
       ? student.nome
       : currentRole === 'COORDENADOR'
-      ? 'Profª. Mariana Alcantara'
-      : 'Super Administrador DocFlow';
+      ? 'Coordenação / RH'
+      : 'Super Administrador';
 
-  const userRoleBadge =
+  const userRoleBadge = {
+    label:
+      currentRole === 'ESTUDANTE'
+        ? student.tipoVinculo === 'APRENDIZ'
+          ? 'Jovem Aprendiz'
+          : 'Estagiário'
+        : currentRole === 'COORDENADOR'
+        ? 'Coordenador / RH'
+        : 'Super Admin',
+  };
+
+  const RoleIcon =
     currentRole === 'ESTUDANTE'
-      ? { label: 'Aprendiz / Estagiário', color: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800', icon: GraduationCap }
+      ? GraduationCap
       : currentRole === 'COORDENADOR'
-      ? { label: 'Coordenação & RH', color: 'bg-cyan-50 text-cyan-800 border-cyan-200 dark:bg-cyan-950/40 dark:text-cyan-300 dark:border-cyan-800', icon: UserCheck }
-      : { label: 'Super Admin', color: 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800', icon: Shield };
-
-  const RoleIcon = userRoleBadge.icon;
+      ? ShieldCheck
+      : Shield;
 
   return (
-    <header className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-3.5 shadow-sm transition-colors duration-200">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        {/* Left Side: Active Portal Title */}
+    <header className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3 shadow-sm transition-colors duration-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        {/* Left Side: Sidebar Toggle & Portal Title */}
         <div className="flex items-center gap-3">
-          <div className="h-8 w-1.5 bg-[#065373] dark:bg-cyan-400 rounded-full" />
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors shadow-2xs flex items-center justify-center shrink-0 cursor-pointer active:scale-95"
+            title={isSidebarOpen ? 'Ocultar menu lateral' : 'Exibir menu lateral'}
+            aria-label="Alternar visibilidade do menu lateral"
+          >
+            <Menu className="w-4 h-4 text-[#065373] dark:text-cyan-300" />
+          </button>
+
+          <div className="hidden sm:block h-6 w-[1px] bg-slate-200 dark:border-slate-800" />
+
           <div>
-            <h1 className="text-base font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <h1 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2 flex-wrap">
               DocFlow
-              <span className="text-xs font-semibold text-[#065373] dark:text-cyan-300 bg-[#065373]/10 dark:bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-[#065373]/20 dark:border-cyan-500/30">
+              <span className="text-[11px] sm:text-xs font-semibold text-[#065373] dark:text-cyan-300 bg-[#065373]/10 dark:bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-[#065373]/20 dark:border-cyan-500/30">
                 {currentRole === 'ESTUDANTE'
                   ? 'Portal do Aprendiz'
                   : currentRole === 'COORDENADOR'
@@ -63,7 +86,7 @@ export default function Header() {
                   : 'Painel do Super Administrador'}
               </span>
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
               Ambiente de acesso seguro e exclusivo
             </p>
           </div>

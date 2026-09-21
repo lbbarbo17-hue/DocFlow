@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
+import { Plus_Jakarta_Sans, JetBrains_Mono, Outfit } from 'next/font/google';
 import './globals.css';
 import { AppProvider } from '@/context/AppContext';
 import AppShell from '@/components/layout/AppShell';
@@ -16,6 +16,12 @@ const jetbrains = JetBrains_Mono({
   display: 'swap',
 });
 
+const outfit = Outfit({
+  subsets: ['latin'],
+  variable: '--font-outfit',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: 'DocFlow — Guarda Documental & Conformidade LGPD',
   description:
@@ -28,7 +34,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${jakarta.variable} ${jetbrains.variable}`}>
+    <html
+      lang="pt-BR"
+      className={`${jakarta.variable} ${jetbrains.variable} ${outfit.variable}`}
+    >
       <body className="font-sans antialiased bg-[#DDDDDD] text-slate-900 min-h-screen">
         <AppProvider>
           <AppShell>{children}</AppShell>

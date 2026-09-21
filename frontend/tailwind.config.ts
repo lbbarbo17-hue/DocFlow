@@ -22,6 +22,9 @@ export default {
           "light-sky": "#77afd3",
           ice: "#eef6fa",
           "ice-50": "#f5f9fc",
+          yellow: "#eac652",
+          "yellow-light": "#fef8e7",
+          "yellow-dark": "#8a6e14",
         },
       },
       fontFamily: {

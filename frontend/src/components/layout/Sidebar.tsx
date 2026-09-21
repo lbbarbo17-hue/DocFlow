@@ -53,11 +53,6 @@ export default function Sidebar() {
           href: '/estudante/enviar',
           icon: UploadCloud,
         },
-        {
-          label: 'Adicionar Documentos',
-          href: '/estudante/enviar',
-          icon: UploadCloud,
-        },
       ];
     }
 

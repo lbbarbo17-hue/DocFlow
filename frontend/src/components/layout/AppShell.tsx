@@ -11,7 +11,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { currentRole, isSidebarOpen, closeSidebar } = useApp();
 
-  const isAuthPage = pathname === '/login';
+  const isAuthPage = pathname === '/login' || pathname === '/';
 
   if (isAuthPage) {
     return <main className="min-h-screen w-full">{children}</main>;

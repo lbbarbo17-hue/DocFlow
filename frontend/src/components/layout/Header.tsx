@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
 import {
   CheckCircle2,
@@ -11,12 +12,17 @@ import {
   Sun,
   Moon,
   Menu,
+  LogOut,
+  GraduationCap,
+  ShieldCheck,
+  Shield,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function Header() {
   const {
     currentRole,
+    student,
     toastMessage,
     setToastMessage,
     isLgpdRedactionActive,
@@ -26,6 +32,31 @@ export default function Header() {
     isSidebarOpen,
     toggleSidebar,
   } = useApp();
+
+  const userDisplayName =
+    currentRole === 'ESTUDANTE'
+      ? student.nome
+      : currentRole === 'COORDENADOR'
+      ? 'Coordenação / RH'
+      : 'Super Administrador';
+
+  const userRoleBadge = {
+    label:
+      currentRole === 'ESTUDANTE'
+        ? student.tipoVinculo === 'APRENDIZ'
+          ? 'Jovem Aprendiz'
+          : 'Estagiário'
+        : currentRole === 'COORDENADOR'
+        ? 'Coordenador / RH'
+        : 'Super Admin',
+  };
+
+  const RoleIcon =
+    currentRole === 'ESTUDANTE'
+      ? GraduationCap
+      : currentRole === 'COORDENADOR'
+      ? ShieldCheck
+      : Shield;
 
   return (
     <header className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3 shadow-sm transition-colors duration-200">

@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, ArrowUpDown } from 'lucide-react';
+import { Search, ArrowUpDown, UserPlus } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { getRiskBadgeConfig } from '@/lib/utils';
 import DossierViewer from './DossierViewer';
+import StudentRegisterModal from './StudentRegisterModal';
 
 interface StudentMasterListProps {
   initialStudentId?: string;
@@ -24,6 +25,7 @@ export default function StudentMasterList({
     initialStudentId || studentsList[0]?.id || ''
   );
   const [activeDocId, setActiveDocId] = useState<string | undefined>(initialDocId);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
   useEffect(() => {
     if (initialStudentId) {
@@ -150,6 +152,16 @@ export default function StudentMasterList({
               <option value="NOME" className="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200">Nome (A - Z)</option>
             </select>
           </div>
+
+          {/* Cadastrar Novo Aluno Button */}
+          <button
+            type="button"
+            onClick={() => setIsRegisterOpen(true)}
+            className="px-3.5 py-2 bg-gradient-to-r from-[#065373] to-[#226a8b] hover:from-[#0a6d96] hover:to-[#226a8b] text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition-all shrink-0 cursor-pointer active:scale-95"
+          >
+            <UserPlus className="w-3.5 h-3.5 text-cyan-300" />
+            <span>Cadastrar Aluno</span>
+          </button>
         </div>
       </div>
 
@@ -318,6 +330,15 @@ export default function StudentMasterList({
           )}
         </div>
       </div>
+
+      {/* Student Registration Modal */}
+      <StudentRegisterModal
+        isOpen={isRegisterOpen}
+        onClose={() => setIsRegisterOpen(false)}
+        onSuccess={(newStudentId) => {
+          setActiveStudentId(newStudentId);
+        }}
+      />
     </div>
   );
 }

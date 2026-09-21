@@ -9,7 +9,6 @@ import confetti from 'canvas-confetti';
 import {
   Lock,
   Mail,
-  User,
   Eye,
   EyeOff,
   ArrowRight,
@@ -20,7 +19,6 @@ import {
   Shield,
   Clock,
   KeyRound,
-  Calendar,
   Loader2,
 } from 'lucide-react';
 
@@ -28,12 +26,8 @@ export default function LoginPage() {
   const router = useRouter();
   const { setCurrentRole, setToastMessage } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'LOGIN' | 'SIGNUP'>('LOGIN');
   const [identifier, setIdentifier] = useState('lucas.gabriel@empresa-tech.com.br');
   const [password, setPassword] = useState('DocFlow@2026');
-  const [dataNascimento, setDataNascimento] = useState('2005-05-14');
-  const [nome, setNome] = useState('Lucas Gabriel da Silva');
-  const [cpf, setCpf] = useState('458.912.308-44');
   const [showPassword, setShowPassword] = useState(false);
   const [selectedRolePreset, setSelectedRolePreset] = useState<UserRole>('ESTUDANTE');
   const [isLoading, setIsLoading] = useState(false);
@@ -273,82 +267,8 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Tab Switcher: Login vs Primeiro Acesso */}
-            <div className="flex rounded-xl bg-slate-950/80 p-1 border border-slate-800 mb-6">
-              <button
-                type="button"
-                onClick={() => setActiveTab('LOGIN')}
-                className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
-                  activeTab === 'LOGIN'
-                    ? 'bg-[#065373] text-white shadow-md'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Entrar na Conta
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('SIGNUP')}
-                className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
-                  activeTab === 'SIGNUP'
-                    ? 'bg-[#065373] text-white shadow-md'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Primeiro Acesso ✨
-              </button>
-            </div>
-
             {/* Main Form */}
             <form onSubmit={handleLoginSubmit} className="space-y-4">
-              {activeTab === 'SIGNUP' && (
-                <>
-                  {/* Nome Completo */}
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>Nome Completo</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={nome}
-                      onChange={(e) => setNome(e.target.value)}
-                      placeholder="Ex: Lucas Gabriel da Silva"
-                      className="w-full bg-slate-950/90 border border-slate-700 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 transition-all font-sans outline-none"
-                    />
-                  </div>
-
-                  {/* CPF & Data de Nascimento */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-bold text-slate-300">CPF</label>
-                      <input
-                        type="text"
-                        required
-                        value={cpf}
-                        onChange={(e) => setCpf(e.target.value)}
-                        placeholder="000.000.000-00"
-                        className="w-full bg-slate-950/90 border border-slate-700 focus:border-cyan-400 rounded-xl px-3 py-2 text-xs text-white placeholder:text-slate-500 font-mono outline-none"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-bold text-slate-300 flex items-center gap-1">
-                        <Calendar className="w-3 h-3 text-cyan-400" />
-                        <span>Data de Nascimento</span>
-                      </label>
-                      <input
-                        type="date"
-                        required
-                        value={dataNascimento}
-                        onChange={(e) => setDataNascimento(e.target.value)}
-                        className="w-full bg-slate-950/90 border border-slate-700 focus:border-cyan-400 rounded-xl px-3 py-2 text-xs text-white placeholder:text-slate-500 font-sans outline-none"
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
               {/* Email / Identificador */}
               <div className="space-y-1">
                 <label className="text-[11px] font-bold text-slate-300 flex items-center justify-between">
@@ -374,22 +294,20 @@ export default function LoginPage() {
                     <KeyRound className="w-3.5 h-3.5 text-cyan-400" />
                     <span>Senha</span>
                   </label>
-                  {activeTab === 'LOGIN' && (
-                    <a
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setToastMessage({
-                          title: 'Link de Recuperação Enviado',
-                          desc: `Instruções enviadas para ${identifier}.`,
-                          type: 'info',
-                        });
-                      }}
-                      className="text-[11px] text-cyan-300 hover:text-cyan-200 transition-colors"
-                    >
-                      Esqueceu a senha?
-                    </a>
-                  )}
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setToastMessage({
+                        title: 'Link de Recuperação Enviado',
+                        desc: `Instruções enviadas para ${identifier}.`,
+                        type: 'info',
+                      });
+                    }}
+                    className="text-[11px] text-cyan-300 hover:text-cyan-200 transition-colors"
+                  >
+                    Esqueceu a senha?
+                  </a>
                 </div>
 
                 <div className="relative">
@@ -473,9 +391,7 @@ export default function LoginPage() {
                   </>
                 ) : (
                   <>
-                    <span>
-                      {activeTab === 'LOGIN' ? 'Acessar Meu Dossiê Seguro' : 'Criar Minha Conta no DocFlow'}
-                    </span>
+                    <span>Acessar Meu Dossiê Seguro</span>
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1 text-cyan-300" />
                   </>
                 )}

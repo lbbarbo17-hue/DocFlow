@@ -85,6 +85,18 @@ export interface Turma {
   alunosRegulares: number;
 }
 
+export interface Empresa {
+  id: string;
+  razaoSocial: string;
+  nomeFantasia: string;
+  cnpj: string;
+  ramoAtuacao: string;
+  contatoRh: string;
+  emailRh: string;
+  telefone?: string;
+  cidadeUf?: string;
+}
+
 export interface SystemUser {
   id: string;
   nome: string;

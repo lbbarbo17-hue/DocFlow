@@ -7,7 +7,6 @@ import {
   Camera,
   FolderOpen,
   AlertTriangle,
-  Lock,
   Cpu,
   ShieldCheck,
   CheckCircle2,
@@ -156,8 +155,8 @@ export default function UploadModal({ document, onClose }: UploadModalProps) {
                 Envio: {document.nomeExibicao}
               </h3>
               <p className="text-[11px] text-cyan-100/80 flex items-center gap-1.5 mt-0.5">
-                <Lock className="w-3 h-3 text-cyan-300" />
-                <span>Upload Seguro & Guard-rails de Conformidade</span>
+                <ShieldCheck className="w-3.5 h-3.5 text-cyan-300" />
+                <span>Upload e Envio de Documento</span>
               </p>
             </div>
           </div>
@@ -374,9 +373,9 @@ export default function UploadModal({ document, onClose }: UploadModalProps) {
                 <div className="flex items-center justify-between border-b border-slate-800 pb-2 text-[11px] text-cyan-400 font-bold uppercase">
                   <div className="flex items-center gap-1.5">
                     <Cpu className="w-4 h-4" />
-                    <span>Guard-rails de Segurança DocFlow</span>
+                    <span>Validação de Segurança & Integridade</span>
                   </div>
-                  <span>Etapa {pipelineStep}/4</span>
+                  <span>Etapa {pipelineStep}/3</span>
                 </div>
 
                 <div className="space-y-2">
@@ -402,23 +401,13 @@ export default function UploadModal({ document, onClose }: UploadModalProps) {
                   {pipelineStep >= 2 && (
                     <div className="space-y-1 text-[10px] bg-slate-950 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-800">
                       <div className="flex items-center justify-between text-slate-400">
-                        <span>2. Hash SHA-256:</span>
+                        <span>2. Hash SHA-256 (Integridade):</span>
                         <span className="text-cyan-300 font-bold">{simulatedHash.substring(0, 16)}...</span>
                       </div>
                       <div className="flex items-center justify-between text-slate-400">
                         <span>3. Storage Privado UUID:</span>
                         <span className="text-emerald-400">{simulatedUuid}</span>
                       </div>
-                    </div>
-                  )}
-
-                  {/* Step 3: LGPD Minimization */}
-                  {pipelineStep >= 3 && (
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-slate-400">4. Minimização LGPD (Art. 6º, III):</span>
-                      <span className="text-cyan-400 flex items-center gap-1 font-bold">
-                        <Lock className="w-3 h-3" /> Tarja Automática Pronta
-                      </span>
                     </div>
                   )}
                 </div>
@@ -436,7 +425,7 @@ export default function UploadModal({ document, onClose }: UploadModalProps) {
 
           {/* Security limits discrete footer note */}
           <p className="text-[11px] text-slate-400 dark:text-slate-500 text-center">
-            🔒 Transmissão segura com criptografia TLS 1.3 de ponta a ponta. Formatos: PDF, PNG, JPG até 10 MB.
+            🔒 Transmissão com validação de formato e integridade. Formatos: PDF, PNG, JPG até 10 MB.
           </p>
         </div>
 
@@ -451,7 +440,7 @@ export default function UploadModal({ document, onClose }: UploadModalProps) {
           </button>
           <button
             type="button"
-            disabled={!selectedFile || isProcessing || pipelineStep < 3}
+            disabled={!selectedFile || isProcessing || pipelineStep < 2}
             onClick={handleConfirmUpload}
             className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-[#065373] hover:bg-[#043c53] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md flex items-center gap-2"
           >

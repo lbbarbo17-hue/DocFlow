@@ -4,7 +4,6 @@ import React from 'react';
 import {
   X,
   ShieldCheck,
-  Lock,
   FileText,
   CheckCircle2,
   AlertTriangle,
@@ -44,8 +43,8 @@ export default function DocumentViewModal({
                 {document.nomeExibicao}
               </h3>
               <p className="text-[11px] text-cyan-100/80 flex items-center gap-1.5 mt-0.5">
-                <Lock className="w-3 h-3 text-cyan-300" />
-                <span>Visualização Segura & Conformidade LGPD</span>
+                <ShieldCheck className="w-3.5 h-3.5 text-cyan-300" />
+                <span>Visualização e Detalhes do Documento</span>
               </p>
             </div>
           </div>
@@ -59,7 +58,18 @@ export default function DocumentViewModal({
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="p-4 sm:p-6 space-y-5 overflow-y-auto flex-1">
+        <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
+          {/* Document Description / Guidelines */}
+          {document.descricao && (
+            <div className="p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 flex items-start gap-2.5">
+              <FileText className="w-4 h-4 text-[#065373] dark:text-cyan-400 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-slate-800 dark:text-white">Instruções do Documento: </span>
+                <span>{document.descricao}</span>
+              </div>
+            </div>
+          )}
+
           {/* Status & Verification Bar */}
           <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2">
@@ -75,7 +85,7 @@ export default function DocumentViewModal({
             {document.dataEnvio && (
               <span className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" />
-                Enviado em {formatDateBr(document.dataEnvio)}
+                Atualizado em {formatDateBr(document.dataEnvio)}
               </span>
             )}
           </div>
@@ -98,7 +108,7 @@ export default function DocumentViewModal({
             {/* Watermark/Security Badge */}
             <div className="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-sm text-cyan-300 text-[10px] font-mono px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-cyan-400/20 shadow-sm">
               <ShieldCheck className="w-3 h-3 text-cyan-400" />
-              <span>CUSTÓDIA SEGURA DOCFLOW</span>
+              <span>CUSTÓDIA DIGITAL DOCFLOW</span>
             </div>
 
             <div className="bg-white dark:bg-slate-900 rounded-xl p-5 sm:p-6 border border-slate-200 dark:border-slate-700 shadow-sm max-w-lg mx-auto space-y-4">
@@ -111,28 +121,17 @@ export default function DocumentViewModal({
                     <p className="font-extrabold text-xs text-slate-900 dark:text-white leading-tight">
                       {document.nomeExibicao}
                     </p>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
                       {document.nomeArquivoOriginal || 'documento_digitalizado.pdf'}
                     </p>
                   </div>
                 </div>
                 {document.tamanhoBytes && (
-                  <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">
-                    {formatBytes(document.tamanhoBytes)}
+                  <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 font-medium">
+                    ({formatBytes(document.tamanhoBytes)})
                   </span>
                 )}
               </div>
-
-              {/* Data protection notice / LGPD */}
-              {document.protecaoLgpd && (
-                <div className="p-3 bg-sky-50/70 dark:bg-cyan-950/40 border border-sky-200/80 dark:border-cyan-800/60 rounded-xl text-[11px] text-sky-900 dark:text-cyan-200 flex items-start gap-2">
-                  <Lock className="w-3.5 h-3.5 text-[#065373] dark:text-cyan-400 shrink-0 mt-0.5" />
-                  <p className="leading-tight">
-                    <strong>Proteção LGPD Ativa:</strong> Dados sensíveis estão criptografados e
-                    anonimizados para visualização estudantil (Art. 6º, III da Lei 13.709/2018).
-                  </p>
-                </div>
-              )}
 
               {/* Simulated extracted fields */}
               <div className="space-y-2.5 text-xs">

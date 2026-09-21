@@ -37,8 +37,12 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       className={`${jakarta.variable} ${jetbrains.variable} ${outfit.variable}`}
+      suppressHydrationWarning
     >
-      <body className="font-sans antialiased bg-[#DDDDDD] text-slate-900 min-h-screen">
+      <body
+        className="font-sans antialiased bg-[#DDDDDD] text-slate-900 min-h-screen"
+        suppressHydrationWarning
+      >
         <AppProvider>
           <AppShell>{children}</AppShell>
         </AppProvider>

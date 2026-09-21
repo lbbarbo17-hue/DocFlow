@@ -8,7 +8,6 @@ import {
   Camera,
   FolderOpen,
   AlertTriangle,
-  Lock,
   Cpu,
   ShieldCheck,
   CheckCircle2,
@@ -28,16 +27,38 @@ import { formatBytes, computeSHA256, generateStorageUUID } from '@/lib/utils';
 import StudentHeader from '@/components/student/StudentHeader';
 import { TipoDocumento } from '@/lib/types';
 
+const SUPPLEMENTARY_DOCUMENT_OPTIONS = [
+  {
+    tipo: 'CONTRATO_TCE' as TipoDocumento,
+    nomeExibicao: 'Termo Aditivo de Contrato / Estágio',
+    descricao: 'Aditivo contratual assinado para prorrogação de vigência ou alteração de bolsa/carga horária.',
+  },
+  {
+    tipo: 'CONTRATO_TCE' as TipoDocumento,
+    nomeExibicao: 'Relatório de Atividades Semestrais',
+    descricao: 'Relatório periódico de atividades desempenhadas, assinado pelo supervisor da empresa.',
+  },
+  {
+    tipo: 'COMPROVANTE_MATRICULA' as TipoDocumento,
+    nomeExibicao: 'Histórico Escolar / Atestado de Frequência',
+    descricao: 'Documento emitido pela instituição de ensino comprovando regularidade e frequência.',
+  },
+  {
+    tipo: 'CONTRATO_TCE' as TipoDocumento,
+    nomeExibicao: 'Apólice de Seguro de Vida / Acidentes',
+    descricao: 'Comprovante da apólice de seguro obrigatório contra acidentes pessoais.',
+  },
+];
+
 export default function AdicionarDocumentoPage() {
   const { student, uploadStudentDocument, addNewDocumentToStudent } = useApp();
 
-  // Selection mode: 'EXISTING' or 'CUSTOM'
+  // Selection mode: 'EXISTING' or 'SUPPLEMENTARY'
   const [selectedDocId, setSelectedDocId] = useState<string>(
     student.documentos.find((d) => d.status !== 'APROVADO')?.id || student.documentos[0]?.id || ''
   );
-  const [isCustomDoc, setIsCustomDoc] = useState<boolean>(false);
-  const [customDocTitle, setCustomDocTitle] = useState<string>('');
-  const [customDocDesc, setCustomDocDesc] = useState<string>('');
+  const [isSupplementary, setIsSupplementary] = useState<boolean>(false);
+  const [selectedSupplementaryIndex, setSelectedSupplementaryIndex] = useState<number>(0);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -57,6 +78,7 @@ export default function AdicionarDocumentoPage() {
   const [uploadSuccess, setUploadSuccess] = useState<boolean>(false);
 
   const selectedDoc = student.documentos.find((d) => d.id === selectedDocId);
+  const currentSupplementary = SUPPLEMENTARY_DOCUMENT_OPTIONS[selectedSupplementaryIndex];
 
   // Clean up object URL when component unmounts or file changes
   useEffect(() => {
@@ -119,9 +141,9 @@ export default function AdicionarDocumentoPage() {
     setSimulatedUuid(uuid);
 
     await new Promise((r) => setTimeout(r, 450));
-    setPipelineStep(3); // LGPD Redaction Pre-process
+    setPipelineStep(3); // Armazenamento seguro
     await new Promise((r) => setTimeout(r, 350));
-    setPipelineStep(4); // Ready
+    setPipelineStep(4); // Pronto para envio
     setIsProcessing(false);
   };
 
@@ -147,20 +169,15 @@ export default function AdicionarDocumentoPage() {
   const handleSubmit = async () => {
     if (!selectedFile) return;
 
-    if (isCustomDoc) {
-      if (!customDocTitle.trim()) {
-        setErrorMessage('Por favor, informe o nome do documento adicional.');
-        return;
-      }
+    if (isSupplementary) {
       setIsProcessing(true);
       const success = await addNewDocumentToStudent(
         {
-          tipo: 'CONTRATO_TCE' as TipoDocumento,
-          nomeExibicao: customDocTitle.trim(),
-          descricao: customDocDesc.trim() || 'Documento complementar anexado pelo estudante.',
+          tipo: currentSupplementary.tipo,
+          nomeExibicao: currentSupplementary.nomeExibicao,
+          descricao: currentSupplementary.descricao,
           obrigatorio: false,
           status: 'EM_ANALISE',
-          protecaoLgpd: true,
         },
         selectedFile
       );
@@ -188,8 +205,6 @@ export default function AdicionarDocumentoPage() {
     setPipelineStep(0);
     setErrorMessage(null);
     setUploadSuccess(false);
-    setCustomDocTitle('');
-    setCustomDocDesc('');
   };
 
   const handleZoomIn = () => setZoomLevel((prev) => Math.min(prev + 25, 200));
@@ -212,7 +227,7 @@ export default function AdicionarDocumentoPage() {
               Adicionar e Enviar Documentos
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Envio seguro com conferência de autenticidade, custódia SHA-256 e conformidade LGPD
+              Envio com conferência de autenticidade e custódia digital
             </p>
           </div>
         </div>
@@ -238,7 +253,7 @@ export default function AdicionarDocumentoPage() {
               Documento Enviado com Sucesso! 🎉
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              O arquivo foi processado, criptografado e encaminhado para a equipe de coordenação e RH para validação contínua.
+              O arquivo foi processado com validação de autenticidade e encaminhado para a equipe de coordenação para conferência.
             </p>
           </div>
 
@@ -290,13 +305,13 @@ export default function AdicionarDocumentoPage() {
                 </h3>
               </div>
 
-              {/* Toggle entre Documento do Checklist ou Documento Adicional */}
+              {/* Toggle entre Documento do Checklist ou Documento Complementar */}
               <div className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl gap-1">
                 <button
                   type="button"
-                  onClick={() => setIsCustomDoc(false)}
+                  onClick={() => setIsSupplementary(false)}
                   className={`py-2 px-3 rounded-xl text-xs font-bold transition-all ${
-                    !isCustomDoc
+                    !isSupplementary
                       ? 'bg-white dark:bg-slate-900 text-[#065373] dark:text-cyan-300 shadow-sm'
                       : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
@@ -305,19 +320,19 @@ export default function AdicionarDocumentoPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setIsCustomDoc(true)}
+                  onClick={() => setIsSupplementary(true)}
                   className={`py-2 px-3 rounded-xl text-xs font-bold transition-all ${
-                    isCustomDoc
+                    isSupplementary
                       ? 'bg-white dark:bg-slate-900 text-[#065373] dark:text-cyan-300 shadow-sm'
                       : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  Documento Adicional
+                  Documentos Complementares
                 </button>
               </div>
 
-              {!isCustomDoc ? (
-                /* Lista de Documentos do Estudante */
+              {!isSupplementary ? (
+                /* Lista de Opções de Documentos do Estudante */
                 <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
                   {student.documentos.map((doc) => {
                     const isSelected = selectedDocId === doc.id;
@@ -377,46 +392,52 @@ export default function AdicionarDocumentoPage() {
                   })}
                 </div>
               ) : (
-                /* Formulário para Documento Adicional */
-                <div className="space-y-3.5">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                      Nome / Título do Documento:
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Ex: Certificado de Curso, Termo Aditivo..."
-                      value={customDocTitle}
-                      onChange={(e) => setCustomDocTitle(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 text-slate-900 dark:text-white"
-                    />
-                  </div>
+                /* Lista de Opções Pré-definidas Seguras de Documentos Complementares */
+                <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+                  {SUPPLEMENTARY_DOCUMENT_OPTIONS.map((opt, idx) => {
+                    const isSelected = selectedSupplementaryIndex === idx;
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                      Descrição ou Observação (Opcional):
-                    </label>
-                    <textarea
-                      rows={3}
-                      placeholder="Descreva brevemente a finalidade deste arquivo..."
-                      value={customDocDesc}
-                      onChange={(e) => setCustomDocDesc(e.target.value)}
-                      className="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 text-slate-900 dark:text-white resize-none"
-                    />
-                  </div>
+                    return (
+                      <div
+                        key={opt.nomeExibicao}
+                        onClick={() => setSelectedSupplementaryIndex(idx)}
+                        className={`p-3.5 rounded-2xl border-2 cursor-pointer transition-all ${
+                          isSelected
+                            ? 'border-[#065373] dark:border-cyan-400 bg-cyan-50/40 dark:bg-cyan-950/30 shadow-xs'
+                            : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/50 dark:bg-slate-800/40'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="font-bold text-xs text-slate-900 dark:text-white">
+                              {opt.nomeExibicao}
+                            </p>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                              {opt.descricao}
+                            </p>
+                          </div>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-950/60 text-[#065373] dark:text-cyan-300 shrink-0">
+                            Opção Oficial
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
 
-              {/* Informações e Diretrizes */}
-              {selectedDoc && !isCustomDoc && (
-                <div className="p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 flex items-start gap-2.5">
-                  <Info className="w-4 h-4 text-[#065373] dark:text-cyan-400 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold text-slate-800 dark:text-white">Dica da Coordenação: </span>
-                    {selectedDoc.descricao}
-                  </div>
+              {/* Informações e Diretrizes do Documento Selecionado */}
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 flex items-start gap-2.5">
+                <Info className="w-4 h-4 text-[#065373] dark:text-cyan-400 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold text-slate-800 dark:text-white">Diretriz de Envio: </span>
+                  <span>
+                    {!isSupplementary && selectedDoc
+                      ? selectedDoc.descricao
+                      : currentSupplementary?.descricao}
+                  </span>
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
@@ -604,14 +625,14 @@ export default function AdicionarDocumentoPage() {
                     </div>
                   </div>
 
-                  {/* Pipeline de Guard-rails */}
+                  {/* Pipeline de Segurança & Integridade */}
                   <div className="p-4 rounded-2xl bg-slate-900 dark:bg-slate-950 text-slate-200 space-y-3 font-mono text-xs shadow-md border border-slate-800">
                     <div className="flex items-center justify-between border-b border-slate-800 pb-2 text-[11px] text-cyan-400 font-bold uppercase">
                       <div className="flex items-center gap-1.5">
                         <Cpu className="w-4 h-4" />
-                        <span>Guard-rails de Segurança DocFlow</span>
+                        <span>Validação de Segurança & Integridade</span>
                       </div>
-                      <span>Etapa {pipelineStep}/4</span>
+                      <span>Etapa {pipelineStep}/3</span>
                     </div>
 
                     <div className="space-y-2">
@@ -635,22 +656,13 @@ export default function AdicionarDocumentoPage() {
                       {pipelineStep >= 2 && (
                         <div className="space-y-1 text-[10px] bg-slate-950 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-800">
                           <div className="flex items-center justify-between text-slate-400">
-                            <span>2. Hash SHA-256:</span>
+                            <span>2. Hash SHA-256 (Integridade):</span>
                             <span className="text-cyan-300 font-bold">{simulatedHash.substring(0, 16)}...</span>
                           </div>
                           <div className="flex items-center justify-between text-slate-400">
                             <span>3. Storage Privado UUID:</span>
                             <span className="text-emerald-400">{simulatedUuid}</span>
                           </div>
-                        </div>
-                      )}
-
-                      {pipelineStep >= 3 && (
-                        <div className="flex items-center justify-between text-[11px]">
-                          <span className="text-slate-400">4. Minimização LGPD (Art. 6º, III):</span>
-                          <span className="text-cyan-400 flex items-center gap-1 font-bold">
-                            <Lock className="w-3 h-3" /> Tarja Automática Pronta
-                          </span>
                         </div>
                       )}
                     </div>
@@ -670,19 +682,19 @@ export default function AdicionarDocumentoPage() {
               <div className="pt-2">
                 <button
                   type="button"
-                  disabled={!selectedFile || isProcessing || pipelineStep < 3}
+                  disabled={!selectedFile || isProcessing || pipelineStep < 2}
                   onClick={handleSubmit}
                   className="w-full py-3.5 rounded-2xl text-sm font-black text-white bg-[#065373] hover:bg-[#043c53] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md flex items-center justify-center gap-2.5 active:scale-98"
                 >
                   {isProcessing ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Validando & Criptografando Arquivo...</span>
+                      <span>Processando & Enviando Arquivo...</span>
                     </>
                   ) : (
                     <>
                       <ShieldCheck className="w-5 h-5 text-cyan-300" />
-                      <span>Confirmar & Enviar Documento para Custódia</span>
+                      <span>Confirmar & Enviar Documento</span>
                     </>
                   )}
                 </button>

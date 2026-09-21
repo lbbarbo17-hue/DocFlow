@@ -120,13 +120,6 @@ export default function Sidebar() {
 
   const navItems = getNavItemsForRole();
 
-  const interfaceTitle =
-    currentRole === 'ESTUDANTE'
-      ? 'Portal do Aprendiz'
-      : currentRole === 'COORDENADOR'
-      ? 'Portal da Coordenação & RH'
-      : 'Painel do Super Admin';
-
   const userInitials =
     currentRole === 'ESTUDANTE'
       ? student.nome
@@ -159,7 +152,6 @@ export default function Sidebar() {
             <span className="font-extrabold text-base tracking-tight text-white block leading-tight">
               DocFlow
             </span>
-            <p className="text-[11px] text-[#77afd3] truncate">{interfaceTitle}</p>
           </div>
         </div>
 

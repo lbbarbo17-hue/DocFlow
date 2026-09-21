@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   FileText,
   Eye,
-  Lock,
   RefreshCw,
   Calendar,
   AlertTriangle,
@@ -17,7 +16,7 @@ import {
 } from 'lucide-react';
 import { DocumentItem } from '@/lib/types';
 import { useApp } from '@/context/AppContext';
-import { getStatusBadgeConfig, formatDateBr, formatBytes } from '@/lib/utils';
+import { getStatusBadgeConfig, formatDateBr } from '@/lib/utils';
 import UploadModal from './UploadModal';
 import DocumentViewModal from './DocumentViewModal';
 
@@ -71,7 +70,7 @@ export default function DocumentChecklist() {
               Checklist de Documentos Obrigatórios
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Guarda digital, conferência contínua e conformidade LGPD
+              Guarda digital e conferência contínua de documentos
             </p>
           </div>
 
@@ -237,17 +236,6 @@ export default function DocumentChecklist() {
                           {badge.label}
                         </span>
 
-                        {/* LGPD Protection indicator */}
-                        {doc.protecaoLgpd && (
-                          <span
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 dark:bg-cyan-950/50 text-[#065373] dark:text-cyan-300 border border-sky-200 dark:border-cyan-800/60"
-                            title="Protegido por Criptografia e Anonimização LGPD (Art. 6º, III)"
-                          >
-                            <Lock className="w-3 h-3 text-[#065373] dark:text-cyan-300" />
-                            <span>Proteção LGPD</span>
-                          </span>
-                        )}
-
                         {/* Recorrente tag */}
                         {doc.recorrente && (
                           <span
@@ -260,48 +248,22 @@ export default function DocumentChecklist() {
                         )}
                       </div>
 
-                      {/* Description */}
-                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                        {doc.descricao}
-                      </p>
-
-                      {/* Observations / Validity info */}
-                      {doc.observacaoValidade && (
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1">
-                          <Calendar className="w-3 h-3 text-slate-400 dark:text-slate-500" />
-                          <span>{doc.observacaoValidade}</span>
+                      {/* Atualizado em (visible directly on card) */}
+                      {doc.dataEnvio && (
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium flex items-center gap-1 pt-0.5">
+                          <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                          <span>Atualizado em {formatDateBr(doc.dataEnvio)}</span>
                         </p>
                       )}
 
                       {/* Rejection alert box */}
                       {isRejected && doc.justificativaRecusa && (
-                        <div className="mt-2 p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 rounded-xl text-xs text-rose-800 dark:text-rose-200 space-y-0.5">
+                        <div className="mt-2 p-2.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 rounded-xl text-xs text-rose-800 dark:text-rose-200 space-y-0.5">
                           <div className="flex items-center gap-1 font-bold text-rose-700 dark:text-rose-300">
                             <AlertCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
                             <span>Motivo da recusa / Correção necessária:</span>
                           </div>
                           <p className="text-rose-700 dark:text-rose-300 pl-4">{doc.justificativaRecusa}</p>
-                        </div>
-                      )}
-
-                      {/* Upload metadata: filename, date */}
-                      {doc.nomeArquivoOriginal && (
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500 dark:text-slate-400 pt-1">
-                          <span className="flex items-center gap-1 font-mono font-medium text-slate-700 dark:text-slate-300 truncate max-w-[200px] sm:max-w-xs">
-                            <FileText className="w-3 h-3 text-slate-400" />
-                            {doc.nomeArquivoOriginal}
-                          </span>
-                          {doc.tamanhoBytes && (
-                            <span className="font-mono text-slate-400 dark:text-slate-500">
-                              ({formatBytes(doc.tamanhoBytes)})
-                            </span>
-                          )}
-                          {doc.dataEnvio && (
-                            <span className="flex items-center gap-1 text-slate-400 dark:text-slate-500">
-                              <Calendar className="w-3 h-3" />
-                              Atualizado em {formatDateBr(doc.dataEnvio)}
-                            </span>
-                          )}
                         </div>
                       )}
                     </div>
@@ -315,7 +277,7 @@ export default function DocumentChecklist() {
                         type="button"
                         onClick={() => setActiveViewDoc(doc)}
                         className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors"
-                        title="Visualizar documento e conformidade LGPD"
+                        title="Visualizar detalhes do documento"
                       >
                         <Eye className="w-3.5 h-3.5 text-[#065373] dark:text-cyan-400" />
                         <span>Visualizar</span>

@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
 import {
   CheckCircle2,
@@ -12,7 +11,6 @@ import {
   Sun,
   Moon,
   Menu,
-  LogOut,
   GraduationCap,
   ShieldCheck,
   Shield,
@@ -76,23 +74,17 @@ export default function Header() {
           <div className="hidden sm:block h-6 w-[1px] bg-slate-200 dark:border-slate-800" />
 
           <div>
-            <h1 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2 flex-wrap">
-              DocFlow
-              <span className="text-[11px] sm:text-xs font-semibold text-[#065373] dark:text-cyan-300 bg-[#065373]/10 dark:bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-[#065373]/20 dark:border-cyan-500/30">
-                {currentRole === 'ESTUDANTE'
-                  ? 'Portal do Aprendiz'
-                  : currentRole === 'COORDENADOR'
-                  ? 'Portal da Coordenação & RH'
-                  : 'Painel do Super Administrador'}
-              </span>
+            <h1 className="text-sm sm:text-base font-extrabold text-[#065373] dark:text-cyan-300 tracking-tight">
+              {currentRole === 'ESTUDANTE'
+                ? 'Portal do Aprendiz'
+                : currentRole === 'COORDENADOR'
+                ? 'Portal da Coordenação & RH'
+                : 'Painel do Super Administrador'}
             </h1>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
-              Ambiente de acesso seguro e exclusivo
-            </p>
           </div>
         </div>
 
-        {/* Right Side: Theme Toggle, User Profile & Actions */}
+        {/* Right Side: Theme Toggle & User Profile */}
         <div className="flex items-center gap-2.5 sm:gap-3">
           {/* Theme Toggle Button */}
           <button
@@ -148,16 +140,6 @@ export default function Header() {
               </p>
             </div>
           </div>
-
-          {/* Logout Button */}
-          <Link
-            href="/login"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-800/40 transition-colors"
-            title="Encerrar sessão e trocar de conta"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Sair</span>
-          </Link>
         </div>
       </div>
 

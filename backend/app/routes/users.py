@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Institution, User, UserRole
+from app.schemas import UserCreate, UserResponse
+from app.auth import get_current_user
 
 router = APIRouter(
     prefix="/api/users",
@@ -13,30 +15,29 @@ router = APIRouter(
 password_hash = PasswordHash.recommended()
 
 
-@router.post("/")
+@router.post("/", response_model=UserResponse)
 def create_user(
-    name: str,
-    email: str,
-    password: str,
-    role: UserRole,
-    institution_id: int | None = None,
+    user_data: UserCreate,
     db: Session = Depends(get_db),
 ):
-    if role == UserRole.SUPER_ADMIN:
-        if institution_id is not None:
+    if user_data.role == UserRole.SUPER_ADMIN:
+        if user_data.institution_id is not None:
             raise HTTPException(
                 status_code=400,
                 detail="SUPER_ADMIN não deve possuir instituição.",
             )
 
     else:
-        if institution_id is None:
+        if user_data.institution_id is None:
             raise HTTPException(
                 status_code=400,
                 detail="Usuários institucionais precisam de uma instituição.",
             )
 
-        institution = db.get(Institution, institution_id)
+        institution = db.get(
+            Institution,
+            user_data.institution_id,
+        )
 
         if institution is None:
             raise HTTPException(
@@ -45,7 +46,7 @@ def create_user(
             )
 
     existing_user = db.query(User).filter(
-        User.email == email
+        User.email == user_data.email
     ).first()
 
     if existing_user:
@@ -55,41 +56,23 @@ def create_user(
         )
 
     user = User(
-        name=name,
-        email=email,
-        password_hash=password_hash.hash(password),
-        role=role,
-        institution_id=institution_id,
+        name=user_data.name,
+        email=user_data.email,
+        password_hash=password_hash.hash(user_data.password),
+        role=user_data.role,
+        institution_id=user_data.institution_id,
     )
 
     db.add(user)
     db.commit()
     db.refresh(user)
 
-    return {
-        "id": user.id,
-        "name": user.name,
-        "email": user.email,
-        "role": user.role,
-        "institution_id": user.institution_id,
-        "created_at": user.created_at,
-    }
+    return user
 
 
-@router.get("/")
+@router.get("/", response_model=list[UserResponse])
 def list_users(
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    users = db.query(User).all()
-
-    return [
-        {
-            "id": user.id,
-            "name": user.name,
-            "email": user.email,
-            "role": user.role,
-            "institution_id": user.institution_id,
-            "created_at": user.created_at,
-        }
-        for user in users
-    ]
+    return db.query(User).all()

@@ -23,14 +23,14 @@ export default function CoordinatorDashboardPage() {
               Dashboard do Coordenador & RH — Urgências e Priorização
             </h1>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-700 dark:text-slate-300 font-medium mt-0.5">
             Visão executiva em tempo real das pendências documentais críticas, documentos aguardando análise e fila de prioridades.
           </p>
         </div>
 
         <button
           onClick={() => router.push('/coordenador/dossies')}
-          className="px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold shadow-sm flex items-center gap-2 transition-colors self-start md:self-auto"
+          className="px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100 border-2 border-slate-400 dark:border dark:border-slate-800 rounded-xl text-xs font-bold shadow-sm flex items-center gap-2 transition-colors self-start md:self-auto"
         >
           <FolderKanban className="w-4 h-4 text-[#065373] dark:text-cyan-400" />
           <span>Explorar Dossiês Completos</span>

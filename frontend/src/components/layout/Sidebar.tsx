@@ -15,12 +15,13 @@ import {
   FileCheck,
   UploadCloud,
   PanelLeftClose,
+  UserPlus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { currentRole, student, studentsList, turmas, closeSidebar } = useApp();
+  const { currentRole, student, studentsList, closeSidebar } = useApp();
 
   // Pending docs for student
   const pendingStudentDocs = student.documentos.filter(
@@ -45,8 +46,8 @@ export default function Sidebar() {
           label: 'Checklist de Documentos',
           href: '/estudante/checklist',
           icon: FileCheck,
-          badge: pendingStudentDocs > 0 ? `${pendingStudentDocs} pendente${pendingStudentDocs > 1 ? 's' : ''}` : '100% OK',
-          badgeColor: pendingStudentDocs > 0 ? 'bg-[#eac652] text-slate-950 font-black' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 font-bold',
+          hasAlert: pendingStudentDocs > 0,
+          alertColor: 'bg-amber-400',
         },
         {
           label: 'Adicionar Documentos',
@@ -59,25 +60,26 @@ export default function Sidebar() {
     if (currentRole === 'COORDENADOR') {
       return [
         {
-          label: 'Dashboard de Urgências',
+          label: 'Dashboard',
           href: '/coordenador',
           icon: LayoutDashboard,
-          badge: criticalStudents > 0 ? `${criticalStudents} em risco` : undefined,
-          badgeColor: 'bg-rose-100 text-rose-800',
+          hasAlert: criticalStudents > 0,
+          alertColor: 'bg-rose-400',
         },
         {
-          label: 'Dossiês de Aprendizes',
+          label: 'Aprendizes/Estagiários',
           href: '/coordenador/dossies',
           icon: UserCheck,
-          badge: `${studentsList.length} alunos`,
-          badgeColor: 'bg-cyan-100 text-cyan-800',
         },
         {
-          label: 'Dashboard de Turmas',
+          label: 'Turmas',
           href: '/analytics',
           icon: BarChart3,
-          badge: `${turmas.length} turmas`,
-          badgeColor: 'bg-purple-100 text-purple-800',
+        },
+        {
+          label: 'Cadastro',
+          href: '/coordenador/cadastro',
+          icon: UserPlus,
         },
       ];
     }
@@ -88,32 +90,33 @@ export default function Sidebar() {
         label: 'Controle Global',
         href: '/admin',
         icon: Shield,
-        badge: 'Admin',
-        badgeColor: 'bg-purple-100 text-purple-800',
       },
       {
-        label: 'Dashboard do Coordenador',
+        label: 'Dashboard',
         href: '/coordenador',
         icon: LayoutDashboard,
-        badge: criticalStudents > 0 ? `${criticalStudents} urgências` : undefined,
-        badgeColor: 'bg-rose-100 text-rose-800',
+        hasAlert: criticalStudents > 0,
+        alertColor: 'bg-rose-400',
       },
       {
-        label: 'Dossiês de Aprendizes',
+        label: 'Aprendizes/Estagiários',
         href: '/coordenador/dossies',
         icon: UserCheck,
       },
       {
-        label: 'Dashboard de Turmas',
+        label: 'Turmas',
         href: '/analytics',
         icon: BarChart3,
+      },
+      {
+        label: 'Cadastro',
+        href: '/coordenador/cadastro',
+        icon: UserPlus,
       },
       {
         label: 'Trilha de Auditoria',
         href: '/auditoria',
         icon: ShieldCheck,
-        badge: 'Forense',
-        badgeColor: 'bg-emerald-100 text-emerald-800',
       },
     ];
   };
@@ -212,14 +215,20 @@ export default function Sidebar() {
                 />
                 <span className="truncate">{item.label}</span>
               </div>
-              {item.badge && (
-                <span
-                  className={cn(
-                    'text-[10px] px-2 py-0.5 rounded-full tracking-wide shrink-0 whitespace-nowrap shadow-xs',
-                    item.badgeColor
-                  )}
-                >
-                  {item.badge}
+              {item.hasAlert && (
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span
+                    className={cn(
+                      'animate-ping absolute inline-flex h-full w-full rounded-full opacity-75',
+                      item.alertColor || 'bg-rose-400'
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      'relative inline-flex rounded-full h-2 w-2',
+                      item.alertColor || 'bg-rose-500'
+                    )}
+                  />
                 </span>
               )}
             </Link>

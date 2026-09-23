@@ -52,46 +52,46 @@ export function getStatusBadgeConfig(status: StatusDocumento) {
       return {
         label: 'Aprovado / Válido',
         shortLabel: 'Aprovado',
-        bg: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/60',
-        badgeColor: 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/60',
+        bg: 'bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-[#023326] dark:text-white dark:border-emerald-700',
+        badgeColor: 'text-emerald-900 bg-emerald-100 border-emerald-300 dark:bg-[#023326] dark:text-white dark:border-emerald-700',
         dot: 'bg-emerald-500',
-        iconColor: 'text-emerald-600 dark:text-emerald-400',
+        iconColor: 'text-emerald-600 dark:text-emerald-300',
       };
     case 'EM_ANALISE':
       return {
         label: 'Pendente de Análise',
         shortLabel: 'Em Análise',
-        bg: 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/60',
-        badgeColor: 'text-sky-700 bg-sky-50 border-sky-200 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/60',
+        bg: 'bg-sky-100 text-sky-900 border-sky-300 dark:bg-[#0c4a6e] dark:text-white dark:border-sky-500',
+        badgeColor: 'text-sky-900 bg-sky-100 border-sky-300 dark:bg-[#0c4a6e] dark:text-white dark:border-sky-500',
         dot: 'bg-sky-500',
-        iconColor: 'text-sky-600 dark:text-sky-400',
+        iconColor: 'text-sky-600 dark:text-sky-300',
       };
     case 'RECUSADO':
       return {
         label: 'Recusado / Precisa de Correção',
         shortLabel: 'Recusado',
-        bg: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/60',
-        badgeColor: 'text-rose-700 bg-rose-50 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/60',
+        bg: 'bg-rose-100 text-rose-900 border-rose-300 dark:bg-[#7f1d1d] dark:text-white dark:border-red-600',
+        badgeColor: 'text-rose-900 bg-rose-100 border-rose-300 dark:bg-[#7f1d1d] dark:text-white dark:border-red-600',
         dot: 'bg-rose-500',
-        iconColor: 'text-rose-600 dark:text-rose-400',
+        iconColor: 'text-rose-600 dark:text-rose-300',
       };
     case 'EXPIRADO':
     case 'VENCENDO':
       return {
         label: 'Vencendo / Requer Renovação',
         shortLabel: 'Vencendo / Renovação',
-        bg: 'bg-[#eac652]/15 text-[#8a6e14] border-[#eac652]/40',
-        badgeColor: 'text-[#8a6e14] bg-[#eac652]/15 border-[#eac652]/40',
-        dot: 'bg-[#eac652]',
-        iconColor: 'text-[#8a6e14]',
+        bg: 'bg-amber-100 text-amber-900 border-amber-300 dark:bg-[#78350f] dark:text-white dark:border-amber-500',
+        badgeColor: 'text-amber-900 bg-amber-100 border-amber-300 dark:bg-[#78350f] dark:text-white dark:border-amber-500',
+        dot: 'bg-amber-500',
+        iconColor: 'text-amber-600 dark:text-amber-300',
       };
     case 'PENDENTE':
     default:
       return {
         label: 'Pendente de Envio',
         shortLabel: 'Pendente',
-        bg: 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
-        badgeColor: 'text-slate-600 bg-slate-100 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
+        bg: 'bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-white dark:border-slate-600',
+        badgeColor: 'text-slate-800 bg-slate-100 border-slate-300 dark:bg-slate-800 dark:text-white dark:border-slate-600',
         dot: 'bg-slate-400',
         iconColor: 'text-slate-500 dark:text-slate-400',
       };
@@ -119,20 +119,20 @@ export function getRiskBadgeConfig(risk: NivelRisco) {
     case 'CRITICO':
       return {
         label: 'Risco Crítico',
-        bg: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/60',
-        text: 'text-rose-700 dark:text-rose-300',
+        bg: 'bg-rose-100 text-rose-900 border-rose-300 dark:bg-[#7f1d1d] dark:text-white dark:border-red-600',
+        text: 'text-rose-700 dark:text-white',
       };
     case 'MEDIO':
       return {
         label: 'Atenção / Médio',
-        bg: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/60',
-        text: 'text-amber-700 dark:text-amber-300',
+        bg: 'bg-amber-100 text-amber-900 border-amber-300 dark:bg-[#78350f] dark:text-white dark:border-amber-500',
+        text: 'text-amber-700 dark:text-white',
       };
     case 'BAIXO':
       return {
         label: 'Regular / Baixo',
-        bg: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/60',
-        text: 'text-emerald-700 dark:text-emerald-300',
+        bg: 'bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-[#023326] dark:text-white dark:border-emerald-700',
+        text: 'text-emerald-700 dark:text-white',
       };
   }
 }

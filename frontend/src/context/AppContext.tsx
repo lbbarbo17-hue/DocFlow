@@ -3,8 +3,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   UserRole,
+  TipoVinculo,
   Student,
   Turma,
+  Empresa,
   AuditLog,
   DocumentItem,
   StatusDocumento,
@@ -14,6 +16,7 @@ import {
   CURRENT_STUDENT,
   INITIAL_STUDENTS,
   INITIAL_TURMAS,
+  INITIAL_EMPRESAS,
   INITIAL_AUDIT_LOGS,
   INITIAL_SYSTEM_USERS,
 } from '@/lib/mockData';
@@ -25,6 +28,7 @@ interface AppContextType {
   student: Student;
   studentsList: Student[];
   turmas: Turma[];
+  empresas: Empresa[];
   systemUsers: SystemUser[];
   auditLogs: AuditLog[];
   isLgpdRedactionActive: boolean;
@@ -49,6 +53,19 @@ interface AppContextType {
   addAuditEntry: (entry: Omit<AuditLog, 'id' | 'timestampUtc'>) => void;
   updateUserRole: (userId: string, newRole: UserRole) => void;
   addNewTurma: (turma: Turma) => void;
+  addNewEmpresa: (empresa: Empresa) => void;
+  addNewStudent: (data: {
+    nome: string;
+    cpf: string;
+    email: string;
+    matricula: string;
+    tipoVinculo: TipoVinculo;
+    dataAdmissao?: string;
+    turmaId: string;
+    curso?: string;
+    empresa?: string;
+    instituicao?: string;
+  }) => Student;
   selectStudent: (studentId: string) => void;
 }
 
@@ -59,9 +76,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [student, setStudent] = useState<Student>(CURRENT_STUDENT);
   const [studentsList, setStudentsList] = useState<Student[]>(INITIAL_STUDENTS);
   const [turmas, setTurmas] = useState<Turma[]>(INITIAL_TURMAS);
+  const [empresas, setEmpresas] = useState<Empresa[]>(INITIAL_EMPRESAS);
   const [systemUsers, setSystemUsers] = useState<SystemUser[]>(INITIAL_SYSTEM_USERS);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
-  const [isLgpdRedactionActive, setIsLgpdRedactionActive] = useState<boolean>(true);
+  const [isLgpdRedactionActive, setIsLgpdRedactionActive] = useState<boolean>(false);
   const [theme, setThemeState] = useState<'light' | 'dark'>('light');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
   const [toastMessage, setToastMessage] = useState<{
@@ -426,6 +444,145 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const addNewStudent = (data: {
+    nome: string;
+    cpf: string;
+    email: string;
+    matricula: string;
+    tipoVinculo: TipoVinculo;
+    dataAdmissao?: string;
+    turmaId: string;
+    curso?: string;
+    empresa?: string;
+    instituicao?: string;
+  }): Student => {
+    const selectedTurma = turmas.find((t) => t.id === data.turmaId);
+    const newStudentId = `std-${Date.now()}`;
+    const newStudent: Student = {
+      id: newStudentId,
+      nome: data.nome,
+      cpf: data.cpf,
+      email: data.email,
+      matricula: data.matricula,
+      tipoVinculo: data.tipoVinculo,
+      dataAdmissao: data.dataAdmissao || new Date().toISOString().split('T')[0],
+      turmaId: data.turmaId,
+      turmaNome: selectedTurma ? `${selectedTurma.codigo} — ${selectedTurma.nomeCurso}` : 'Turma Geral',
+      curso: data.curso || (selectedTurma ? selectedTurma.nomeCurso : 'Curso Técnico'),
+      empresa: data.empresa || 'Empresa Conveniada',
+      instituicao: data.instituicao || 'Instituição de Ensino',
+      percentualConformidade: 0,
+      nivelRisco: 'CRITICO',
+      statusGeral: 'PENDENTE',
+      documentos: [
+        {
+          id: `doc-rg-${Date.now()}`,
+          tipo: 'RG',
+          nomeExibicao: 'Carteira de Identidade (RG)',
+          descricao: 'Frente e verso nítidos com foto visível e órgão expedidor legível.',
+          obrigatorio: true,
+          status: 'PENDENTE',
+          conteudoSensivelSimulado: {
+            cpfNumero: data.cpf,
+          },
+        },
+        {
+          id: `doc-cpf-${Date.now() + 1}`,
+          tipo: 'CPF',
+          nomeExibicao: 'Comprovante de Inscrição no CPF',
+          descricao: 'Comprovante oficial da Receita Federal com QR Code ou cartão com CPF regular.',
+          obrigatorio: true,
+          status: 'PENDENTE',
+          conteudoSensivelSimulado: {
+            cpfNumero: data.cpf,
+          },
+        },
+        {
+          id: `doc-res-${Date.now() + 2}`,
+          tipo: 'COMPROVANTE_RESIDENCIA',
+          nomeExibicao: 'Comprovante de Residência Atualizado',
+          descricao: 'Conta de consumo (água, luz, gás ou internet) emitida nos últimos 90 dias.',
+          obrigatorio: true,
+          status: 'PENDENTE',
+        },
+        {
+          id: `doc-mat-${Date.now() + 3}`,
+          tipo: 'COMPROVANTE_MATRICULA',
+          nomeExibicao: 'Comprovante de Matrícula / Frequência Escolar',
+          descricao: 'Declaração semestral oficial da instituição de ensino com período letivo atual.',
+          obrigatorio: true,
+          recorrente: true,
+          status: 'PENDENTE',
+        },
+        {
+          id: `doc-tce-${Date.now() + 4}`,
+          tipo: 'CONTRATO_TCE',
+          nomeExibicao:
+            data.tipoVinculo === 'APRENDIZ'
+              ? 'Contrato de Aprendizagem Profissional (CTPS / Registro)'
+              : 'Termo de Compromisso de Estágio (TCE)',
+          descricao: 'Documento assinado com vigência e dados da empresa e instituição concedente.',
+          obrigatorio: true,
+          status: 'PENDENTE',
+        },
+      ],
+    };
+
+    setStudentsList((prev) => [newStudent, ...prev]);
+
+    if (data.turmaId) {
+      setTurmas((prev) =>
+        prev.map((t) =>
+          t.id === data.turmaId
+            ? { ...t, totalAlunos: t.totalAlunos + 1, alunosEmRisco: t.alunosEmRisco + 1 }
+            : t
+        )
+      );
+    }
+
+    addAuditEntry({
+      userId: 'usr-coord',
+      userNome: 'Profª. Mariana Alcantara (Coordenação)',
+      userRole: 'COORDENADOR',
+      action: 'USER_ROLE_CHANGED',
+      resourceId: newStudentId,
+      resourceTipo: `Aprendiz/Estagiário: ${data.nome}`,
+      ipAddress: '187.54.12.88',
+      status: 'SUCCESS',
+      detalhes: `Novo aluno cadastrado e associado à turma ${selectedTurma?.codigo || data.turmaId}.`,
+      sha256Hash: `HASH-CADASTRO-${newStudentId}`,
+    });
+
+    setToastMessage({
+      title: 'Aluno Cadastrado com Sucesso! 🎉',
+      desc: `${data.nome} foi cadastrado(a) e seu dossiê documental foi iniciado.`,
+      type: 'success',
+    });
+
+    return newStudent;
+  };
+
+  const addNewEmpresa = (empresa: Empresa) => {
+    setEmpresas((prev) => [empresa, ...prev]);
+    addAuditEntry({
+      userId: 'usr-coord',
+      userNome: 'Profª. Mariana Alcantara (Coordenação)',
+      userRole: 'COORDENADOR',
+      action: 'USER_ROLE_CHANGED',
+      resourceId: empresa.id,
+      resourceTipo: `Empresa Parceira: ${empresa.razaoSocial}`,
+      ipAddress: '187.54.12.88',
+      status: 'SUCCESS',
+      detalhes: `Nova empresa concedente parceira cadastrada: ${empresa.razaoSocial} (CNPJ: ${empresa.cnpj}).`,
+      sha256Hash: `HASH-EMPRESA-${empresa.id}`,
+    });
+    setToastMessage({
+      title: 'Empresa Cadastrada com Sucesso! 🏢',
+      desc: `${empresa.nomeFantasia || empresa.razaoSocial} foi adicionada ao catálogo de empresas conveniadas.`,
+      type: 'success',
+    });
+  };
+
   const selectStudent = (studentId: string) => {
     const target = studentsList.find((s) => s.id === studentId);
     if (target) {
@@ -446,6 +603,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         student,
         studentsList,
         turmas,
+        empresas,
         systemUsers,
         auditLogs,
         isLgpdRedactionActive,
@@ -465,6 +623,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addAuditEntry,
         updateUserRole,
         addNewTurma,
+        addNewEmpresa,
+        addNewStudent,
         selectStudent,
       }}
     >

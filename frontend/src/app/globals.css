@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --background: #DDDDDD;
+  --background: #eaedf2;
   --foreground: #0f172a;
 }
 
@@ -44,7 +44,7 @@ body {
   background: #475569;
 }
 
-/* Tarja LGPD visual redaction styling */
+/* Visual redaction styling */
 .redacted-sensitive {
   background-color: #0f172a;
   color: transparent !important;
@@ -55,7 +55,7 @@ body {
 }
 
 .redacted-sensitive::after {
-  content: "[DADO RESTRITO - LGPD ART. 6º, III]";
+  content: "[DADO RESTRITO]";
   position: absolute;
   top: 0;
   left: 0;

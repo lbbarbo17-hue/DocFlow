@@ -375,11 +375,11 @@ export default function AdminDashboard() {
 
             <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-slate-800">Tarjamento Automático de Dados Sensíveis</span>
-                <span className="font-mono px-2 py-0.5 rounded bg-cyan-700 text-white font-bold">LGPD ART. 6º</span>
+                <span className="font-bold text-slate-800">Proteção Automática de Dados Pessoais</span>
+                <span className="font-mono px-2 py-0.5 rounded bg-cyan-700 text-white font-bold">ATIVO</span>
               </div>
               <p className="text-slate-500 text-[11px]">
-                Aplica tarja opaca sobre filiação e endereço antes da visualização por operadores de validação.
+                Aplica proteção sobre filiação e endereço antes da visualização pública.
               </p>
             </div>
 

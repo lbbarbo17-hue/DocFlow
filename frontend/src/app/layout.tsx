@@ -23,9 +23,9 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: 'DocFlow — Guarda Documental & Conformidade LGPD',
+  title: 'DocFlow — Guarda & Gestão Documental',
   description:
-    'Plataforma B2B SaaS corporativa para guarda de documentos de aprendizes e estagiários com arquitetura DDD Lite e conformidade LGPD.',
+    'Plataforma B2B corporativa para guarda e gestão de documentos de aprendizes e estagiários.',
 };
 
 export default function RootLayout({
@@ -38,7 +38,7 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${jakarta.variable} ${jetbrains.variable} ${outfit.variable}`}
     >
-      <body className="font-sans antialiased bg-[#DDDDDD] text-slate-900 min-h-screen">
+      <body className="font-sans antialiased bg-[#eaedf2] dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen">
         <AppProvider>
           <AppShell>{children}</AppShell>
         </AppProvider>

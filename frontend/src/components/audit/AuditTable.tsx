@@ -48,10 +48,10 @@ export default function AuditTable() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-cyan-300" />
-            <h2 className="text-lg font-bold">Trilha Forense de Auditoria Imutável (Append-Only)</h2>
+            <h2 className="text-lg font-bold">Trilha de Auditoria e Registro de Atividades</h2>
           </div>
           <p className="text-xs text-cyan-100/80">
-            Conformidade estrita com o Art. 6º da LGPD. Todos os eventos de visualização, validação e custódia são irreversivelmente registrados.
+            Registro detalhado de eventos de visualização, validação e custódia de documentos.
           </p>
         </div>
 
@@ -87,7 +87,7 @@ export default function AuditTable() {
             <option value="DOCUMENT_UPLOAD">Upload de Documento</option>
             <option value="DOCUMENT_APPROVAL">Aprovação de Documento</option>
             <option value="DOCUMENT_REJECTION">Recusa de Documento</option>
-            <option value="DOCUMENT_VIEW_REDACTED">Visualização Tarjada LGPD</option>
+            <option value="DOCUMENT_VIEW_REDACTED">Visualização de Documento</option>
             <option value="DOSSIER_BULK_DOWNLOAD">Download em Lote</option>
             <option value="SYSTEM_MAGIC_BYTES_VALIDATION">Inspeção Magic Bytes</option>
           </select>

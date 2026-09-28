@@ -34,7 +34,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     : 'Super Administrador';
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#DDDDDD] dark:bg-slate-950 transition-colors duration-200 relative">
+    <div className="flex h-screen overflow-hidden bg-[#eaedf2] dark:bg-slate-950 transition-colors duration-200 relative">
       {/* Mobile/Tablet Backdrop Overlay */}
       {isSidebarOpen && (
         <div

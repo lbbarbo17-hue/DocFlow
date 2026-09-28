@@ -10,16 +10,13 @@ import {
   Sun,
   Moon,
   Menu,
-  GraduationCap,
-  ShieldCheck,
-  Shield,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function Header() {
   const {
     currentRole,
-    student,
     toastMessage,
     setToastMessage,
     theme,
@@ -28,47 +25,22 @@ export default function Header() {
     toggleSidebar,
   } = useApp();
 
-  const userDisplayName =
-    currentRole === 'ESTUDANTE'
-      ? student.nome
-      : currentRole === 'COORDENADOR'
-      ? 'Coordenação / RH'
-      : 'Super Administrador';
-
-  const userRoleBadge = {
-    label:
-      currentRole === 'ESTUDANTE'
-        ? student.tipoVinculo === 'APRENDIZ'
-          ? 'Jovem Aprendiz'
-          : 'Estagiário'
-        : currentRole === 'COORDENADOR'
-        ? 'Coordenador / RH'
-        : 'Super Admin',
-  };
-
-  const RoleIcon =
-    currentRole === 'ESTUDANTE'
-      ? GraduationCap
-      : currentRole === 'COORDENADOR'
-      ? ShieldCheck
-      : Shield;
-
   return (
-    <header className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3 shadow-sm transition-colors duration-200">
+    <header className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b-2 border-slate-300 dark:border-slate-800 px-4 sm:px-6 py-3 shadow-sm transition-colors duration-200">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         {/* Left Side: Sidebar Toggle & Portal Title */}
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={toggleSidebar}
-            className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors shadow-2xs flex items-center justify-center shrink-0 cursor-pointer active:scale-95"
+            className="p-2 rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors shadow-xs flex items-center justify-center shrink-0 cursor-pointer active:scale-95"
             title={isSidebarOpen ? 'Ocultar menu lateral' : 'Exibir menu lateral'}
             aria-label="Alternar visibilidade do menu lateral"
           >
             <Menu className="w-4 h-4 text-[#065373] dark:text-cyan-300" />
           </button>
 
-          <div className="hidden sm:block h-6 w-[1px] bg-slate-200 dark:border-slate-800" />
+          <div className="hidden sm:block h-6 w-[1px] bg-slate-300 dark:bg-slate-700" />
 
           <div>
             <h1 className="text-sm sm:text-base font-extrabold text-[#065373] dark:text-cyan-300 tracking-tight">
@@ -78,16 +50,19 @@ export default function Header() {
                 ? 'Portal da Coordenação & RH'
                 : 'Painel do Super Administrador'}
             </h1>
+            <p className="text-[11px] text-slate-700 dark:text-slate-300 font-medium hidden sm:block">
+              Ambiente de acesso seguro e exclusivo
+            </p>
           </div>
         </div>
 
-        {/* Right Side: Theme Toggle & User Profile */}
+        {/* Right Side: Theme Toggle & Logout */}
         <div className="flex items-center gap-2.5 sm:gap-3">
           {/* Theme Toggle Button */}
           <button
             type="button"
             onClick={toggleTheme}
-            className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors shadow-xs"
+            className="p-2 rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors shadow-xs"
             title={theme === 'dark' ? 'Mudar para Tema Claro' : 'Mudar para Tema Escuro'}
             aria-label="Alternar tema de cores"
           >
@@ -98,20 +73,15 @@ export default function Header() {
             )}
           </button>
 
-          {/* User Profile Pill */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-            <div className="w-7 h-7 rounded-lg bg-[#065373]/10 dark:bg-cyan-400/10 text-[#065373] dark:text-cyan-300 flex items-center justify-center font-bold text-xs">
-              <RoleIcon className="w-4 h-4" />
-            </div>
-            <div className="text-left">
-              <p className="text-xs font-bold text-slate-900 dark:text-white truncate max-w-[130px] sm:max-w-[160px] leading-tight">
-                {userDisplayName}
-              </p>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                {userRoleBadge.label}
-              </p>
-            </div>
-          </div>
+          {/* Logout Button */}
+          <Link
+            href="/login"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border-2 border-rose-300 dark:border-rose-800/60 transition-colors"
+            title="Encerrar sessão e trocar de conta"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Sair</span>
+          </Link>
         </div>
       </div>
 
@@ -131,7 +101,7 @@ export default function Header() {
             {toastMessage.type === 'info' && <Info className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />}
             <div>
               <p className="font-bold">{toastMessage.title}</p>
-              <p className="text-slate-600 font-mono text-[11px] mt-0.5">{toastMessage.desc}</p>
+              <p className="text-slate-800 dark:text-slate-200 font-mono text-[11px] mt-0.5">{toastMessage.desc}</p>
             </div>
           </div>
           <button

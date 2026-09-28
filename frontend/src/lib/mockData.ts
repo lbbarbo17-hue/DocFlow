@@ -1,4 +1,40 @@
-import { Student, Turma, AuditLog, SystemUser } from './types';
+import { Student, Turma, Empresa, AuditLog, SystemUser } from './types';
+
+export const INITIAL_EMPRESAS: Empresa[] = [
+  {
+    id: 'emp-001',
+    razaoSocial: 'TechCorp Soluções Digitais S.A.',
+    nomeFantasia: 'TechCorp Digital',
+    cnpj: '18.234.567/0001-89',
+    ramoAtuacao: 'Tecnologia da Informação & Software',
+    contatoRh: 'Camila Peixoto',
+    emailRh: 'camila.rh@techcorp.com.br',
+    telefone: '(11) 98765-4321',
+    cidadeUf: 'São Paulo / SP',
+  },
+  {
+    id: 'emp-002',
+    razaoSocial: 'LogiTrans Logística & Distribuição Ltda.',
+    nomeFantasia: 'LogiTrans Brasil',
+    cnpj: '24.890.123/0001-45',
+    ramoAtuacao: 'Logística, Cargas & Supply Chain',
+    contatoRh: 'Roberto Mendes',
+    emailRh: 'rh@logitrans.com.br',
+    telefone: '(11) 97654-3210',
+    cidadeUf: 'Guarulhos / SP',
+  },
+  {
+    id: 'emp-003',
+    razaoSocial: 'Banco Alpha Serviços Financeiros S.A.',
+    nomeFantasia: 'Banco Alpha',
+    cnpj: '03.111.222/0001-33',
+    ramoAtuacao: 'Setor Bancário & Financeiro',
+    contatoRh: 'Fernanda Costa',
+    emailRh: 'talentos@bancoalpha.com.br',
+    telefone: '(11) 99123-4567',
+    cidadeUf: 'São Paulo / SP',
+  },
+];
 
 export const INITIAL_TURMAS: Turma[] = [
   {

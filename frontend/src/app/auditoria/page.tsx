@@ -11,12 +11,12 @@ export default function AuditoriaPage() {
       <div>
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-[#065373]" />
-          <h1 className="text-xl font-bold text-slate-900">
-            Painel do DPO & Governança LGPD — Trilha Forense
+          <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+            Trilha de Auditoria & Registro de Atividades
           </h1>
         </div>
-        <p className="text-xs text-slate-500">
-          Rastreabilidade completa de todas as operações de custódia documental com garantias criptográficas de imutabilidade.
+        <p className="text-xs text-slate-700 dark:text-slate-300">
+          Rastreabilidade completa de todas as operações e validações de documentos realizadas no sistema.
         </p>
       </div>
 

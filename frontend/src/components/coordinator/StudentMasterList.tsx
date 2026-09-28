@@ -313,7 +313,7 @@ export default function StudentMasterList({
             <DossierViewer student={activeStudent} initialDocId={activeDocId} />
           ) : (
             <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 text-xs">
-              Selecione um aprendiz para visualizar o dossiê.
+              Selecione um aprendiz para visualizar os documentos.
             </div>
           )}
         </div>

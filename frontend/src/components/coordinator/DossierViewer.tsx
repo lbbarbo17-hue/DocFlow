@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import {
   Shield,
-  Lock,
   CheckCircle2,
   XCircle,
   FileText,
@@ -11,7 +10,7 @@ import {
 } from 'lucide-react';
 import { Student, DocumentItem } from '@/lib/types';
 import { useApp } from '@/context/AppContext';
-import { getStatusBadgeConfig, getRiskBadgeConfig, maskCPF } from '@/lib/utils';
+import { getStatusBadgeConfig, getRiskBadgeConfig } from '@/lib/utils';
 import ValidateModal from './ValidateModal';
 
 interface DossierViewerProps {
@@ -20,7 +19,7 @@ interface DossierViewerProps {
 }
 
 export default function DossierViewer({ student, initialDocId }: DossierViewerProps) {
-  const { isLgpdRedactionActive, setIsLgpdRedactionActive, addAuditEntry, setToastMessage, currentRole } = useApp();
+  const { addAuditEntry, setToastMessage, currentRole } = useApp();
   const [selectedDoc, setSelectedDoc] = useState<DocumentItem>(() => {
     if (initialDocId) {
       const found = student.documentos.find((d) => d.id === initialDocId);
@@ -59,15 +58,15 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
       userRole: currentRole,
       action: 'DOSSIER_BULK_DOWNLOAD',
       resourceId: student.id,
-      resourceTipo: `Download Dossiê: ${student.nome}`,
+      resourceTipo: `Download Documentos: ${student.nome}`,
       ipAddress: '189.45.112.44',
       status: 'SUCCESS',
-      detalhes: `Download consolidado de 5 documentos do aprendiz ${student.nome}. Trilha registrada.`,
-      sha256Hash: student.documentos[0]?.fileHashSha256 || 'HASH-DOSSIER-CONSOLIDADO',
+      detalhes: `Download consolidado de documentos do aprendiz ${student.nome}. Trilha registrada.`,
+      sha256Hash: student.documentos[0]?.fileHashSha256 || 'HASH-DOCUMENTOS-CONSOLIDADO',
     });
 
     setToastMessage({
-      title: 'Dossiê Digital Exportado com Sucesso',
+      title: 'Documentação Digital Exportada com Sucesso',
       desc: `Pacote ZIP com conformidade auditada para ${student.nome}.`,
       type: 'success',
     });
@@ -75,7 +74,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col h-full">
-      {/* Dossier Header */}
+      {/* Header */}
       <div className="p-6 border-b border-slate-200 dark:border-slate-800 bg-gradient-to-r from-slate-50 to-white dark:from-slate-900 dark:to-slate-900">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -100,7 +99,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
               className="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-colors flex items-center gap-1.5"
             >
               <Download className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
-              <span>Exportar Dossiê</span>
+              <span>Exportar Documentos</span>
             </button>
 
             {/* Compliance pill */}
@@ -206,21 +205,8 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                 <div className="flex items-center gap-2">
                   <Shield className="w-4 h-4 text-[#065373] dark:text-cyan-400" />
                   <span className="font-bold text-xs text-slate-800 dark:text-slate-200">
-                    Visualizador de Alta Fidelidade (Protegido por UUID)
+                    Visualizador de Documentos (Protegido por UUID)
                   </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setIsLgpdRedactionActive(!isLgpdRedactionActive)}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono font-bold border transition-all ${
-                      isLgpdRedactionActive
-                        ? 'bg-slate-900 dark:bg-slate-950 text-cyan-300 border-slate-800 dark:border-cyan-800/40'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
-                    }`}
-                  >
-                    <Lock className="w-3 h-3 text-cyan-400" />
-                    <span>{isLgpdRedactionActive ? 'LGPD Tarjado' : 'Sem Tarja'}</span>
-                  </button>
                 </div>
               </div>
 
@@ -237,7 +223,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                   </div>
                 </div>
 
-                {/* Render Redacted Fields */}
+                {/* Render Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Nome do Titular:</label>
@@ -247,7 +233,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                   <div className="space-y-1">
                     <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Cadastro de Pessoa Física (CPF):</label>
                     <p className="font-mono font-bold text-slate-900 dark:text-white">
-                      {isLgpdRedactionActive ? maskCPF(student.cpf) : student.cpf}
+                      {student.cpf}
                     </p>
                   </div>
 
@@ -260,27 +246,15 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
 
                   {selectedDoc.conteudoSensivelSimulado?.rgFiliacaoMae && (
                     <div className="space-y-1">
-                      <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Filiação Materna (Dado Sensível):</label>
-                      {isLgpdRedactionActive ? (
-                        <div className="p-1 bg-slate-900 dark:bg-slate-950 text-cyan-300 font-mono text-[10px] rounded px-2">
-                          [DADO MINIMIZADO - LGPD ART. 6º, III]
-                        </div>
-                      ) : (
-                        <p className="text-slate-900 dark:text-white">{selectedDoc.conteudoSensivelSimulado.rgFiliacaoMae}</p>
-                      )}
+                      <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Filiação Materna:</label>
+                      <p className="text-slate-900 dark:text-white">{selectedDoc.conteudoSensivelSimulado.rgFiliacaoMae}</p>
                     </div>
                   )}
 
                   {selectedDoc.conteudoSensivelSimulado?.enderecoCompleto && (
                     <div className="col-span-2 space-y-1">
                       <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Endereço Residencial:</label>
-                      {isLgpdRedactionActive ? (
-                        <div className="p-1 bg-slate-900 dark:bg-slate-950 text-cyan-300 font-mono text-[10px] rounded px-2">
-                          [ENDEREÇO TARJADO PARA OPERADOR NÃO PRIVILEGIADO]
-                        </div>
-                      ) : (
-                        <p className="text-slate-900 dark:text-white">{selectedDoc.conteudoSensivelSimulado.enderecoCompleto}</p>
-                      )}
+                      <p className="text-slate-900 dark:text-white">{selectedDoc.conteudoSensivelSimulado.enderecoCompleto}</p>
                     </div>
                   )}
 
@@ -295,7 +269,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                 {/* Expiration warning note */}
                 {selectedDoc.validadeAte && (
                   <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-lg text-amber-900 dark:text-amber-300 text-[11px] flex items-center justify-between">
-                    <span>Validade do documento semestral: <strong>{selectedDoc.validadeAte}</strong></span>
+                    <span>Validade do documento: <strong>{selectedDoc.validadeAte}</strong></span>
                     <span className="font-bold">
                       {selectedDoc.diasParaVencer && selectedDoc.diasParaVencer > 0
                         ? `Expira em ${selectedDoc.diasParaVencer} dias`

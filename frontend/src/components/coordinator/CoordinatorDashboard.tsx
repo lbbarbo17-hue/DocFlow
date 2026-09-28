@@ -91,7 +91,7 @@ export default function CoordinatorDashboard({ onNavigateToDossier }: Coordinato
               onClick={() => onNavigateToDossier(studentsList[0]?.id || '')}
               className="px-5 py-2.5 bg-slate-900 dark:bg-cyan-700 hover:bg-[#065373] dark:hover:bg-cyan-600 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 shrink-0 self-start lg:self-center"
             >
-              <span>Acessar Dossiês com Risco</span>
+              <span>Acessar Documentos com Risco</span>
               <ArrowRight className="w-4 h-4 text-cyan-300 dark:text-white" />
             </button>
           </div>
@@ -243,7 +243,7 @@ export default function CoordinatorDashboard({ onNavigateToDossier }: Coordinato
             onClick={() => onNavigateToDossier(studentsList[0]?.id || '')}
             className="text-xs font-bold text-[#065373] dark:text-cyan-300 hover:underline flex items-center gap-1"
           >
-            <span>Ver Dossiês</span>
+            <span>Ver Documentos</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>

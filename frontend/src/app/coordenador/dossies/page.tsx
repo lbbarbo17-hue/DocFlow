@@ -20,11 +20,11 @@ function DossiesContent() {
           <div className="flex items-center gap-2">
             <UserCheck className="w-5 h-5 text-[#065373] dark:text-cyan-400" />
             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-              Gestão de Dossiês dos Aprendizes & Estagiários
+              Gestão de Documentos dos Aprendizes & Estagiários
             </h1>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Inspeção aprofundada de documentos digitais com validação LGPD, conferência de hash SHA-256 e emissão de pareceres.
+            Inspeção aprofundada de documentos digitais com conferência de integridade e emissão de pareceres.
           </p>
         </div>
 
@@ -52,7 +52,7 @@ export default function DossiesPage() {
       fallback={
         <div className="p-12 text-center flex flex-col items-center justify-center space-y-2 text-slate-500 dark:text-slate-400">
           <Loader2 className="w-6 h-6 animate-spin text-[#065373] dark:text-cyan-400" />
-          <span className="text-xs">Carregando dossiês...</span>
+          <span className="text-xs">Carregando documentos...</span>
         </div>
       }
     >

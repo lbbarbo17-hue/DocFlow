@@ -7,7 +7,14 @@ export type TipoDocumento =
   | 'CPF'
   | 'COMPROVANTE_RESIDENCIA'
   | 'COMPROVANTE_MATRICULA'
-  | 'CONTRATO_TCE';
+  | 'CONTRATO_TCE'
+  | 'DOC_RESPONSAVEL'
+  | 'TITULO_ELEITOR'
+  | 'CERTIFICADO_RESERVISTA'
+  | 'CARTEIRA_TRABALHO'
+  | 'DADOS_BANCARIOS'
+  | 'APOLICE_SEGURO'
+  | 'OUTROS_ANEXOS';
 
 export type StatusDocumento =
   | 'PENDENTE'
@@ -26,6 +33,8 @@ export interface DocumentItem {
   descricao: string;
   obrigatorio: boolean;
   status: StatusDocumento;
+  condicional?: string; // ex: 'Necessário para menores de 18 anos', 'Necessário para +18 anos'
+  categoria?: 'OBRIGATORIO' | 'IDENTIFICACAO_APOIO' | 'COMPLEMENTAR';
   recorrente?: boolean; // Para documentos periódicos (ex: Matrícula semestral)
   protecaoLgpd?: boolean; // Indicador de dados sensíveis e anonimização
   observacaoValidade?: string;
@@ -61,6 +70,10 @@ export interface Student {
   email: string;
   matricula: string;
   tipoVinculo: TipoVinculo;
+  dataNascimento?: string;
+  idade?: number;
+  genero?: 'M' | 'F' | 'OUTRO';
+  menorDeIdade?: boolean;
   dataAdmissao?: string;
   turmaId: string;
   turmaNome: string;

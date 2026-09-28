@@ -73,7 +73,7 @@ export default function DocumentViewModal({
           {/* Status & Verification Bar */}
           <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Status do Dossiê:</span>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Status do Documento:</span>
               <span
                 className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${badge.bg}`}
               >

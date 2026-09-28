@@ -52,17 +52,17 @@ export function getStatusBadgeConfig(status: StatusDocumento) {
       return {
         label: 'Aprovado / Válido',
         shortLabel: 'Aprovado',
-        bg: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/60',
-        badgeColor: 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/60',
+        bg: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/60',
+        badgeColor: 'text-emerald-800 bg-emerald-100 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/60',
         dot: 'bg-emerald-500',
         iconColor: 'text-emerald-600 dark:text-emerald-400',
       };
     case 'EM_ANALISE':
       return {
-        label: 'Pendente de Análise',
+        label: 'Em Análise',
         shortLabel: 'Em Análise',
-        bg: 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/60',
-        badgeColor: 'text-sky-700 bg-sky-50 border-sky-200 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/60',
+        bg: 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800/60',
+        badgeColor: 'text-sky-800 bg-sky-100 border-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800/60',
         dot: 'bg-sky-500',
         iconColor: 'text-sky-600 dark:text-sky-400',
       };
@@ -70,8 +70,8 @@ export function getStatusBadgeConfig(status: StatusDocumento) {
       return {
         label: 'Recusado / Precisa de Correção',
         shortLabel: 'Recusado',
-        bg: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/60',
-        badgeColor: 'text-rose-700 bg-rose-50 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/60',
+        bg: 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800/60',
+        badgeColor: 'text-rose-800 bg-rose-100 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800/60',
         dot: 'bg-rose-500',
         iconColor: 'text-rose-600 dark:text-rose-400',
       };
@@ -80,8 +80,8 @@ export function getStatusBadgeConfig(status: StatusDocumento) {
       return {
         label: 'Vencendo / Requer Renovação',
         shortLabel: 'Vencendo / Renovação',
-        bg: 'bg-[#eac652]/15 text-[#8a6e14] border-[#eac652]/40',
-        badgeColor: 'text-[#8a6e14] bg-[#eac652]/15 border-[#eac652]/40',
+        bg: 'bg-[#eac652]/20 text-[#8a6e14] border-[#eac652]/40 dark:text-[#fef08a]',
+        badgeColor: 'text-[#8a6e14] bg-[#eac652]/20 border-[#eac652]/40 dark:text-[#fef08a]',
         dot: 'bg-[#eac652]',
         iconColor: 'text-[#8a6e14]',
       };
@@ -90,10 +90,10 @@ export function getStatusBadgeConfig(status: StatusDocumento) {
       return {
         label: 'Pendente de Envio',
         shortLabel: 'Pendente',
-        bg: 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
-        badgeColor: 'text-slate-600 bg-slate-100 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
-        dot: 'bg-slate-400',
-        iconColor: 'text-slate-500 dark:text-slate-400',
+        bg: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700/60',
+        badgeColor: 'text-amber-800 bg-amber-100 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700/60',
+        dot: 'bg-amber-500',
+        iconColor: 'text-amber-600 dark:text-amber-400',
       };
   }
 }
@@ -136,3 +136,42 @@ export function getRiskBadgeConfig(risk: NivelRisco) {
       };
   }
 }
+
+export function isDocumentApplicableForStudent(
+  docTipo: string,
+  student: { idade?: number; menorDeIdade?: boolean; dataNascimento?: string; genero?: string }
+): boolean {
+  let isMinor = false;
+  if (typeof student.menorDeIdade === 'boolean') {
+    isMinor = student.menorDeIdade;
+  } else if (typeof student.idade === 'number') {
+    isMinor = student.idade < 18;
+  } else if (student.dataNascimento) {
+    const birth = new Date(student.dataNascimento);
+    const ageDiff = Date.now() - birth.getTime();
+    const ageDate = new Date(ageDiff);
+    const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+    isMinor = age < 18;
+  }
+
+  // Se for menor de 18 anos:
+  // - Oculta Título de Eleitor e Reservista
+  if (isMinor) {
+    if (docTipo === 'TITULO_ELEITOR' || docTipo === 'CERTIFICADO_RESERVISTA') {
+      return false;
+    }
+  } else {
+    // Se for maior de 18 anos:
+    // - Oculta Documento do Responsável Legal
+    if (docTipo === 'DOC_RESPONSAVEL') {
+      return false;
+    }
+    // Se for mulher, Certificado de Reservista não se aplica
+    if (student.genero === 'F' && docTipo === 'CERTIFICADO_RESERVISTA') {
+      return false;
+    }
+  }
+
+  return true;
+}
+

@@ -42,7 +42,7 @@ export default function Sidebar() {
           icon: LayoutDashboard,
         },
         {
-          label: 'Checklist de Documentos',
+          label: 'Documentos',
           href: '/estudante/checklist',
           icon: FileCheck,
           badge: pendingStudentDocs > 0 ? `${pendingStudentDocs} pendente${pendingStudentDocs > 1 ? 's' : ''}` : '100% OK',
@@ -66,7 +66,7 @@ export default function Sidebar() {
           badgeColor: 'bg-rose-100 text-rose-800',
         },
         {
-          label: 'Dossiês de Aprendizes',
+          label: 'Documentos de Aprendizes',
           href: '/coordenador/dossies',
           icon: UserCheck,
           badge: `${studentsList.length} alunos`,
@@ -99,7 +99,7 @@ export default function Sidebar() {
         badgeColor: 'bg-rose-100 text-rose-800',
       },
       {
-        label: 'Dossiês de Aprendizes',
+        label: 'Documentos de Aprendizes',
         href: '/coordenador/dossies',
         icon: UserCheck,
       },

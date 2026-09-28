@@ -121,7 +121,7 @@ export default function ValidateModal({
             <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800/60 text-xs text-emerald-900 dark:text-emerald-200">
               <p className="font-bold mb-1">Confirmar Conformidade Documental</p>
               <p className="text-[11px] text-emerald-800 dark:text-emerald-300">
-                Ao aprovar, o índice de regularidade do dossiê do estudante será recalculado automaticamente e gravado sob hash na trilha de auditoria.
+                Ao aprovar, o índice de regularidade da documentação do estudante será recalculado automaticamente e gravado sob hash na trilha de auditoria.
               </p>
             </div>
           )}

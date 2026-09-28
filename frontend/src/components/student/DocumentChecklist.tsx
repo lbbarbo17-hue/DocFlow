@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { DocumentItem } from '@/lib/types';
 import { useApp } from '@/context/AppContext';
-import { getStatusBadgeConfig, formatDateBr } from '@/lib/utils';
+import { getStatusBadgeConfig, formatDateBr, isDocumentApplicableForStudent } from '@/lib/utils';
 import UploadModal from './UploadModal';
 import DocumentViewModal from './DocumentViewModal';
 
@@ -24,18 +24,28 @@ export default function DocumentChecklist() {
   const { student } = useApp();
   const [activeUploadDoc, setActiveUploadDoc] = useState<DocumentItem | null>(null);
   const [activeViewDoc, setActiveViewDoc] = useState<DocumentItem | null>(null);
-  const [activeTab, setActiveTab] = useState<'ALL' | 'PENDING' | 'APPROVED'>('ALL');
+  const [activeTab, setActiveTab] = useState<'ALL' | 'PRINCIPAL' | 'COMPLEMENTARES' | 'PENDING' | 'APPROVED'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const totalDocs = student.documentos.length;
-  const pendingDocsCount = student.documentos.filter(
+  const applicableDocs = student.documentos.filter((d) =>
+    isDocumentApplicableForStudent(d.tipo, student)
+  );
+
+  const totalDocs = applicableDocs.length;
+  const essentialDocsCount = applicableDocs.filter((d) => d.obrigatorio).length;
+  const complementaryDocsCount = applicableDocs.filter((d) => !d.obrigatorio).length;
+  const pendingDocsCount = applicableDocs.filter(
     (d) => d.status === 'PENDENTE' || d.status === 'RECUSADO' || d.status === 'EXPIRADO' || d.status === 'VENCENDO'
   ).length;
-  const approvedDocsCount = student.documentos.filter((d) => d.status === 'APROVADO').length;
+  const approvedDocsCount = applicableDocs.filter((d) => d.status === 'APROVADO').length;
 
-  const filteredDocs = student.documentos.filter((doc) => {
+  const filteredDocs = applicableDocs.filter((doc) => {
     // Tab filter
-    if (activeTab === 'PENDING') {
+    if (activeTab === 'PRINCIPAL') {
+      if (!doc.obrigatorio) return false;
+    } else if (activeTab === 'COMPLEMENTARES') {
+      if (doc.obrigatorio) return false;
+    } else if (activeTab === 'PENDING') {
       const isPending =
         doc.status === 'PENDENTE' ||
         doc.status === 'RECUSADO' ||
@@ -52,7 +62,8 @@ export default function DocumentChecklist() {
       return (
         doc.nomeExibicao.toLowerCase().includes(q) ||
         doc.descricao.toLowerCase().includes(q) ||
-        (doc.nomeArquivoOriginal && doc.nomeArquivoOriginal.toLowerCase().includes(q))
+        (doc.nomeArquivoOriginal && doc.nomeArquivoOriginal.toLowerCase().includes(q)) ||
+        (doc.condicional && doc.condicional.toLowerCase().includes(q))
       );
     }
 
@@ -67,10 +78,10 @@ export default function DocumentChecklist() {
           <div>
             <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
               <FileText className="w-5 h-5 text-[#065373] dark:text-cyan-400" />
-              Checklist de Documentos Obrigatórios
+              Documentos
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Guarda digital e conferência contínua de documentos
+              Guarda digital rápida e conferência de documentos essenciais e complementares
             </p>
           </div>
 
@@ -98,13 +109,51 @@ export default function DocumentChecklist() {
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
           >
-            <span>Todos os Documentos</span>
+            <span>Todos</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] ${
                 activeTab === 'ALL' ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
               }`}
             >
               {totalDocs}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('PRINCIPAL')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
+              activeTab === 'PRINCIPAL'
+                ? 'bg-[#065373] text-white shadow-sm'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+            }`}
+          >
+            <span>Documentação Principal</span>
+            <span
+              className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                activeTab === 'PRINCIPAL' ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+              }`}
+            >
+              {essentialDocsCount}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('COMPLEMENTARES')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
+              activeTab === 'COMPLEMENTARES'
+                ? 'bg-[#065373] text-white shadow-sm'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+            }`}
+          >
+            <span>Complementares & Apoio</span>
+            <span
+              className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                activeTab === 'COMPLEMENTARES' ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+              }`}
+            >
+              {complementaryDocsCount}
             </span>
           </button>
 
@@ -174,10 +223,10 @@ export default function DocumentChecklist() {
                     : isExpiringOrExpired
                     ? 'border-[#eac652]/50 dark:border-[#eac652]/30 bg-[#eac652]/10 dark:bg-[#eac652]/15'
                     : isInReview
-                    ? 'border-orange-200 dark:border-orange-800/50 bg-orange-50/10 dark:bg-orange-950/10'
+                    ? 'border-sky-200 dark:border-sky-800/50 bg-sky-50/10 dark:bg-sky-950/10'
                     : isApproved
                     ? 'border-emerald-200 dark:border-emerald-800/50 hover:border-emerald-300 dark:hover:border-emerald-700'
-                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                    : 'border-amber-200/70 dark:border-amber-800/50 bg-amber-50/5 dark:bg-amber-950/10 hover:border-amber-300 dark:hover:border-amber-700'
                 }`}
               >
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -189,12 +238,12 @@ export default function DocumentChecklist() {
                         isApproved
                           ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
                           : isInReview
-                          ? 'bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300'
+                          ? 'bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300'
                           : isRejected
                           ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300'
                           : isExpiringOrExpired
                           ? 'bg-[#eac652]/20 dark:bg-[#eac652]/20 text-[#8a6e14] dark:text-[#eac652]'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                          : 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
                       }`}
                     >
                       {isApproved ? (
@@ -218,19 +267,9 @@ export default function DocumentChecklist() {
                           {doc.nomeExibicao}
                         </h4>
 
-                        {/* Status Badge with 5 distinct colors */}
+                        {/* Status Badge with 5 distinct colors signaling gravity */}
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border ${
-                            isApproved
-                              ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60'
-                              : isInReview
-                              ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800/60'
-                              : isRejected
-                              ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/60'
-                              : isExpiringOrExpired
-                              ? 'bg-[#eac652]/15 dark:bg-[#eac652]/20 text-[#8a6e14] dark:text-[#fef08a] border-[#eac652]/40 dark:border-[#eac652]/40'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
-                          }`}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border ${badge.bg}`}
                         >
                           <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
                           {badge.label}
@@ -240,10 +279,10 @@ export default function DocumentChecklist() {
                         {doc.recorrente && (
                           <span
                             className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-50 dark:bg-cyan-950/50 text-cyan-800 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/60"
-                            title="Documento de renovação semestral contínua"
+                            title="Documento de renovação contínua"
                           >
                             <RefreshCw className="w-3 h-3 text-[#065373] dark:text-cyan-300" />
-                            <span>Recorrente Semestral</span>
+                            <span>Recorrente</span>
                           </span>
                         )}
                       </div>

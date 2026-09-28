@@ -13,12 +13,9 @@ export default function AnalyticsPage() {
         <div className="flex items-center gap-2">
           <BarChart3 className="w-5 h-5 text-[#065373] dark:text-cyan-400" />
           <h1 className="text-xl font-bold text-slate-950 dark:text-white">
-            Dashboard de Encaminhamento & Conformidade por Turma
+            Turmas
           </h1>
         </div>
-        <p className="text-xs text-slate-700 dark:text-slate-300 font-medium mt-0.5">
-          Visão consolidada da regularidade documental de todas as turmas ativas para prevenção de penalidades e cancelamento de estágios.
-        </p>
       </div>
 
       {/* Strategic KPIs Overview */}

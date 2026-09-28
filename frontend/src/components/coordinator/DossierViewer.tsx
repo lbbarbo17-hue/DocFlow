@@ -71,9 +71,9 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-400 dark:border dark:border-slate-800 shadow-sm overflow-hidden flex flex-col h-full">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col h-full">
       {/* Dossier Header */}
-      <div className="p-4 sm:p-5 border-b-2 border-slate-400 dark:border-b dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900">
+      <div className="p-4 sm:p-5 border-b border-slate-300 dark:border-b dark:border-slate-700 bg-slate-50/90 dark:bg-slate-900">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2.5">
@@ -84,7 +84,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                 {riskBadge.label}
               </span>
             </div>
-            <p className="text-xs text-slate-700 dark:text-slate-300 font-semibold mt-0.5">
+            <p className="text-xs text-slate-600 dark:text-slate-300 font-semibold mt-0.5">
               {student.empresa}
             </p>
           </div>
@@ -93,9 +93,9 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
             <button
               type="button"
               onClick={handleBulkDownload}
-              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 border-2 border-slate-400 dark:border dark:border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs"
             >
-              <Download className="w-3.5 h-3.5 text-slate-700 dark:text-slate-300" />
+              <Download className="w-3.5 h-3.5 text-slate-500 dark:text-slate-300" />
               <span>Exportar Dossiê</span>
             </button>
           </div>
@@ -105,8 +105,8 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
       {/* Main Grid: Document List (Left) + Document Details (Right) */}
       <div className="grid grid-cols-1 md:grid-cols-12 flex-1 min-h-[500px]">
         {/* Document List */}
-        <div className="md:col-span-4 border-r-2 border-slate-400 dark:border-r dark:border-slate-800 p-3 space-y-1.5 bg-slate-50/60 dark:bg-slate-950/20">
-          <div className="text-[11px] font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider px-2 py-1">
+        <div className="md:col-span-4 border-r border-slate-300 dark:border-r dark:border-slate-700 p-3 space-y-1.5 bg-slate-50/50 dark:bg-slate-950/20">
+          <div className="text-[11px] font-extrabold text-slate-700 dark:text-slate-200 uppercase tracking-wider px-2 py-1">
             Documentos ({student.documentos.length})
           </div>
 
@@ -120,14 +120,14 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                 type="button"
                 onClick={() => setSelectedDoc(doc)}
                 title={`${doc.nomeExibicao} (${b.label})`}
-                className={`w-full text-left p-2.5 rounded-xl border-2 dark:border transition-all flex items-center justify-between gap-2.5 cursor-pointer ${
+                className={`w-full text-left p-2.5 rounded-xl border-[1.5px] transition-all duration-200 flex items-center justify-between gap-2.5 cursor-pointer ${
                   isSelected
-                    ? 'bg-white dark:bg-slate-800 border-[#065373] dark:border-cyan-400 shadow-md ring-2 ring-[#065373]/30'
-                    : 'bg-white dark:bg-slate-900 border-slate-400 dark:border-slate-800 hover:border-[#065373] dark:hover:border-cyan-400 shadow-2xs'
+                    ? 'bg-white dark:bg-slate-800 border-[#065373] dark:border-cyan-400 shadow-sm ring-1 ring-[#065373]'
+                    : 'bg-white dark:bg-slate-900 border-slate-400 dark:border-slate-700 hover:border-slate-500 dark:hover:border-slate-600 shadow-2xs hover:shadow-xs'
                 }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                  <FileText className="w-4 h-4 text-slate-600 dark:text-slate-400 shrink-0" />
+                  <FileText className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
                   <span className="text-xs font-semibold text-slate-950 dark:text-white leading-snug">
                     {doc.nomeExibicao}
                   </span>
@@ -146,7 +146,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
         <div className="md:col-span-8 p-5 flex flex-col justify-between space-y-4">
           <div className="space-y-4">
             {/* Top Toolbar for Selected Doc */}
-            <div className="flex items-center justify-between gap-3 pb-3 border-b-2 border-slate-400 dark:border-b dark:border-slate-800">
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-b dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                   {selectedDoc.nomeExibicao}
@@ -161,7 +161,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                 <button
                   type="button"
                   onClick={() => setValidateModalState({ doc: selectedDoc, action: 'APROVADO' })}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors flex items-center gap-1 cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors flex items-center gap-1 cursor-pointer shadow-2xs hover:shadow-xs"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Aprovar</span>
@@ -169,7 +169,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                 <button
                   type="button"
                   onClick={() => setValidateModalState({ doc: selectedDoc, action: 'RECUSADO' })}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white transition-colors flex items-center gap-1 cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white transition-colors flex items-center gap-1 cursor-pointer shadow-2xs hover:shadow-xs"
                 >
                   <XCircle className="w-3.5 h-3.5" />
                   <span>Recusar</span>
@@ -178,42 +178,42 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
             </div>
 
             {/* Document Metadata Details Card */}
-            <div className="bg-white dark:bg-slate-800/80 rounded-xl border-2 border-slate-400 dark:border dark:border-slate-800 p-4 space-y-4 text-xs shadow-sm">
+            <div className="bg-slate-50/60 dark:bg-slate-800/60 rounded-xl border border-slate-200/80 dark:border-slate-700/60 p-4 space-y-4 text-xs shadow-2xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 block mb-0.5">Titular</span>
+                  <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Titular</span>
                   <p className="font-bold text-slate-950 dark:text-white">{student.nome}</p>
                 </div>
 
                 <div>
-                  <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 block mb-0.5">CPF</span>
+                  <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">CPF</span>
                   <p className="font-mono font-bold text-slate-950 dark:text-white">{student.cpf}</p>
                 </div>
 
                 {selectedDoc.conteudoSensivelSimulado?.rgNumero && (
                   <div>
-                    <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 block mb-0.5">RG</span>
+                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">RG</span>
                     <p className="font-mono font-bold text-slate-950 dark:text-white">{selectedDoc.conteudoSensivelSimulado.rgNumero}</p>
                   </div>
                 )}
 
                 {selectedDoc.conteudoSensivelSimulado?.rgFiliacaoMae && (
                   <div>
-                    <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 block mb-0.5">Filiação</span>
+                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Filiação</span>
                     <p className="font-semibold text-slate-950 dark:text-white">{selectedDoc.conteudoSensivelSimulado.rgFiliacaoMae}</p>
                   </div>
                 )}
 
                 {selectedDoc.conteudoSensivelSimulado?.enderecoCompleto && (
                   <div className="sm:col-span-2">
-                    <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 block mb-0.5">Endereço</span>
+                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Endereço</span>
                     <p className="font-semibold text-slate-950 dark:text-white">{selectedDoc.conteudoSensivelSimulado.enderecoCompleto}</p>
                   </div>
                 )}
 
                 {selectedDoc.conteudoSensivelSimulado?.semestreAtual && (
                   <div>
-                    <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 block mb-0.5">Semestre Letivo</span>
+                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Semestre Letivo</span>
                     <p className="font-bold text-slate-950 dark:text-white">{selectedDoc.conteudoSensivelSimulado.semestreAtual}</p>
                   </div>
                 )}
@@ -221,7 +221,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
 
               {/* Expiration warning note if applicable */}
               {selectedDoc.validadeAte && (
-                <div className="p-2.5 bg-amber-100 dark:bg-[#78350f] border-2 border-amber-400 dark:border dark:border-amber-600 rounded-lg text-amber-950 dark:text-white text-[11px] flex items-center justify-between">
+                <div className="p-2.5 bg-amber-50 dark:bg-[#78350f] border border-amber-200 dark:border dark:border-amber-600 rounded-lg text-amber-950 dark:text-white text-[11px] flex items-center justify-between">
                   <span>Validade: <strong>{selectedDoc.validadeAte}</strong></span>
                   <span className="font-bold">
                     {selectedDoc.diasParaVencer && selectedDoc.diasParaVencer > 0

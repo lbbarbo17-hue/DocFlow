@@ -115,16 +115,16 @@ export default function StudentMasterList({
   return (
     <div className="space-y-4">
       {/* Filter Bar */}
-      <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border-2 border-slate-400 dark:border dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-2.5 items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm flex flex-col md:flex-row gap-2.5 items-center justify-between">
         {/* Search Input */}
         <div className="relative w-full md:w-80">
-          <Search className="w-3.5 h-3.5 text-slate-700 dark:text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Buscar por nome, matrícula ou empresa..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border-2 border-slate-400 dark:border dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-950 dark:text-white placeholder:text-slate-600 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 transition-colors"
+            className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white transition-colors shadow-2xs"
           />
         </div>
 
@@ -134,7 +134,7 @@ export default function StudentMasterList({
           <select
             value={selectedRisk}
             onChange={(e) => setSelectedRisk(e.target.value)}
-            className="text-xs py-1.5 px-2.5 rounded-xl border-2 border-slate-400 dark:border dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold focus:outline-none focus:border-[#065373] cursor-pointer"
+            className="text-xs py-1.5 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-semibold focus:outline-none focus:border-[#065373] cursor-pointer shadow-2xs"
           >
             <option value="ALL">Todos os Riscos</option>
             <option value="CRITICO">Risco Crítico</option>
@@ -143,8 +143,8 @@ export default function StudentMasterList({
           </select>
 
           {/* Sort selector */}
-          <div className="flex items-center gap-1 bg-white dark:bg-slate-800 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-2 py-1">
-            <ArrowUpDown className="w-3 h-3 text-slate-700 dark:text-slate-400 shrink-0" />
+          <div className="flex items-center gap-1 bg-slate-50/60 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 py-1 shadow-2xs">
+            <ArrowUpDown className="w-3 h-3 text-slate-500 dark:text-slate-400 shrink-0" />
             <select
               value={sortBy}
               onChange={(e) =>
@@ -152,7 +152,7 @@ export default function StudentMasterList({
                   e.target.value as 'URGENCIA' | 'CONFORMIDADE_ASC' | 'CONFORMIDADE_DESC' | 'NOME'
                 )
               }
-              className="text-xs bg-transparent border-none focus:outline-none text-slate-900 dark:text-slate-100 font-semibold cursor-pointer"
+              className="text-xs bg-transparent border-none focus:outline-none text-slate-800 dark:text-slate-100 font-semibold cursor-pointer"
             >
               <option value="URGENCIA">Urgência</option>
               <option value="CONFORMIDADE_ASC">Menor Conformidade</option>
@@ -171,7 +171,7 @@ export default function StudentMasterList({
           className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
             selectedTurma === 'ALL'
               ? 'bg-[#065373] text-white shadow-xs'
-              : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 border-2 border-slate-400 dark:border dark:border-slate-800'
+              : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800 shadow-2xs'
           }`}
         >
           Todas as Turmas ({studentsList.length})
@@ -189,12 +189,12 @@ export default function StudentMasterList({
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
                 isSelected
                   ? 'bg-[#065373] text-white shadow-xs'
-                  : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 border-2 border-slate-400 dark:border dark:border-slate-800'
+                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800 shadow-2xs'
               }`}
             >
               <span>{t.codigo}</span>
               <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
-                isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200'
+                isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
               }`}>
                 {count}
               </span>
@@ -208,7 +208,7 @@ export default function StudentMasterList({
         {/* Left Column: Students Grouped by Turma */}
         <div className="lg:col-span-4 space-y-3 max-h-[750px] overflow-y-auto pr-1">
           {processedStudents.length === 0 ? (
-            <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-medium text-xs">
+            <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium text-xs">
               Nenhum estudante encontrado.
             </div>
           ) : selectedTurma !== 'ALL' ? (
@@ -226,39 +226,39 @@ export default function StudentMasterList({
               return (
                 <div
                   key={turmaId}
-                  className="bg-white dark:bg-slate-900 rounded-xl border-2 border-slate-400 dark:border dark:border-slate-800 overflow-hidden shadow-sm"
+                  className="bg-white dark:bg-slate-900 rounded-xl border-[1.5px] border-slate-400 dark:border-slate-700 overflow-hidden shadow-sm"
                 >
                   {/* Turma Section Header (Clickable to collapse/expand) */}
                   <button
                     type="button"
                     onClick={() => toggleTurmaCollapse(turmaId)}
-                    className="w-full px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-800 transition-colors flex items-center justify-between text-left cursor-pointer border-b-2 border-slate-400 dark:border-b dark:border-slate-800"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center justify-between text-left cursor-pointer border-b border-slate-300 dark:border-b dark:border-slate-700"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <Layers className="w-3.5 h-3.5 text-[#065373] dark:text-cyan-400 shrink-0" />
                       <span className="font-bold text-xs text-slate-950 dark:text-white truncate">
                         {turmaObj?.codigo || 'Turma'}
                       </span>
-                      <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 truncate hidden sm:inline">
+                      <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 truncate hidden sm:inline">
                         • {turmaObj?.nomeCurso}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-950 dark:text-slate-100 border border-slate-500">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200/80 dark:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-600">
                         {studentsInTurma.length}
                       </span>
                       {isCollapsed ? (
-                        <ChevronRight className="w-4 h-4 text-slate-700 dark:text-slate-400" />
+                        <ChevronRight className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                       ) : (
-                        <ChevronDown className="w-4 h-4 text-slate-700 dark:text-slate-400" />
+                        <ChevronDown className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                       )}
                     </div>
                   </button>
 
                   {/* Student Cards in Turma */}
                   {!isCollapsed && (
-                    <div className="p-2 space-y-2 bg-slate-50/50 dark:bg-slate-950/30">
+                    <div className="p-2.5 space-y-2.5 bg-slate-50/60 dark:bg-slate-950/30">
                       {studentsInTurma.map((s) => renderStudentCard(s))}
                     </div>
                   )}
@@ -273,7 +273,7 @@ export default function StudentMasterList({
           {activeStudent ? (
             <DossierViewer student={activeStudent} initialDocId={activeDocId} />
           ) : (
-            <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-400 dark:border dark:border-slate-800 text-slate-800 dark:text-slate-200 font-medium text-xs shadow-sm">
+            <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium text-xs shadow-sm">
               Selecione um estudante para visualizar o dossiê.
             </div>
           )}
@@ -306,10 +306,10 @@ export default function StudentMasterList({
           setActiveStudentId(s.id);
           setActiveDocId(undefined);
         }}
-        className={`p-3 rounded-xl border-2 dark:border cursor-pointer transition-all ${
+        className={`p-3.5 rounded-xl border-[1.5px] cursor-pointer transition-all duration-200 ${
           isSelected
-            ? 'bg-white dark:bg-slate-800 border-[#065373] dark:border-cyan-400 shadow-md ring-2 ring-[#065373]/30'
-            : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 border-slate-400 dark:border-slate-800 text-slate-950 dark:text-slate-100 shadow-sm'
+            ? 'bg-white dark:bg-slate-800 border-[#065373] dark:border-cyan-400 shadow-sm ring-1 ring-[#065373]'
+            : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 border-slate-400 dark:border-slate-700 text-slate-950 dark:text-slate-100 shadow-2xs hover:shadow-sm'
         }`}
       >
         <div className="flex items-start justify-between gap-2">

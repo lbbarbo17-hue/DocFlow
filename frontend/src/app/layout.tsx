@@ -38,7 +38,7 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${jakarta.variable} ${jetbrains.variable} ${outfit.variable}`}
     >
-      <body className="font-sans antialiased bg-[#eaedf2] dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen">
+      <body className="font-sans antialiased bg-[#c5cfdb] dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen">
         <AppProvider>
           <AppShell>{children}</AppShell>
         </AppProvider>

@@ -30,7 +30,7 @@ export default function CoordinatorDashboardPage() {
 
         <button
           onClick={() => router.push('/coordenador/dossies')}
-          className="px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100 border-2 border-slate-400 dark:border dark:border-slate-800 rounded-xl text-xs font-bold shadow-sm flex items-center gap-2 transition-colors self-start md:self-auto"
+          className="px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-800 rounded-xl text-xs font-bold shadow-2xs hover:shadow-xs flex items-center gap-2 transition-colors self-start md:self-auto cursor-pointer"
         >
           <FolderKanban className="w-4 h-4 text-[#065373] dark:text-cyan-400" />
           <span>Explorar Dossiês Completos</span>

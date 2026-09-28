@@ -94,9 +94,9 @@ export default function StudentRegisterModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fadeIn">
-      <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border-2 border-slate-400 dark:border dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="px-6 py-4 border-b-2 border-slate-400 dark:border-b dark:border-slate-800 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-b dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-[#065373] dark:text-cyan-400 flex items-center justify-center">
               <UserPlus className="w-4 h-4" />
@@ -109,7 +109,7 @@ export default function StudentRegisterModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-700 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -118,14 +118,14 @@ export default function StudentRegisterModal({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
           {/* Modalidade */}
-          <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-xl border-2 border-slate-400 dark:border dark:border-slate-800">
+          <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800">
             <button
               type="button"
               onClick={() => setTipoVinculo('APRENDIZ')}
               className={`py-2 font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 tipoVinculo === 'APRENDIZ'
-                  ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-300 dark:border-slate-700'
-                  : 'text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white'
+                  ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200 dark:border-slate-700'
+                  : 'text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white'
               }`}
             >
               {tipoVinculo === 'APRENDIZ' && <Check className="w-3 h-3 text-[#065373] dark:text-cyan-400" />}
@@ -136,8 +136,8 @@ export default function StudentRegisterModal({
               onClick={() => setTipoVinculo('ESTAGIARIO')}
               className={`py-2 font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 tipoVinculo === 'ESTAGIARIO'
-                  ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-300 dark:border-slate-700'
-                  : 'text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white'
+                  ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-200 dark:border-slate-700'
+                  : 'text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white'
               }`}
             >
               {tipoVinculo === 'ESTAGIARIO' && <Check className="w-3 h-3 text-[#065373] dark:text-cyan-400" />}
@@ -157,7 +157,7 @@ export default function StudentRegisterModal({
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 placeholder="Nome do estudante"
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                className="w-full bg-slate-50/60 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 rounded-xl px-3.5 py-2 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all shadow-2xs"
               />
             </div>
 
@@ -172,7 +172,7 @@ export default function StudentRegisterModal({
                 onChange={(e) => setCpf(formatCPF(e.target.value))}
                 placeholder="000.000.000-00"
                 maxLength={14}
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                className="w-full bg-slate-50/60 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 rounded-xl px-3.5 py-2 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all shadow-2xs"
               />
             </div>
 
@@ -186,7 +186,7 @@ export default function StudentRegisterModal({
                 value={matricula}
                 onChange={(e) => setMatricula(e.target.value)}
                 placeholder="Ex: 2026-DS-0199"
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                className="w-full bg-slate-50/60 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 rounded-xl px-3.5 py-2 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all shadow-2xs"
               />
             </div>
 
@@ -199,7 +199,7 @@ export default function StudentRegisterModal({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="email@exemplo.com"
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                className="w-full bg-slate-50/60 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 rounded-xl px-3.5 py-2 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all shadow-2xs"
               />
             </div>
 
@@ -211,7 +211,7 @@ export default function StudentRegisterModal({
                 required
                 value={turmaId}
                 onChange={(e) => handleTurmaChange(e.target.value)}
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all cursor-pointer"
+                className="w-full bg-slate-50/60 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 rounded-xl px-3.5 py-2 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all cursor-pointer shadow-2xs"
               >
                 {turmas.map((t) => (
                   <option key={t.id} value={t.id}>
@@ -229,7 +229,7 @@ export default function StudentRegisterModal({
                 type="date"
                 value={dataAdmissao}
                 onChange={(e) => setDataAdmissao(e.target.value)}
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                className="w-full bg-slate-50/60 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 rounded-xl px-3.5 py-2 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all shadow-2xs"
               />
             </div>
 
@@ -240,7 +240,7 @@ export default function StudentRegisterModal({
               <select
                 value={empresa}
                 onChange={(e) => setEmpresa(e.target.value)}
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all cursor-pointer"
+                className="w-full bg-slate-50/60 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 rounded-xl px-3.5 py-2 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all cursor-pointer shadow-2xs"
               >
                 {empresas.map((emp) => (
                   <option key={emp.id} value={emp.razaoSocial}>
@@ -259,13 +259,13 @@ export default function StudentRegisterModal({
                 value={instituicao}
                 onChange={(e) => setInstituicao(e.target.value)}
                 placeholder="ETEC Politécnica de São Paulo"
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                className="w-full bg-slate-50/60 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 rounded-xl px-3.5 py-2 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all shadow-2xs"
               />
             </div>
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-3 border-t-2 border-slate-400 dark:border-t dark:border-slate-800 flex items-center justify-end gap-2.5">
+          <div className="pt-3 border-t border-slate-200 dark:border-t dark:border-slate-800 flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}

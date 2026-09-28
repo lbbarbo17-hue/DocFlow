@@ -80,8 +80,8 @@ export default function CoordinatorDashboard({ onNavigateToDossier }: Coordinato
               onClick={() => onNavigateToDossier(studentsList[0]?.id || '')}
               className="px-4 py-2 bg-[#065373] hover:bg-[#08678f] dark:bg-cyan-700 dark:hover:bg-cyan-600 text-white text-xs font-bold rounded-xl shadow-xs hover:shadow transition-all flex items-center justify-center gap-2 shrink-0 self-start lg:self-center cursor-pointer"
             >
-              <span>Acessar Dossiês com Risco</span>
-              <ArrowRight className="w-4 h-4 text-cyan-200 dark:text-white" />
+              <span>Acessar Documentos com Risco</span>
+              <ArrowRight className="w-4 h-4 text-cyan-300 dark:text-white" />
             </button>
           </div>
         </div>

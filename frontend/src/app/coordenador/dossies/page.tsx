@@ -38,7 +38,7 @@ export default function DossiesPage() {
       fallback={
         <div className="p-12 text-center flex flex-col items-center justify-center space-y-2 text-slate-700 dark:text-slate-300 font-medium">
           <Loader2 className="w-6 h-6 animate-spin text-[#065373] dark:text-cyan-400" />
-          <span className="text-xs">Carregando dossiês...</span>
+          <span className="text-xs">Carregando documentos...</span>
         </div>
       }
     >

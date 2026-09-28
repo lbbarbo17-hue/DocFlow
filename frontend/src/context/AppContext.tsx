@@ -219,10 +219,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
 
     const updatedDocuments = updateDocs(student.documentos);
-    const approvedOrReview = updatedDocuments.filter(
+    const essentialDocs = updatedDocuments.filter((d) => d.obrigatorio);
+    const approvedOrReview = essentialDocs.filter(
       (d) => d.status === 'APROVADO' || d.status === 'EM_ANALISE'
     ).length;
-    const newPercent = Math.round((approvedOrReview / updatedDocuments.length) * 100);
+    const newPercent = essentialDocs.length > 0 ? Math.round((approvedOrReview / essentialDocs.length) * 100) : 100;
 
     const updatedStudent: Student = {
       ...student,
@@ -294,10 +295,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
 
     const updatedDocs = [...student.documentos, createdDoc];
-    const approvedOrReview = updatedDocs.filter(
+    const essentialDocs = updatedDocs.filter((d) => d.obrigatorio);
+    const approvedOrReview = essentialDocs.filter(
       (d) => d.status === 'APROVADO' || d.status === 'EM_ANALISE'
     ).length;
-    const newPercent = Math.round((approvedOrReview / updatedDocs.length) * 100);
+    const newPercent = essentialDocs.length > 0 ? Math.round((approvedOrReview / essentialDocs.length) * 100) : 100;
 
     const updatedStudent: Student = {
       ...student,
@@ -321,7 +323,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       resourceTipo: `Novo Documento Adicionado: ${createdDoc.nomeExibicao}`,
       ipAddress: '177.132.89.201',
       status: 'SUCCESS',
-      detalhes: `Novo documento '${createdDoc.nomeExibicao}' adicionado ao dossiê. Hash SHA-256: ${sha256}.`,
+      detalhes: `Novo documento '${createdDoc.nomeExibicao}' adicionado aos documentos. Hash SHA-256: ${sha256}.`,
       sha256Hash: sha256,
       storageUuid,
     });
@@ -357,9 +359,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             return d;
           });
 
-          const approvedCount = updatedDocs.filter((d) => d.status === 'APROVADO').length;
-          const newPercent = Math.round((approvedCount / updatedDocs.length) * 100);
-          const hasCritico = updatedDocs.some(
+          const essentialDocs = updatedDocs.filter((d) => d.obrigatorio);
+          const approvedCount = essentialDocs.filter((d) => d.status === 'APROVADO').length;
+          const newPercent = essentialDocs.length > 0 ? Math.round((approvedCount / essentialDocs.length) * 100) : 100;
+          const hasCritico = essentialDocs.some(
             (d) => d.status === 'EXPIRADO' || d.status === 'RECUSADO'
           );
 

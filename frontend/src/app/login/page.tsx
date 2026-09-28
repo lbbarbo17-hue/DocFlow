@@ -198,7 +198,7 @@ export default function LoginPage() {
                 <Clock className="w-5 h-5" />
               </div>
               <div>
-                <p className="font-bold text-xs text-white">Avisos de Renovação Semestral</p>
+                <p className="font-bold text-xs text-white">Avisos de Renovação</p>
                 <p className="text-[11px] text-cyan-100/80">
                   O sistema avisa com antecedência quando chegar a hora de renovar o comprovante da faculdade ou curso técnico.
                 </p>

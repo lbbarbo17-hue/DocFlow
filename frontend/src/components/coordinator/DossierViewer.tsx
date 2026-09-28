@@ -56,11 +56,11 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
       userRole: currentRole,
       action: 'DOSSIER_BULK_DOWNLOAD',
       resourceId: student.id,
-      resourceTipo: `Download Dossiê: ${student.nome}`,
+      resourceTipo: `Download Documentos: ${student.nome}`,
       ipAddress: '189.45.112.44',
       status: 'SUCCESS',
-      detalhes: `Download consolidado de 5 documentos do aprendiz ${student.nome}. Trilha registrada.`,
-      sha256Hash: student.documentos[0]?.fileHashSha256 || 'HASH-DOSSIER-CONSOLIDADO',
+      detalhes: `Download consolidado de documentos do aprendiz ${student.nome}. Trilha registrada.`,
+      sha256Hash: student.documentos[0]?.fileHashSha256 || 'HASH-DOCUMENTOS-CONSOLIDADO',
     });
 
     setToastMessage({

@@ -19,15 +19,15 @@ export default function MetricsOverview() {
     {
       label: 'Taxa Geral de Conformidade',
       value: `${avgCompliance}%`,
-      sub: 'Média ponderada dos dossiês ativos',
+      sub: 'Média ponderada dos documentos ativos',
       icon: TrendingUp,
       iconColor: 'text-emerald-700 dark:text-emerald-300',
       iconBg: 'bg-emerald-100 dark:bg-emerald-950/60',
     },
     {
-      label: 'Dossiês 100% Regulares',
+      label: 'Documentos 100% Regulares',
       value: `${regularStudents}/${totalStudents}`,
-      sub: 'Todos os 5 documentos aprovados',
+      sub: 'Todos os documentos aprovados',
       icon: ShieldCheck,
       iconColor: 'text-cyan-700 dark:text-cyan-300',
       iconBg: 'bg-cyan-100 dark:bg-cyan-950/60',

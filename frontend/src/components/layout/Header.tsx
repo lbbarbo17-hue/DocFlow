@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
 import {
   CheckCircle2,
@@ -44,15 +43,12 @@ export default function Header() {
           <div className="hidden sm:block h-6 w-[1px] bg-slate-300 dark:bg-slate-700" />
 
           <div>
-            <h1 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2 flex-wrap">
-              DocFlow
-              <span className="text-[11px] sm:text-xs font-semibold text-[#065373] dark:text-cyan-300 bg-[#065373]/10 dark:bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-[#065373]/20 dark:border-cyan-500/30">
-                {currentRole === 'ESTUDANTE'
-                  ? 'Portal do Aprendiz'
-                  : currentRole === 'COORDENADOR'
-                  ? 'Portal da Coordenação & RH'
-                  : 'Painel do Super Administrador'}
-              </span>
+            <h1 className="text-sm sm:text-base font-extrabold text-[#065373] dark:text-cyan-300 tracking-tight">
+              {currentRole === 'ESTUDANTE'
+                ? 'Portal do Aprendiz'
+                : currentRole === 'COORDENADOR'
+                ? 'Portal da Coordenação & RH'
+                : 'Painel do Super Administrador'}
             </h1>
             <p className="text-[11px] text-slate-700 dark:text-slate-300 font-medium hidden sm:block">
               Ambiente de acesso seguro e exclusivo

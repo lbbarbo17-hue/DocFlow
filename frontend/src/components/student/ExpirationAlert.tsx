@@ -45,9 +45,6 @@ export default function ExpirationAlert({ documents, onUploadClick }: Expiration
             <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight">
               Central de Avisos
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Renovações e atenções importantes
-            </p>
           </div>
         </div>
 
@@ -57,7 +54,7 @@ export default function ExpirationAlert({ documents, onUploadClick }: Expiration
           </span>
         ) : (
           <span className="text-[10px] sm:text-[11px] font-black px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 shrink-0">
-            Dossiê em dia
+            Documentação em dia
           </span>
         )}
       </div>
@@ -87,11 +84,8 @@ export default function ExpirationAlert({ documents, onUploadClick }: Expiration
                 doc.status === 'EXPIRADO' ||
                 (doc.diasParaVencer !== undefined && doc.diasParaVencer < 0);
               const isRejected = doc.status === 'RECUSADO';
-              const isRecurring = doc.recorrente;
 
-              const actionButtonLabel = isRecurring
-                ? 'Atualizar Matrícula Agora'
-                : isRejected
+              const actionButtonLabel = isRejected
                 ? 'Corrigir e Reenviar'
                 : isExpired
                 ? 'Regularizar Imediatamente'
@@ -136,9 +130,7 @@ export default function ExpirationAlert({ documents, onUploadClick }: Expiration
                             ? 'Correção Solicitada'
                             : isExpired
                             ? 'Documento Expirado'
-                            : isRecurring
-                            ? 'Renovação Semestral Obrigatória'
-                            : 'Prazo Próximo do Fim'}
+                            : 'Vencimento Próximo'}
                         </span>
 
                         {/* Badge de prazo */}
@@ -157,13 +149,6 @@ export default function ExpirationAlert({ documents, onUploadClick }: Expiration
                             ? `VENCE EM ${doc.diasParaVencer} DIAS`
                             : 'RENOVAÇÃO'}
                         </span>
-
-                        {isRecurring && (
-                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-cyan-100 dark:bg-cyan-950/60 text-[#065373] dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/60 flex items-center gap-0.5">
-                            <RefreshCw className="w-2.5 h-2.5" />
-                            Semestral
-                          </span>
-                        )}
                       </div>
 
                       {/* Texto Explicativo */}
@@ -179,16 +164,8 @@ export default function ExpirationAlert({ documents, onUploadClick }: Expiration
                             <strong>{doc.nomeExibicao}</strong>:{' '}
                             {doc.justificativaRecusa || 'Requer novo envio corrigido pela coordenação.'}
                           </>
-                        ) : isRecurring ? (
-                          <>
-                            O seu <strong>{doc.nomeExibicao}</strong> precisa ser renovado
-                            periodicamente para manter a conformidade do seu contrato ativa.
-                          </>
                         ) : (
-                          <>
-                            Envie uma nova via de <strong>{doc.nomeExibicao}</strong> para evitar
-                            pendências no contrato.
-                          </>
+                          'O seu prazo está prestes a vencer!'
                         )}
                       </p>
 
@@ -196,7 +173,7 @@ export default function ExpirationAlert({ documents, onUploadClick }: Expiration
                       {doc.validadeAte && (
                         <div className="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-mono">
                           <Calendar className="w-3 h-3 text-slate-400 dark:text-slate-500" />
-                          <span>Prazo: {formatDateBr(doc.validadeAte).split(' ')[0]}</span>
+                          <span>Data limite: {formatDateBr(doc.validadeAte).split(' ')[0]}</span>
                         </div>
                       )}
                     </div>

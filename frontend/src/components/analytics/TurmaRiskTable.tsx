@@ -8,18 +8,18 @@ export default function TurmaRiskTable() {
   const { turmas } = useApp();
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-400 dark:border dark:border-slate-800 shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm overflow-hidden">
       {/* Table Header */}
-      <div className="p-5 border-b-2 border-slate-400 dark:border-b dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="p-5 border-b border-slate-200/80 dark:border-b dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h3 className="font-bold text-base text-slate-950 dark:text-white">
-            Monitoramento de Conformidade por Turma
+            Monitoramento por Turma
           </h3>
-          <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
-            Métricas de prevenção de anulação de contratos e regularidade documental acadêmica
+          <p className="text-xs font-medium text-slate-600 dark:text-slate-300">
+            Visão detalhada e índice de conformidade de cada turma
           </p>
         </div>
-        <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border-2 border-slate-400 dark:border dark:border-slate-700 shadow-xs">
+        <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 shadow-2xs">
           Total: {turmas.length} Turmas Monitoradas
         </span>
       </div>
@@ -28,7 +28,7 @@ export default function TurmaRiskTable() {
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-100/70 dark:bg-slate-800/60 text-[11px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider border-b-2 border-slate-400 dark:border-b dark:border-slate-800">
+            <tr className="bg-slate-50/80 dark:bg-slate-800/60 text-[11px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider border-b border-slate-200/80 dark:border-b dark:border-slate-800">
               <th className="py-3 px-5">Código / Turma</th>
               <th className="py-3 px-5">Curso Técnico</th>
               <th className="py-3 px-5">Período</th>

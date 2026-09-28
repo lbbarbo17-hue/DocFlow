@@ -194,7 +194,7 @@ export default function CadastroPage() {
   return (
     <div className="max-w-2xl mx-auto py-4 px-2 sm:px-0 animate-fadeIn">
       {/* Tab Switcher */}
-      <div className="flex bg-slate-100 dark:bg-slate-800/60 p-1.5 rounded-xl mb-6 border-2 border-slate-400 dark:border dark:border-slate-800 shadow-sm">
+      <div className="flex bg-slate-100 dark:bg-slate-800/60 p-1.5 rounded-xl mb-6 border border-slate-200/80 dark:border-slate-800 shadow-sm">
         <button
           type="button"
           onClick={() => setActiveTab('ALUNO')}
@@ -236,12 +236,12 @@ export default function CadastroPage() {
       </div>
 
       {/* Main Form Container */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-400 dark:border dark:border-slate-800 shadow-sm p-6 sm:p-8">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm p-6 sm:p-8">
         {/* TAB 1: ESTUDANTE */}
         {activeTab === 'ALUNO' && (
           <form onSubmit={handleAlunoSubmit} className="space-y-5">
             {/* Vínculo Switch */}
-            <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-xl border-2 border-slate-400 dark:border dark:border-slate-800">
+            <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-xl border border-slate-200/80 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setTipoVinculo('APRENDIZ')}
@@ -280,7 +280,7 @@ export default function CadastroPage() {
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
                   placeholder="Nome do estudante"
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                 />
               </div>
 
@@ -295,7 +295,7 @@ export default function CadastroPage() {
                   onChange={(e) => setCpf(formatCPF(e.target.value))}
                   placeholder="000.000.000-00"
                   maxLength={14}
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                 />
               </div>
 
@@ -309,7 +309,7 @@ export default function CadastroPage() {
                   value={matricula}
                   onChange={(e) => setMatricula(e.target.value)}
                   placeholder="Ex: 2026-DS-0199"
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                 />
               </div>
 
@@ -322,7 +322,7 @@ export default function CadastroPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="email@exemplo.com"
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                 />
               </div>
 
@@ -334,7 +334,7 @@ export default function CadastroPage() {
                   required
                   value={turmaId}
                   onChange={(e) => handleTurmaChange(e.target.value)}
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all cursor-pointer"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all cursor-pointer"
                 >
                   {turmas.map((t) => (
                     <option key={t.id} value={t.id}>
@@ -352,7 +352,7 @@ export default function CadastroPage() {
                   type="date"
                   value={dataAdmissao}
                   onChange={(e) => setDataAdmissao(e.target.value)}
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                 />
               </div>
 
@@ -372,7 +372,7 @@ export default function CadastroPage() {
                 <select
                   value={empresa}
                   onChange={(e) => setEmpresa(e.target.value)}
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all cursor-pointer"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all cursor-pointer"
                 >
                   {empresas.map((emp) => (
                     <option key={emp.id} value={emp.razaoSocial}>
@@ -391,7 +391,7 @@ export default function CadastroPage() {
                   value={instituicao}
                   onChange={(e) => setInstituicao(e.target.value)}
                   placeholder="ETEC Politécnica de São Paulo"
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                 />
               </div>
             </div>
@@ -429,7 +429,7 @@ export default function CadastroPage() {
                 value={codigoTurma}
                 onChange={(e) => setCodigoTurma(e.target.value)}
                 placeholder="Ex: DS-2026.2-A"
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
               />
             </div>
 
@@ -443,7 +443,7 @@ export default function CadastroPage() {
                 value={nomeCursoTurma}
                 onChange={(e) => setNomeCursoTurma(e.target.value)}
                 placeholder="Ex: Técnico em Desenvolvimento de Sistemas"
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
               />
             </div>
 
@@ -454,7 +454,7 @@ export default function CadastroPage() {
               <select
                 value={periodoTurma}
                 onChange={(e) => setPeriodoTurma(e.target.value)}
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all cursor-pointer"
+                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all cursor-pointer"
               >
                 <option value="2026.2 - Manhã">2026.2 - Manhã</option>
                 <option value="2026.2 - Tarde">2026.2 - Tarde</option>
@@ -496,7 +496,7 @@ export default function CadastroPage() {
                   value={razaoSocial}
                   onChange={(e) => setRazaoSocial(e.target.value)}
                   placeholder="Razão social da empresa"
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                 />
               </div>
 
@@ -509,7 +509,7 @@ export default function CadastroPage() {
                   value={nomeFantasia}
                   onChange={(e) => setNomeFantasia(e.target.value)}
                   placeholder="Nome fantasia"
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                 />
               </div>
 
@@ -524,7 +524,7 @@ export default function CadastroPage() {
                   onChange={(e) => setCnpj(formatCNPJ(e.target.value))}
                   placeholder="00.000.000/0001-00"
                   maxLength={18}
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                 />
               </div>
 
@@ -537,7 +537,7 @@ export default function CadastroPage() {
                   value={ramoAtuacao}
                   onChange={(e) => setRamoAtuacao(e.target.value)}
                   placeholder="Ex: Tecnologia"
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                 />
               </div>
 
@@ -550,7 +550,7 @@ export default function CadastroPage() {
                   value={cidadeUf}
                   onChange={(e) => setCidadeUf(e.target.value)}
                   placeholder="São Paulo / SP"
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                 />
               </div>
 
@@ -563,7 +563,7 @@ export default function CadastroPage() {
                   value={contatoRh}
                   onChange={(e) => setContatoRh(e.target.value)}
                   placeholder="Nome do contato"
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                 />
               </div>
 
@@ -576,7 +576,7 @@ export default function CadastroPage() {
                   value={emailRh}
                   onChange={(e) => setEmailRh(e.target.value)}
                   placeholder="rh@empresa.com.br"
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                 />
               </div>
 
@@ -590,7 +590,7 @@ export default function CadastroPage() {
                   onChange={(e) => setTelefone(formatPhone(e.target.value))}
                   placeholder="(11) 3456-7890"
                   maxLength={15}
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-400 dark:border dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                 />
               </div>
             </div>

@@ -19,15 +19,15 @@ export default function MetricsOverview() {
     {
       label: 'Taxa Geral de Conformidade',
       value: `${avgCompliance}%`,
-      sub: 'Média ponderada dos dossiês ativos',
+      sub: 'Média ponderada dos documentos ativos',
       icon: TrendingUp,
       iconColor: 'text-emerald-700 dark:text-emerald-300',
       iconBg: 'bg-emerald-100 dark:bg-emerald-950/60',
     },
     {
-      label: 'Dossiês 100% Regulares',
+      label: 'Documentos 100% Regulares',
       value: `${regularStudents}/${totalStudents}`,
-      sub: 'Todos os 5 documentos aprovados',
+      sub: 'Todos os documentos aprovados',
       icon: ShieldCheck,
       iconColor: 'text-cyan-700 dark:text-cyan-300',
       iconBg: 'bg-cyan-100 dark:bg-cyan-950/60',
@@ -57,7 +57,7 @@ export default function MetricsOverview() {
         return (
           <div
             key={idx}
-            className="p-5 rounded-2xl border-2 border-slate-400 dark:border dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 flex flex-col justify-between transition-all hover:shadow-md"
+            className="p-5 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-900 flex flex-col justify-between transition-all duration-200 hover:shadow-md hover:border-slate-500 dark:hover:border-slate-600"
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">

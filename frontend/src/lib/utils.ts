@@ -59,7 +59,7 @@ export function getStatusBadgeConfig(status: StatusDocumento) {
       };
     case 'EM_ANALISE':
       return {
-        label: 'Pendente de Análise',
+        label: 'Em Análise',
         shortLabel: 'Em Análise',
         bg: 'bg-sky-100 text-sky-900 border-sky-300 dark:bg-[#0c4a6e] dark:text-white dark:border-sky-500',
         badgeColor: 'text-sky-900 bg-sky-100 border-sky-300 dark:bg-[#0c4a6e] dark:text-white dark:border-sky-500',
@@ -136,3 +136,42 @@ export function getRiskBadgeConfig(risk: NivelRisco) {
       };
   }
 }
+
+export function isDocumentApplicableForStudent(
+  docTipo: string,
+  student: { idade?: number; menorDeIdade?: boolean; dataNascimento?: string; genero?: string }
+): boolean {
+  let isMinor = false;
+  if (typeof student.menorDeIdade === 'boolean') {
+    isMinor = student.menorDeIdade;
+  } else if (typeof student.idade === 'number') {
+    isMinor = student.idade < 18;
+  } else if (student.dataNascimento) {
+    const birth = new Date(student.dataNascimento);
+    const ageDiff = Date.now() - birth.getTime();
+    const ageDate = new Date(ageDiff);
+    const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+    isMinor = age < 18;
+  }
+
+  // Se for menor de 18 anos:
+  // - Oculta Título de Eleitor e Reservista
+  if (isMinor) {
+    if (docTipo === 'TITULO_ELEITOR' || docTipo === 'CERTIFICADO_RESERVISTA') {
+      return false;
+    }
+  } else {
+    // Se for maior de 18 anos:
+    // - Oculta Documento do Responsável Legal
+    if (docTipo === 'DOC_RESPONSAVEL') {
+      return false;
+    }
+    // Se for mulher, Certificado de Reservista não se aplica
+    if (student.genero === 'F' && docTipo === 'CERTIFICADO_RESERVISTA') {
+      return false;
+    }
+  }
+
+  return true;
+}
+

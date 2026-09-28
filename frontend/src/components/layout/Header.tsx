@@ -27,34 +27,31 @@ export default function Header() {
   } = useApp();
 
   return (
-    <header className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b-2 border-slate-300 dark:border-slate-800 px-4 sm:px-6 py-3 shadow-sm transition-colors duration-200">
+    <header className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-300 dark:border-slate-800 px-4 sm:px-6 py-3 shadow-2xs transition-colors duration-200">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         {/* Left Side: Sidebar Toggle & Portal Title */}
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={toggleSidebar}
-            className="p-2 rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors shadow-xs flex items-center justify-center shrink-0 cursor-pointer active:scale-95"
+            className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors shadow-2xs flex items-center justify-center shrink-0 cursor-pointer active:scale-95"
             title={isSidebarOpen ? 'Ocultar menu lateral' : 'Exibir menu lateral'}
             aria-label="Alternar visibilidade do menu lateral"
           >
             <Menu className="w-4 h-4 text-[#065373] dark:text-cyan-300" />
           </button>
 
-          <div className="hidden sm:block h-6 w-[1px] bg-slate-300 dark:bg-slate-700" />
+          <div className="hidden sm:block h-6 w-[1px] bg-slate-200 dark:bg-slate-700" />
 
           <div>
-            <h1 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2 flex-wrap">
-              DocFlow
-              <span className="text-[11px] sm:text-xs font-semibold text-[#065373] dark:text-cyan-300 bg-[#065373]/10 dark:bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-[#065373]/20 dark:border-cyan-500/30">
-                {currentRole === 'ESTUDANTE'
-                  ? 'Portal do Aprendiz'
-                  : currentRole === 'COORDENADOR'
-                  ? 'Portal da Coordenação & RH'
-                  : 'Painel do Super Administrador'}
-              </span>
+            <h1 className="text-sm sm:text-base font-extrabold text-[#065373] dark:text-cyan-300 tracking-tight">
+              {currentRole === 'ESTUDANTE'
+                ? 'Portal do Aprendiz'
+                : currentRole === 'COORDENADOR'
+                ? 'Portal da Coordenação & RH'
+                : 'Painel do Super Administrador'}
             </h1>
-            <p className="text-[11px] text-slate-700 dark:text-slate-300 font-medium hidden sm:block">
+            <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium hidden sm:block">
               Ambiente de acesso seguro e exclusivo
             </p>
           </div>
@@ -66,7 +63,7 @@ export default function Header() {
           <button
             type="button"
             onClick={toggleTheme}
-            className="p-2 rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors shadow-xs"
+            className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors shadow-2xs cursor-pointer"
             title={theme === 'dark' ? 'Mudar para Tema Claro' : 'Mudar para Tema Escuro'}
             aria-label="Alternar tema de cores"
           >
@@ -80,7 +77,7 @@ export default function Header() {
           {/* Logout Button */}
           <Link
             href="/login"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border-2 border-rose-300 dark:border-rose-800/60 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-800/60 transition-colors shadow-2xs"
             title="Encerrar sessão e trocar de conta"
           >
             <LogOut className="w-3.5 h-3.5" />

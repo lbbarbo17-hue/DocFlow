@@ -62,7 +62,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Aprendizes / Dossiês</p>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Aprendizes / Documentos</p>
             <p className="text-2xl font-extrabold text-slate-900 mt-1">{studentsList.length}</p>
             <p className="text-[11px] text-emerald-600 font-semibold mt-0.5">Ativos na base central</p>
           </div>

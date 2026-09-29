@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocFlow — Guarda & Gestão Documental de Estagiários e Aprendizes</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Tailwind Custom Configuration -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            app: {
+              bg: '#09131a',
+              card: '#0e1e28',
+              cardHover: '#122634',
+              border: '#1c3547',
+              cyan: '#00b4d8',
+              accent: '#0284c7',
+              amber: '#f59e0b',
+              emerald: '#10b981',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Estilos Personalizados Separados -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-50 dark:bg-[#09131a] text-slate-800 dark:text-slate-100 min-h-screen antialiased transition-colors duration-300">
+
+  <!-- CABEÇALHO / NAVBAR -->
+  <header class="sticky top-0 z-50 bg-white/95 dark:bg-[#09131a]/95 backdrop-blur-md border-b border-slate-200 dark:border-[#1c3547] transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+      
+      <!-- Logo da Marca -->
+      <a href="#" class="flex items-center gap-2.5 sm:gap-3 group">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-app-accent to-app-cyan flex items-center justify-center text-white shadow-lg shadow-app-accent/25 group-hover:scale-105 transition-transform shrink-0">
+          <i data-lucide="cloud-upload" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+        </div>
+        <div>
+          <span class="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white block leading-none">DocFlow</span>
+          <span class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium tracking-wide">Guarda & Gestão</span>
+        </div>
+      </a>
+
+      <!-- Menu de Navegação Desktop -->
+      <nav class="hidden md:flex items-center gap-6 lg:gap-8 text-sm font-medium text-slate-600 dark:text-slate-300">
+        <a href="#recursos" class="hover:text-app-cyan transition-colors">Recursos</a>
+        <a href="#como-funciona" class="hover:text-app-cyan transition-colors">Como Funciona</a>
+        <a href="#beneficios" class="hover:text-app-cyan transition-colors">Vantagens</a>
+      </nav>
+
+      <!-- Ações do Cabeçalho -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Alternador de Tema -->
+        <button id="theme-toggle" type="button" aria-label="Alternar Tema" class="p-2 sm:p-2.5 rounded-xl bg-slate-100 dark:bg-[#122634] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-[#1c3547] hover:border-app-cyan transition-all">
+          <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-400"></i>
+          <i data-lucide="moon" class="w-4 h-4 block dark:hidden text-slate-700"></i>
+        </button>
+
+        <!-- Botão Entrar na Plataforma (visível em todas as telas) -->
+        <a href="/login" class="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold text-white bg-app-accent hover:bg-sky-600 rounded-xl transition-all shadow-md active:scale-95">
+          <span>Entrar</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 hidden xs:inline"></i>
+        </a>
+
+        <!-- Botão Hambúrguer para Celular/Tablet -->
+        <button id="mobile-menu-btn" type="button" aria-label="Abrir Menu" class="md:hidden p-2 rounded-xl bg-slate-100 dark:bg-[#122634] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-[#1c3547] hover:border-app-cyan transition-all">
+          <i data-lucide="menu" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Menu Dropdown para Celular/Tablet -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 dark:border-[#1c3547] bg-white dark:bg-[#09131a] px-4 py-3 space-y-2 transition-all shadow-lg">
+      <a href="#recursos" onclick="closeMobileMenu()" class="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#122634] transition-colors">
+        Recursos
+      </a>
+      <a href="#como-funciona" onclick="closeMobileMenu()" class="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#122634] transition-colors">
+        Como Funciona
+      </a>
+      <a href="#beneficios" onclick="closeMobileMenu()" class="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#122634] transition-colors">
+        Vantagens
+      </a>
+      <div class="pt-2 border-t border-slate-100 dark:border-slate-800">
+        <a href="/login" class="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-app-accent to-app-cyan text-white text-xs font-bold rounded-xl shadow-md">
+          <span>Acessar Plataforma</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="relative pt-8 sm:pt-12 pb-12 sm:pb-16 lg:pt-20 lg:pb-24 overflow-hidden glow-effect">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-4 sm:space-y-6">
+      
+      <div class="inline-flex items-center gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-600 dark:text-app-cyan text-[11px] sm:text-xs font-semibold">
+        <i data-lucide="shield-check" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+        <span>Gestão Documental de Estagiários e Aprendizes</span>
+      </div>
+
+      <h1 class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white leading-tight tracking-tight max-w-4xl mx-auto">
+        Sua gestão de documentos <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 via-app-cyan to-sky-400">100% digital e sem burocracia</span>.
+      </h1>
+
+      <p class="text-xs sm:text-base md:text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
+        Envie e gerencie comprovantes, RG e contratos diretamente pelo computador ou celular com validação e alertas automáticos de renovação.
+      </p>
+
+      <div class="pt-2 sm:pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+        <a href="#como-funciona" class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 text-xs sm:text-sm font-bold text-slate-800 dark:text-white bg-white dark:bg-[#122634] border border-slate-200 dark:border-[#1c3547] hover:border-app-cyan rounded-xl transition-all flex items-center justify-center gap-2">
+          <span>Ver Como Funciona</span>
+          <i data-lucide="arrow-down" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+        </a>
+      </div>
+
+      <!-- Métricas / Diferenciais Limpos -->
+      <div class="pt-6 sm:pt-8 grid grid-cols-3 gap-2 sm:gap-4 max-w-xl mx-auto border-t border-slate-200 dark:border-[#1c3547]/80 text-center">
+        <div class="p-1 sm:p-0">
+          <span class="block text-base sm:text-xl font-black text-slate-900 dark:text-white">100%</span>
+          <span class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">Digital</span>
+        </div>
+        <div class="p-1 sm:p-0">
+          <span class="block text-base sm:text-xl font-black text-app-cyan">Sem Papéis</span>
+          <span class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">PDFs e Fotos</span>
+        </div>
+        <div class="p-1 sm:p-0">
+          <span class="block text-base sm:text-xl font-black text-emerald-500">Alertas</span>
+          <span class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400">De Vencimento</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- RECURSOS DA PLATAFORMA -->
+  <section id="recursos" class="py-16 bg-white dark:bg-[#0e1e28] border-y border-slate-200 dark:border-[#1c3547] transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-6">
+      
+      <div class="text-center max-w-xl mx-auto mb-12 space-y-2">
+        <span class="text-xs font-bold text-app-cyan uppercase tracking-wider">Recursos</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+          Tudo o que você precisa para manter a conformidade
+        </h2>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <!-- Recurso 1 -->
+        <div class="bg-slate-50 dark:bg-[#122634] p-6 rounded-xl border border-slate-200 dark:border-[#1c3547] hover:border-app-cyan/50 transition-all">
+          <div class="w-10 h-10 rounded-lg bg-sky-500/10 text-app-cyan flex items-center justify-center mb-4">
+            <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base mb-1">Upload Rápido</h3>
+          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+            Envio de comprovantes por foto da câmera do celular ou arquivo em PDF/PNG até 10 MB.
+          </p>
+        </div>
+
+        <!-- Recurso 2 -->
+        <div class="bg-slate-50 dark:bg-[#122634] p-6 rounded-xl border border-slate-200 dark:border-[#1c3547] hover:border-amber-500/50 transition-all">
+          <div class="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center mb-4">
+            <i data-lucide="bell" class="w-5 h-5"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base mb-1">Avisos de Vencimento</h3>
+          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+            Notificações e contagem regressiva para renovação semestral de matrículas e contratos.
+          </p>
+        </div>
+
+        <!-- Recurso 3 -->
+        <div class="bg-slate-50 dark:bg-[#122634] p-6 rounded-xl border border-slate-200 dark:border-[#1c3547] hover:border-emerald-500/50 transition-all">
+          <div class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-4">
+            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base mb-1">Checklist Inteligente</h3>
+          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+            Acompanhe o status instantâneo dos itens aprovados, pendentes e em análise.
+          </p>
+        </div>
+
+        <!-- Recurso 4 -->
+        <div class="bg-slate-50 dark:bg-[#122634] p-6 rounded-xl border border-slate-200 dark:border-[#1c3547] hover:border-app-cyan/50 transition-all">
+          <div class="w-10 h-10 rounded-lg bg-sky-500/10 text-app-cyan flex items-center justify-center mb-4">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base mb-1">Custódia Protegida</h3>
+          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+            Segurança no armazenamento com restrição de acesso e privacidade garantida.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- PASSO A PASSO ORGANIZADO -->
+  <section id="como-funciona" class="py-16 bg-slate-50 dark:bg-[#09131a] transition-colors duration-300">
+    <div class="max-w-6xl mx-auto px-6">
+      
+      <div class="text-center max-w-xl mx-auto mb-14 space-y-2">
+        <span class="text-xs font-bold text-app-cyan uppercase tracking-wider">Fluxo Simplificado</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+          Como funciona na prática
+        </h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Processo estruturado em 3 etapas diretas</p>
+      </div>
+
+      <!-- Trilha de 3 Etapas -->
+      <div class="grid md:grid-cols-3 gap-6 relative">
+        
+        <!-- Passo 1 -->
+        <div class="bg-white dark:bg-[#0e1e28] p-6 rounded-2xl border border-slate-200 dark:border-[#1c3547] relative space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="w-8 h-8 rounded-lg bg-app-accent text-white font-black text-sm flex items-center justify-center">1</span>
+            <i data-lucide="bell" class="w-5 h-5 text-slate-400"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">1. Notificação & Pendência</h3>
+          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+            O estudante consulta os documentos que precisam ser enviados ou renovados diretamente no painel.
+          </p>
+        </div>
+
+        <!-- Passo 2 -->
+        <div class="bg-white dark:bg-[#0e1e28] p-6 rounded-2xl border border-slate-200 dark:border-[#1c3547] relative space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="w-8 h-8 rounded-lg bg-app-cyan text-white font-black text-sm flex items-center justify-center">2</span>
+            <i data-lucide="camera" class="w-5 h-5 text-slate-400"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">2. Envio Rápido</h3>
+          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+            Tire uma foto com a câmera do celular ou selecione o arquivo em PDF direto das suas pastas.
+          </p>
+        </div>
+
+        <!-- Passo 3 -->
+        <div class="bg-white dark:bg-[#0e1e28] p-6 rounded-2xl border border-slate-200 dark:border-[#1c3547] relative space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="w-8 h-8 rounded-lg bg-emerald-500 text-white font-black text-sm flex items-center justify-center">3</span>
+            <i data-lucide="file-check" class="w-5 h-5 text-slate-400"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">3. Validação Concluída</h3>
+          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+            A equipe valida os anexos e o status de conformidade atualiza instantaneamente para regular.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- VANTAGENS -->
+  <section id="beneficios" class="py-16 bg-white dark:bg-[#0e1e28] border-t border-slate-200 dark:border-[#1c3547] transition-colors duration-300">
+    <div class="max-w-6xl mx-auto px-6">
+      
+      <div class="text-center max-w-xl mx-auto mb-12 space-y-2">
+        <span class="text-xs font-bold text-app-cyan uppercase tracking-wider">Vantagens</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+          Eficiência para quem gerencia, facilidade para quem envia
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        
+        <!-- Para RH -->
+        <div class="p-6 rounded-2xl bg-slate-50 dark:bg-[#122634] border border-slate-200 dark:border-[#1c3547] space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center">
+              <i data-lucide="building-2" class="w-5 h-5"></i>
+            </div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base">Para RH e Gestores</h3>
+          </div>
+          <ul class="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+            <li class="flex items-start gap-2">
+              <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
+              <span>Elimina a cobrança manual por e-mails ou planilhas.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
+              <span>Mantém contratos de estágio e aprendizagem em dia.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
+              <span>Gera registros organizados para consultas e auditorias.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Para Estagiários -->
+        <div class="p-6 rounded-2xl bg-slate-50 dark:bg-[#122634] border border-slate-200 dark:border-[#1c3547] space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+              <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+            </div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base">Para Estagiários e Aprendizes</h3>
+          </div>
+          <ul class="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+            <li class="flex items-start gap-2">
+              <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
+              <span>Envio simples diretamente do celular.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
+              <span>Alertas prévios para não perder prazos de renovação.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="check" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
+              <span>Confirmação imediata do recebimento do documento.</span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- BANNER FINAL COM O BOTÃO PRINCIPAL DE ACESSO -->
+  <section id="acessar-app" class="py-12 sm:py-20 relative overflow-hidden">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6">
+      <div class="bg-gradient-to-br from-[#0e1e28] via-[#122634] to-[#0e1e28] border border-[#1c3547] rounded-3xl p-6 sm:p-12 text-white shadow-2xl relative text-center space-y-4 sm:space-y-6 glow-card">
+        
+        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-app-accent to-app-cyan flex items-center justify-center mx-auto text-white shadow-lg shadow-app-accent/30">
+          <i data-lucide="cloud-upload" class="w-6 h-6 sm:w-7 sm:h-7"></i>
+        </div>
+
+        <h2 class="text-2xl sm:text-4xl font-black tracking-tight">
+          Pronto para acessar o DocFlow?
+        </h2>
+        
+        <p class="text-slate-300 max-w-lg mx-auto text-xs sm:text-sm leading-relaxed">
+          Clique no botão abaixo para entrar no ambiente da plataforma e gerenciar seus documentos com facilidade e segurança.
+        </p>
+
+        <!-- Botão Principal de Acesso no Final -->
+        <div class="pt-2 flex justify-center">
+          <a href="/login" class="w-full sm:w-auto px-8 sm:px-10 py-3.5 sm:py-4 bg-gradient-to-r from-app-accent to-app-cyan hover:from-sky-600 hover:to-sky-500 text-white font-extrabold text-sm sm:text-base rounded-2xl shadow-xl shadow-app-accent/30 transition-all hover:scale-105 flex items-center justify-center gap-3">
+            <span>Entrar na Plataforma</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+          </a>
+        </div>
+
+        <p class="text-[10px] sm:text-[11px] text-slate-400 pt-1 sm:pt-2">
+          Ambiente Seguro • Custódia Digital com Conformidade
+        </p>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL DE REDIRECIONAMENTO PARA O APP -->
+  <div id="appModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#0e1e28] border border-slate-200 dark:border-[#1c3547] rounded-2xl max-w-md w-full p-5 sm:p-6 text-center space-y-4 sm:space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <button onclick="closeAppModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      
+      <div class="w-12 h-12 bg-app-accent/20 text-app-cyan rounded-xl flex items-center justify-center mx-auto">
+        <i data-lucide="log-in" class="w-6 h-6"></i>
+      </div>
+
+      <div>
+        <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Acessar a Plataforma DocFlow</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          Você será direcionado para a tela de login do aplicativo.
+        </p>
+      </div>
+
+      <div class="space-y-2.5 sm:space-y-3 pt-2">
+        <a href="/login" class="w-full py-3 sm:py-3.5 bg-app-accent hover:bg-sky-600 text-white text-xs sm:text-sm font-bold rounded-xl block transition-all shadow-md">
+          Ir para Login de Usuário
+        </a>
+        <button onclick="closeAppModal()" class="w-full py-2 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:underline">
+          Voltar para o site
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RODAPÉ -->
+  <footer class="bg-slate-900 dark:bg-[#071822] text-slate-400 text-xs py-8 border-t border-slate-800 dark:border-[#1c3547]">
+    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+      
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-app-accent to-app-cyan flex items-center justify-center text-white font-bold">
+          <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+        </div>
+        <span class="text-sm font-bold text-white">DocFlow</span>
+      </div>
+
+      <p class="text-[11px] text-slate-500">
+        © 2026 DocFlow — Guarda & Gestão de Documentos. Todos os direitos reservados.
+      </p>
+
+      <a href="/login" class="text-app-cyan hover:underline font-bold text-xs">
+        Entrar na Plataforma ↑
+      </a>
+
+    </div>
+  </footer>
+
+  <!-- Script JS Separado -->
+  <script src="script.js"></script>
+</body>
+</html>

@@ -11,7 +11,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { currentRole, isSidebarOpen, closeSidebar } = useApp();
 
-  const isAuthPage = pathname === '/login' || pathname === '/';
+  const isAuthPage = pathname === '/login' || pathname === '/' || pathname === '/landing';
 
   if (isAuthPage) {
     return <main className="min-h-screen w-full">{children}</main>;
@@ -58,7 +58,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       {/* Main area scrolls independently */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         <Header />
-        <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-3.5 sm:p-6 md:p-8 max-w-7xl w-full mx-auto">
           {isDenied ? <AccessDenied requiredRoleName={requiredRoleLabel} /> : children}
         </main>
       </div>

@@ -131,9 +131,9 @@ export default function LoginPage() {
         }}
       />
 
-      <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center py-6 sm:py-0">
         {/* LEFT COLUMN: Brand Story & Clear Value Proposition */}
-        <div className="lg:col-span-6 space-y-6 text-white text-center lg:text-left">
+        <div className="order-2 lg:order-1 lg:col-span-6 space-y-4 sm:space-y-6 text-white text-center lg:text-left">
           {/* Logo Brand presentation */}
           <div className="inline-flex items-center gap-3.5 px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
             <div className="w-11 h-11 relative rounded-xl overflow-hidden bg-white flex items-center justify-center p-1 shadow-md">
@@ -208,8 +208,8 @@ export default function LoginPage() {
         </div>
 
         {/* RIGHT COLUMN: Interactive Login / Signup Card */}
-        <div className="lg:col-span-6 w-full max-w-md mx-auto">
-          <div className="relative rounded-3xl bg-slate-900/80 backdrop-blur-2xl border border-white/20 shadow-2xl p-6 sm:p-8 text-white overflow-hidden">
+        <div className="order-1 lg:order-2 lg:col-span-6 w-full max-w-md mx-auto">
+          <div className="relative rounded-2xl sm:rounded-3xl bg-slate-900/80 backdrop-blur-2xl border border-white/20 shadow-2xl p-5 sm:p-8 text-white overflow-hidden">
             {/* Top Glowing Laser Accent */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-[#77afd3] to-[#226a8b]" />
 

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, ArrowUpDown, ChevronDown, ChevronRight, Layers } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { getRiskBadgeConfig } from '@/lib/utils';
+import { getRiskBadgeConfig, cn } from '@/lib/utils';
 import DossierViewer from './DossierViewer';
 
 interface StudentMasterListProps {
@@ -24,6 +24,9 @@ export default function StudentMasterList({
     initialStudentId || studentsList[0]?.id || ''
   );
   const [activeDocId, setActiveDocId] = useState<string | undefined>(initialDocId);
+  const [mobileTab, setMobileTab] = useState<'LIST' | 'DOSSIER'>(
+    initialStudentId || initialDocId ? 'DOSSIER' : 'LIST'
+  );
 
   // Collapsible state for each turma accordion when in 'ALL' mode
   const [collapsedTurmas, setCollapsedTurmas] = useState<Record<string, boolean>>({});
@@ -203,10 +206,38 @@ export default function StudentMasterList({
         })}
       </div>
 
+      {/* Mobile / Tablet Segmented Tabs (Visible below lg) */}
+      <div className="flex lg:hidden bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
+        <button
+          type="button"
+          onClick={() => setMobileTab('LIST')}
+          className={cn(
+            'flex-1 py-2 text-xs font-bold rounded-lg transition-all',
+            mobileTab === 'LIST'
+              ? 'bg-[#065373] text-white shadow-xs'
+              : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
+          )}
+        >
+          Lista de Aprendizes ({processedStudents.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileTab('DOSSIER')}
+          className={cn(
+            'flex-1 py-2 text-xs font-bold rounded-lg transition-all truncate px-2',
+            mobileTab === 'DOSSIER'
+              ? 'bg-[#065373] text-white shadow-xs'
+              : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
+          )}
+        >
+          {activeStudent ? `Dossiê: ${activeStudent.nome.split(' ')[0]}` : 'Dossiê do Aluno'}
+        </button>
+      </div>
+
       {/* Main Grid: Student List (Left) + Dossier (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* Left Column: Students Grouped by Turma */}
-        <div className="lg:col-span-4 space-y-3 max-h-[750px] overflow-y-auto pr-1">
+        <div className={cn('lg:col-span-4 space-y-3 max-h-[750px] overflow-y-auto pr-1', mobileTab !== 'LIST' && 'hidden lg:block')}>
           {processedStudents.length === 0 ? (
             <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium text-xs">
               Nenhum estudante encontrado.
@@ -269,7 +300,16 @@ export default function StudentMasterList({
         </div>
 
         {/* Right Column: Dossier Viewer */}
-        <div className="lg:col-span-8">
+        <div className={cn('lg:col-span-8', mobileTab !== 'DOSSIER' && 'hidden lg:block')}>
+          {/* Back button on mobile */}
+          <button
+            type="button"
+            onClick={() => setMobileTab('LIST')}
+            className="lg:hidden mb-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 text-[#065373] dark:text-cyan-300 border border-slate-200 dark:border-slate-800 text-xs font-bold shadow-2xs hover:bg-slate-50 transition-colors"
+          >
+            ← Voltar para lista de aprendizes
+          </button>
+
           {activeStudent ? (
             <DossierViewer student={activeStudent} initialDocId={activeDocId} />
           ) : (
@@ -305,6 +345,7 @@ export default function StudentMasterList({
         onClick={() => {
           setActiveStudentId(s.id);
           setActiveDocId(undefined);
+          setMobileTab('DOSSIER');
         }}
         className={`p-3.5 rounded-xl border-[1.5px] cursor-pointer transition-all duration-200 ${
           isSelected

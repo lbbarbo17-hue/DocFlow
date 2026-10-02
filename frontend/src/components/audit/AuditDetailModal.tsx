@@ -13,8 +13,8 @@ export default function AuditDetailModal({ log, onClose }: AuditDetailModalProps
   if (!log) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fadeIn font-sans">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-fadeIn font-sans transition-colors">
         {/* Header */}
         <div className="bg-[#065373] text-white p-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -28,7 +28,7 @@ export default function AuditDetailModal({ log, onClose }: AuditDetailModalProps
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-white/80 hover:text-white"
+            className="p-1 rounded-lg text-white/80 hover:text-white cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -36,45 +36,45 @@ export default function AuditDetailModal({ log, onClose }: AuditDetailModalProps
 
         {/* Content */}
         <div className="p-6 space-y-4 text-xs">
-          <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div className="grid grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
             <div>
-              <span className="text-slate-400 block font-medium">Data e Hora (UTC):</span>
-              <span className="font-mono font-bold text-slate-800">
+              <span className="text-slate-400 dark:text-slate-400 block font-medium">Data e Hora (UTC):</span>
+              <span className="font-mono font-bold text-slate-800 dark:text-slate-100">
                 {new Date(log.timestampUtc).toLocaleString('pt-BR')}
               </span>
             </div>
             <div>
-              <span className="text-slate-400 block font-medium">Endereço IP de Origem:</span>
-              <span className="font-mono font-bold text-slate-800">{log.ipAddress}</span>
+              <span className="text-slate-400 dark:text-slate-400 block font-medium">Endereço IP de Origem:</span>
+              <span className="font-mono font-bold text-slate-800 dark:text-slate-100">{log.ipAddress}</span>
             </div>
             <div>
-              <span className="text-slate-400 block font-medium">Operador Responsável:</span>
-              <span className="font-bold text-slate-800">{log.userNome}</span>
+              <span className="text-slate-400 dark:text-slate-400 block font-medium">Operador Responsável:</span>
+              <span className="font-bold text-slate-800 dark:text-slate-100">{log.userNome}</span>
             </div>
             <div>
-              <span className="text-slate-400 block font-medium">Papel (RBAC):</span>
-              <span className="font-mono font-bold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded">
+              <span className="text-slate-400 dark:text-slate-400 block font-medium">Papel (RBAC):</span>
+              <span className="font-mono font-bold text-cyan-700 dark:text-cyan-300 bg-cyan-50 dark:bg-cyan-950/60 px-2 py-0.5 rounded">
                 {log.userRole}
               </span>
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <span className="text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+            <span className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
               Ação Executada:
             </span>
-            <div className="p-3 bg-slate-100 rounded-xl font-mono text-slate-800 font-semibold">
+            <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl font-mono text-slate-800 dark:text-slate-100 font-semibold">
               {log.action}
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <span className="text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+            <span className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
               Recurso Acessado / Descrição:
             </span>
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-700">
-              <p className="font-bold text-slate-900">{log.resourceTipo}</p>
-              <p className="mt-1 text-slate-600">{log.detalhes}</p>
+            <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
+              <p className="font-bold text-slate-900 dark:text-white">{log.resourceTipo}</p>
+              <p className="mt-1 text-slate-600 dark:text-slate-400">{log.detalhes}</p>
             </div>
           </div>
 
@@ -99,10 +99,10 @@ export default function AuditDetailModal({ log, onClose }: AuditDetailModalProps
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-slate-50 border-t flex justify-end">
+        <div className="p-4 bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-colors"
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-900 dark:bg-cyan-600 dark:hover:bg-cyan-500 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
           >
             Fechar Inspeção
           </button>

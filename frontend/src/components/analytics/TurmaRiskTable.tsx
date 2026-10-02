@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { AlertTriangle, ShieldCheck, GraduationCap } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, GraduationCap, Building2 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
 export default function TurmaRiskTable() {
@@ -54,7 +54,13 @@ export default function TurmaRiskTable() {
                   </td>
 
                   <td className="py-4 px-5 font-bold text-slate-950 dark:text-white">
-                    {turma.nomeCurso}
+                    <div>{turma.nomeCurso}</div>
+                    {turma.instituicao && (
+                      <div className="flex items-center gap-1 text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+                        <Building2 className="w-3 h-3 text-[#065373] dark:text-cyan-400 shrink-0" />
+                        <span className="truncate max-w-[240px]">{turma.instituicao}</span>
+                      </div>
+                    )}
                   </td>
 
                   <td className="py-4 px-5 text-slate-700 dark:text-slate-300 font-semibold font-mono">

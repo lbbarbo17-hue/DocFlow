@@ -17,11 +17,18 @@ import {
   PanelLeftClose,
   UserPlus,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, scrollToTop } from '@/lib/utils';
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { currentRole, student, studentsList, closeSidebar } = useApp();
+  const {
+    currentRole,
+    student,
+    studentsList,
+    closeSidebar,
+    activeInstitution,
+    currentCoordinatorUser,
+  } = useApp();
 
   // Pending docs for student
   const pendingStudentDocs = student.documentos.filter(
@@ -92,25 +99,8 @@ export default function Sidebar() {
         icon: Shield,
       },
       {
-        label: 'Dashboard',
-        href: '/coordenador',
-        icon: LayoutDashboard,
-        hasAlert: criticalStudents > 0,
-        alertColor: 'bg-rose-400',
-      },
-      {
-        label: 'Aprendizes/Estagiários',
-        href: '/coordenador/dossies',
-        icon: UserCheck,
-      },
-      {
-        label: 'Turmas',
-        href: '/analytics',
-        icon: BarChart3,
-      },
-      {
-        label: 'Cadastro',
-        href: '/coordenador/cadastro',
+        label: 'Cadastrar Coordenador',
+        href: '/admin/coordenadores',
         icon: UserPlus,
       },
       {
@@ -133,7 +123,14 @@ export default function Sidebar() {
           .join('')
           .toUpperCase()
       : currentRole === 'COORDENADOR'
-      ? 'MA'
+      ? currentCoordinatorUser.nome
+          .replace(/^(Profª\.|Prof\.|Dr\.|Dra\.)\s*/, '')
+          .split(' ')
+          .filter(Boolean)
+          .slice(0, 2)
+          .map((n) => n[0])
+          .join('')
+          .toUpperCase()
       : 'AD';
 
   return (
@@ -187,6 +184,7 @@ export default function Sidebar() {
               key={item.label}
               href={item.href}
               onClick={() => {
+                scrollToTop('instant');
                 if (typeof window !== 'undefined' && window.innerWidth < 1024) {
                   closeSidebar();
                 }
@@ -248,22 +246,37 @@ export default function Sidebar() {
           <div className="flex-1 min-w-0">
             <span
               className="block text-white font-bold text-xs truncate"
-              title={currentRole === 'ESTUDANTE' ? student.nome : undefined}
+              title={
+                currentRole === 'ESTUDANTE'
+                  ? student.nome
+                  : currentRole === 'COORDENADOR'
+                  ? currentCoordinatorUser.nome
+                  : 'Super Administrador'
+              }
             >
               {currentRole === 'ESTUDANTE'
                 ? student.nome
                 : currentRole === 'COORDENADOR'
-                ? 'Coordenação / RH'
+                ? currentCoordinatorUser.nome
                 : 'Super Administrador'}
             </span>
-            <span className="text-[11px] text-[#77afd3] block truncate font-medium">
+            <span
+              className="text-[11px] text-[#77afd3] block truncate font-medium"
+              title={
+                currentRole === 'ESTUDANTE'
+                  ? student.instituicao || (student.tipoVinculo === 'APRENDIZ' ? 'Jovem Aprendiz' : 'Estagiário')
+                  : currentRole === 'COORDENADOR'
+                  ? activeInstitution
+                  : 'Escopo Global (Multi-Instituição)'
+              }
+            >
               {currentRole === 'ESTUDANTE'
                 ? student.tipoVinculo === 'APRENDIZ'
                   ? 'Jovem Aprendiz'
                   : 'Estagiário'
                 : currentRole === 'COORDENADOR'
-                ? 'Coordenador / RH'
-                : 'Super Admin'}
+                ? activeInstitution
+                : 'Escopo Global (Multi-Instituição)'}
             </span>
           </div>
         </div>

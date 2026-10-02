@@ -3,7 +3,8 @@
 import React, { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import StudentMasterList from '@/components/coordinator/StudentMasterList';
-import { Loader2 } from 'lucide-react';
+import PageBanner from '@/components/layout/PageBanner';
+import { Loader2, UserCheck, UserPlus } from 'lucide-react';
 
 function DossiesContent() {
   const searchParams = useSearchParams();
@@ -12,16 +13,18 @@ function DossiesContent() {
   const docParam = searchParams.get('doc') || undefined;
 
   return (
-    <div className="space-y-4 animate-fadeIn">
-      {/* Page Title */}
-      <div className="flex items-center gap-2.5 pb-1">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-          Aprendizes e Estagiários
-        </h1>
-        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700">
-          Dossiês
-        </span>
-      </div>
+    <div className="space-y-6 animate-fadeIn">
+      {/* Page Header Banner */}
+      <PageBanner
+        title="Aprendizes e Estagiários"
+        subtitle="Gestão de dossiês documentais, validação de arquivos e acompanhamento individual"
+        icon={UserCheck}
+        action={{
+          label: 'Novo Cadastro',
+          href: '/coordenador/cadastro',
+          icon: UserPlus,
+        }}
+      />
 
       {/* Master-Detail Student List & Dossier Viewer */}
       <StudentMasterList

@@ -175,3 +175,12 @@ export function isDocumentApplicableForStudent(
   return true;
 }
 
+export function scrollToTop(behavior: ScrollBehavior = 'instant') {
+  if (typeof window === 'undefined') return;
+  const container = document.getElementById('main-scroll-container');
+  if (container) {
+    container.scrollTo({ top: 0, left: 0, behavior });
+  }
+  window.scrollTo({ top: 0, left: 0, behavior });
+}
+

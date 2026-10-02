@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import {
   UserRole,
   TipoVinculo,
@@ -27,10 +27,18 @@ interface AppContextType {
   setCurrentRole: (role: UserRole) => void;
   student: Student;
   studentsList: Student[];
+  allStudentsList: Student[];
   turmas: Turma[];
+  allTurmas: Turma[];
   empresas: Empresa[];
   systemUsers: SystemUser[];
   auditLogs: AuditLog[];
+  activeInstitution: string;
+  setActiveInstitution: (institution: string) => void;
+  superAdminInstitutionFilter: string;
+  setSuperAdminInstitutionFilter: (filter: string) => void;
+  availableInstitutions: string[];
+  currentCoordinatorUser: SystemUser;
   isLgpdRedactionActive: boolean;
   setIsLgpdRedactionActive: (active: boolean) => void;
   theme: 'light' | 'dark';
@@ -54,6 +62,14 @@ interface AppContextType {
   updateUserRole: (userId: string, newRole: UserRole) => void;
   addNewTurma: (turma: Turma) => void;
   addNewEmpresa: (empresa: Empresa) => void;
+  addNewSystemUser: (data: {
+    nome: string;
+    email: string;
+    cargo: string;
+    role: UserRole;
+    instituicao: string;
+    status?: 'ATIVO' | 'INATIVO';
+  }) => SystemUser;
   addNewStudent: (data: {
     nome: string;
     cpf: string;
@@ -74,8 +90,10 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [currentRole, setCurrentRole] = useState<UserRole>('ESTUDANTE');
   const [student, setStudent] = useState<Student>(CURRENT_STUDENT);
-  const [studentsList, setStudentsList] = useState<Student[]>(INITIAL_STUDENTS);
-  const [turmas, setTurmas] = useState<Turma[]>(INITIAL_TURMAS);
+  const [rawStudentsList, setRawStudentsList] = useState<Student[]>(INITIAL_STUDENTS);
+  const [rawTurmas, setRawTurmas] = useState<Turma[]>(INITIAL_TURMAS);
+  const [activeInstitution, setActiveInstitution] = useState<string>('ETEC Politécnica de São Paulo');
+  const [superAdminInstitutionFilter, setSuperAdminInstitutionFilter] = useState<string>('ALL');
   const [empresas, setEmpresas] = useState<Empresa[]>(INITIAL_EMPRESAS);
   const [systemUsers, setSystemUsers] = useState<SystemUser[]>(INITIAL_SYSTEM_USERS);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
@@ -87,6 +105,64 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     desc: string;
     type: 'success' | 'error' | 'info';
   } | null>(null);
+
+  // Available institutions discovered across students, turmas and system users
+  const availableInstitutions = useMemo(() => {
+    const set = new Set<string>();
+    rawStudentsList.forEach((s) => s.instituicao && set.add(s.instituicao));
+    rawTurmas.forEach((t) => t.instituicao && set.add(t.instituicao));
+    systemUsers.forEach((u) => {
+      if (u.instituicao && !u.instituicao.includes('Global')) {
+        set.add(u.instituicao);
+      }
+    });
+    return Array.from(set).sort();
+  }, [rawStudentsList, rawTurmas, systemUsers]);
+
+  // Current coordinator identity derived from active institution
+  const currentCoordinatorUser = useMemo(() => {
+    const found = systemUsers.find(
+      (u) => u.role === 'COORDENADOR' && u.instituicao === activeInstitution
+    );
+    return (
+      found || {
+        id: 'usr-coord-generic',
+        nome: 'Coordenação Geral',
+        email: 'coordenacao@docflow.edu.br',
+        role: 'COORDENADOR' as UserRole,
+        cargo: 'Coordenador Pedagógico / RH',
+        instituicao: activeInstitution,
+        status: 'ATIVO' as const,
+        ultimoAcesso: 'Hoje às 15:00',
+      }
+    );
+  }, [systemUsers, activeInstitution]);
+
+  // Filtered lists based on tenant role and active institution
+  const allStudentsList = rawStudentsList;
+  const allTurmas = rawTurmas;
+
+  const studentsList = useMemo(() => {
+    if (currentRole === 'SUPERADMIN') {
+      if (superAdminInstitutionFilter === 'ALL') {
+        return rawStudentsList;
+      }
+      return rawStudentsList.filter((s) => s.instituicao === superAdminInstitutionFilter);
+    }
+    // Coordinator: isolated strictly to their active institution
+    return rawStudentsList.filter((s) => s.instituicao === activeInstitution);
+  }, [rawStudentsList, currentRole, superAdminInstitutionFilter, activeInstitution]);
+
+  const turmas = useMemo(() => {
+    if (currentRole === 'SUPERADMIN') {
+      if (superAdminInstitutionFilter === 'ALL') {
+        return rawTurmas;
+      }
+      return rawTurmas.filter((t) => t.instituicao === superAdminInstitutionFilter);
+    }
+    // Coordinator: isolated strictly to their active institution
+    return rawTurmas.filter((t) => t.instituicao === activeInstitution);
+  }, [rawTurmas, currentRole, superAdminInstitutionFilter, activeInstitution]);
 
   // Responsive sidebar initialization
   useEffect(() => {
@@ -210,7 +286,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               cpfNumero: student.cpf,
               empresaConcedente: student.empresa,
               semestreAtual: '2º Semestre / 2026',
-              instituicaoEnsino: 'ETEC Central',
+              instituicaoEnsino: student.instituicao || 'ETEC Central',
             },
           };
         }
@@ -234,7 +310,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
 
     setStudent(updatedStudent);
-    setStudentsList((prev) =>
+    setRawStudentsList((prev) =>
       prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s))
     );
 
@@ -310,7 +386,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
 
     setStudent(updatedStudent);
-    setStudentsList((prev) =>
+    setRawStudentsList((prev) =>
       prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s))
     );
 
@@ -343,7 +419,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     newStatus: 'APROVADO' | 'RECUSADO',
     justificativa?: string
   ) => {
-    setStudentsList((prev) =>
+    setRawStudentsList((prev) =>
       prev.map((s) => {
         if (s.id === studentId) {
           const updatedDocs = s.documentos.map((d) => {
@@ -352,7 +428,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 ...d,
                 status: newStatus,
                 justificativaRecusa: newStatus === 'RECUSADO' ? justificativa : undefined,
-                aprovadoPor: currentRole === 'COORDENADOR' ? 'Coordenação / RH' : 'Super Admin',
+                aprovadoPor:
+                  currentRole === 'COORDENADOR'
+                    ? `${currentCoordinatorUser.nome} (${activeInstitution})`
+                    : 'Super Administrador',
                 dataAvaliacao: new Date().toISOString(),
               };
             }
@@ -385,12 +464,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
 
     // Add audit log
-    const targetStudent = studentsList.find((s) => s.id === studentId);
+    const targetStudent = rawStudentsList.find((s) => s.id === studentId);
     const targetDoc = targetStudent?.documentos.find((d) => d.id === docId);
 
     addAuditEntry({
-      userId: 'usr-evaluator',
-      userNome: currentRole === 'COORDENADOR' ? 'Coordenação de Curso / RH' : 'Super Administrador',
+      userId: currentCoordinatorUser.id,
+      userNome:
+        currentRole === 'COORDENADOR'
+          ? `${currentCoordinatorUser.nome} (${activeInstitution})`
+          : 'Super Administrador',
       userRole: currentRole,
       action: newStatus === 'APROVADO' ? 'DOCUMENT_APPROVAL' : 'DOCUMENT_REJECTION',
       resourceId: docId,
@@ -399,7 +481,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       status: 'SUCCESS',
       detalhes:
         newStatus === 'APROVADO'
-          ? 'Conferência de autenticidade documental aprovada.'
+          ? `Conferência de autenticidade documental aprovada pela coordenação (${activeInstitution}).`
           : `Recusa fundamentada: "${justificativa}". Notificação enviada ao estudante.`,
       sha256Hash: targetDoc?.fileHashSha256 || 'N/A',
       storageUuid: targetDoc?.storageUuid,
@@ -438,11 +520,61 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const addNewSystemUser = (data: {
+    nome: string;
+    email: string;
+    cargo: string;
+    role: UserRole;
+    instituicao: string;
+    status?: 'ATIVO' | 'INATIVO';
+  }): SystemUser => {
+    const newUserId = `usr-${Date.now()}`;
+    const newUser: SystemUser = {
+      id: newUserId,
+      nome: data.nome,
+      email: data.email,
+      role: data.role,
+      cargo: data.cargo,
+      instituicao: data.instituicao,
+      status: data.status || 'ATIVO',
+      ultimoAcesso: 'Nunca acessou (Novo Cadastro)',
+    };
+
+    setSystemUsers((prev) => [newUser, ...prev]);
+
+    addAuditEntry({
+      userId: 'usr-admin',
+      userNome: 'Super Administrador',
+      userRole: 'SUPERADMIN',
+      action: 'SYSTEM_CONFIG_UPDATED',
+      resourceId: newUserId,
+      resourceTipo: `Operador: ${data.nome} (${data.role})`,
+      ipAddress: '200.180.99.12',
+      status: 'SUCCESS',
+      detalhes: `Novo operador cadastrado pelo Super Admin: ${data.nome} (${data.cargo}) vinculado à entidade '${data.instituicao}' com perfil ${data.role}.`,
+      sha256Hash: `HASH-USER-${newUserId}`,
+    });
+
+    setToastMessage({
+      title: 'Operador Cadastrado com Sucesso! 👤',
+      desc: `${data.nome} foi cadastrado(a) como ${data.role} em ${data.instituicao}.`,
+      type: 'success',
+    });
+
+    return newUser;
+  };
+
   const addNewTurma = (turma: Turma) => {
-    setTurmas((prev) => [turma, ...prev]);
+    const turmaWithInstitution: Turma = {
+      ...turma,
+      instituicao:
+        turma.instituicao ||
+        (currentRole === 'COORDENADOR' ? activeInstitution : 'ETEC Politécnica de São Paulo'),
+    };
+    setRawTurmas((prev) => [turmaWithInstitution, ...prev]);
     setToastMessage({
       title: 'Turma Criada com Sucesso',
-      desc: `Turma ${turma.codigo} cadastrada no sistema.`,
+      desc: `Turma ${turma.codigo} cadastrada sob ${turmaWithInstitution.instituicao}.`,
       type: 'success',
     });
   };
@@ -459,7 +591,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     empresa?: string;
     instituicao?: string;
   }): Student => {
-    const selectedTurma = turmas.find((t) => t.id === data.turmaId);
+    const selectedTurma = rawTurmas.find((t) => t.id === data.turmaId);
+    const assignedInstitution =
+      data.instituicao ||
+      selectedTurma?.instituicao ||
+      (currentRole === 'COORDENADOR' ? activeInstitution : 'ETEC Politécnica de São Paulo');
+
     const newStudentId = `std-${Date.now()}`;
     const newStudent: Student = {
       id: newStudentId,
@@ -473,7 +610,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       turmaNome: selectedTurma ? `${selectedTurma.codigo} — ${selectedTurma.nomeCurso}` : 'Turma Geral',
       curso: data.curso || (selectedTurma ? selectedTurma.nomeCurso : 'Curso Técnico'),
       empresa: data.empresa || 'Empresa Conveniada',
-      instituicao: data.instituicao || 'Instituição de Ensino',
+      instituicao: assignedInstitution,
       percentualConformidade: 0,
       nivelRisco: 'CRITICO',
       statusGeral: 'PENDENTE',
@@ -531,10 +668,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       ],
     };
 
-    setStudentsList((prev) => [newStudent, ...prev]);
+    setRawStudentsList((prev) => [newStudent, ...prev]);
 
     if (data.turmaId) {
-      setTurmas((prev) =>
+      setRawTurmas((prev) =>
         prev.map((t) =>
           t.id === data.turmaId
             ? { ...t, totalAlunos: t.totalAlunos + 1, alunosEmRisco: t.alunosEmRisco + 1 }
@@ -544,21 +681,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
 
     addAuditEntry({
-      userId: 'usr-coord',
-      userNome: 'Profª. Mariana Alcantara (Coordenação)',
-      userRole: 'COORDENADOR',
+      userId: currentCoordinatorUser.id,
+      userNome: `${currentCoordinatorUser.nome} (${assignedInstitution})`,
+      userRole: currentRole,
       action: 'USER_ROLE_CHANGED',
       resourceId: newStudentId,
       resourceTipo: `Aprendiz/Estagiário: ${data.nome}`,
       ipAddress: '187.54.12.88',
       status: 'SUCCESS',
-      detalhes: `Novo aluno cadastrado e associado à turma ${selectedTurma?.codigo || data.turmaId}.`,
+      detalhes: `Novo aluno cadastrado sob a instituição '${assignedInstitution}' e associado à turma ${selectedTurma?.codigo || data.turmaId}.`,
       sha256Hash: `HASH-CADASTRO-${newStudentId}`,
     });
 
     setToastMessage({
       title: 'Aluno Cadastrado com Sucesso! 🎉',
-      desc: `${data.nome} foi cadastrado(a) e seu dossiê documental foi iniciado.`,
+      desc: `${data.nome} foi cadastrado(a) em ${assignedInstitution}.`,
       type: 'success',
     });
 
@@ -568,9 +705,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addNewEmpresa = (empresa: Empresa) => {
     setEmpresas((prev) => [empresa, ...prev]);
     addAuditEntry({
-      userId: 'usr-coord',
-      userNome: 'Profª. Mariana Alcantara (Coordenação)',
-      userRole: 'COORDENADOR',
+      userId: currentCoordinatorUser.id,
+      userNome: `${currentCoordinatorUser.nome} (${activeInstitution})`,
+      userRole: currentRole,
       action: 'USER_ROLE_CHANGED',
       resourceId: empresa.id,
       resourceTipo: `Empresa Parceira: ${empresa.razaoSocial}`,
@@ -587,12 +724,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const selectStudent = (studentId: string) => {
-    const target = studentsList.find((s) => s.id === studentId);
+    const target = rawStudentsList.find((s) => s.id === studentId);
     if (target) {
       setStudent(target);
       setToastMessage({
         title: `Perfil Selecionado: ${target.nome}`,
-        desc: `Visualizando como ${target.tipoVinculo === 'APRENDIZ' ? 'Jovem Aprendiz' : 'Estagiário'}.`,
+        desc: `Visualizando como ${target.tipoVinculo === 'APRENDIZ' ? 'Jovem Aprendiz' : 'Estagiário'} (${target.instituicao || 'Instituição'}).`,
         type: 'info',
       });
     }
@@ -605,10 +742,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setCurrentRole,
         student,
         studentsList,
+        allStudentsList,
         turmas,
+        allTurmas,
         empresas,
         systemUsers,
         auditLogs,
+        activeInstitution,
+        setActiveInstitution,
+        superAdminInstitutionFilter,
+        setSuperAdminInstitutionFilter,
+        availableInstitutions,
+        currentCoordinatorUser,
         isLgpdRedactionActive,
         setIsLgpdRedactionActive,
         theme,
@@ -625,6 +770,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         evaluateDocument,
         addAuditEntry,
         updateUserRole,
+        addNewSystemUser,
         addNewTurma,
         addNewEmpresa,
         addNewStudent,

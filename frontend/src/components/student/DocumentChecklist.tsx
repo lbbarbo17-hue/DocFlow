@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { DocumentItem } from '@/lib/types';
 import { useApp } from '@/context/AppContext';
-import { getStatusBadgeConfig, formatDateBr, isDocumentApplicableForStudent } from '@/lib/utils';
+import { getStatusBadgeConfig, formatDateBr, isDocumentApplicableForStudent, scrollToTop } from '@/lib/utils';
 import UploadModal from './UploadModal';
 import DocumentViewModal from './DocumentViewModal';
 
@@ -102,8 +102,11 @@ export default function DocumentChecklist() {
         <div className="flex items-center gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800 overflow-x-auto pb-1 sm:pb-0">
           <button
             type="button"
-            onClick={() => setActiveTab('ALL')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
+            onClick={() => {
+              setActiveTab('ALL');
+              scrollToTop('instant');
+            }}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'ALL'
                 ? 'bg-[#065373] text-white shadow-sm'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -121,8 +124,11 @@ export default function DocumentChecklist() {
 
           <button
             type="button"
-            onClick={() => setActiveTab('PRINCIPAL')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
+            onClick={() => {
+              setActiveTab('PRINCIPAL');
+              scrollToTop('instant');
+            }}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'PRINCIPAL'
                 ? 'bg-[#065373] text-white shadow-sm'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -140,8 +146,11 @@ export default function DocumentChecklist() {
 
           <button
             type="button"
-            onClick={() => setActiveTab('COMPLEMENTARES')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
+            onClick={() => {
+              setActiveTab('COMPLEMENTARES');
+              scrollToTop('instant');
+            }}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'COMPLEMENTARES'
                 ? 'bg-[#065373] text-white shadow-sm'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -159,8 +168,11 @@ export default function DocumentChecklist() {
 
           <button
             type="button"
-            onClick={() => setActiveTab('PENDING')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
+            onClick={() => {
+              setActiveTab('PENDING');
+              scrollToTop('instant');
+            }}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'PENDING'
                 ? 'bg-rose-600 text-white shadow-sm'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -178,8 +190,11 @@ export default function DocumentChecklist() {
 
           <button
             type="button"
-            onClick={() => setActiveTab('APPROVED')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
+            onClick={() => {
+              setActiveTab('APPROVED');
+              scrollToTop('instant');
+            }}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'APPROVED'
                 ? 'bg-emerald-600 text-white shadow-sm'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'

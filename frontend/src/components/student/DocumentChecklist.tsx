@@ -73,27 +73,23 @@ export default function DocumentChecklist() {
   return (
     <div className="space-y-4">
       {/* Header & Filter Controls for Mobile & Desktop */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3 transition-colors duration-200">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 transition-colors duration-200">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-              <FileText className="w-5 h-5 text-[#065373] dark:text-cyan-400" />
-              Documentos
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Guarda digital rápida e conferência de documentos essenciais e complementares
-            </p>
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              Filtrar por Categoria ou Situação:
+            </span>
           </div>
 
           {/* Quick Search Input */}
-          <div className="relative w-full sm:w-64">
-            <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+          <div className="relative w-full sm:w-72">
+            <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Buscar documento..."
+              placeholder="Buscar documento por nome..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              className="w-full pl-10 pr-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] text-slate-800 dark:text-slate-100 placeholder:text-slate-400 font-medium transition-all"
             />
           </div>
         </div>

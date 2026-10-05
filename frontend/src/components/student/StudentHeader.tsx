@@ -46,18 +46,14 @@ export default function StudentHeader() {
 
           {/* Student name & details */}
           <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h2 className="text-xl sm:text-2xl font-black text-[#065373] dark:text-cyan-300 tracking-tight">
                 Olá, {firstName}! 👋
               </h2>
 
               {/* Vínculo badge */}
               <span
-                className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-extrabold border shadow-xs ${
-                  isAprendiz
-                    ? 'bg-cyan-50 dark:bg-cyan-950/50 text-[#065373] dark:text-cyan-300 border-cyan-200 dark:border-cyan-800/60'
-                    : 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60'
-                }`}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-2xl bg-sky-50 dark:bg-[#122634] border border-sky-200 dark:border-[#1c3547] text-xs font-semibold text-[#065373] dark:text-cyan-300"
               >
                 {isAprendiz ? (
                   <>

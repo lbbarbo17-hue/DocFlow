@@ -96,6 +96,7 @@ export interface Turma {
   conformidadeMedia: number;
   alunosEmRisco: number;
   alunosRegulares: number;
+  instituicao?: string;
 }
 
 export interface Empresa {
@@ -118,6 +119,7 @@ export interface SystemUser {
   cargo: string;
   status: 'ATIVO' | 'INATIVO';
   ultimoAcesso: string;
+  instituicao?: string;
 }
 
 export type AuditAction =

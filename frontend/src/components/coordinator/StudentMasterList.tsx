@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, ArrowUpDown, ChevronDown, ChevronRight, Layers } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { getRiskBadgeConfig, cn } from '@/lib/utils';
+import { getRiskBadgeConfig, cn, scrollToTop } from '@/lib/utils';
 import DossierViewer from './DossierViewer';
 
 interface StudentMasterListProps {
@@ -15,7 +15,7 @@ export default function StudentMasterList({
   initialStudentId,
   initialDocId,
 }: StudentMasterListProps) {
-  const { studentsList, turmas } = useApp();
+  const { studentsList, turmas, currentRole } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTurma, setSelectedTurma] = useState<string>('ALL');
   const [selectedRisk, setSelectedRisk] = useState<string>('ALL');
@@ -210,9 +210,12 @@ export default function StudentMasterList({
       <div className="flex lg:hidden bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
         <button
           type="button"
-          onClick={() => setMobileTab('LIST')}
+          onClick={() => {
+            setMobileTab('LIST');
+            scrollToTop('instant');
+          }}
           className={cn(
-            'flex-1 py-2 text-xs font-bold rounded-lg transition-all',
+            'flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer',
             mobileTab === 'LIST'
               ? 'bg-[#065373] text-white shadow-xs'
               : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
@@ -222,9 +225,12 @@ export default function StudentMasterList({
         </button>
         <button
           type="button"
-          onClick={() => setMobileTab('DOSSIER')}
+          onClick={() => {
+            setMobileTab('DOSSIER');
+            scrollToTop('instant');
+          }}
           className={cn(
-            'flex-1 py-2 text-xs font-bold rounded-lg transition-all truncate px-2',
+            'flex-1 py-2 text-xs font-bold rounded-lg transition-all truncate px-2 cursor-pointer',
             mobileTab === 'DOSSIER'
               ? 'bg-[#065373] text-white shadow-xs'
               : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
@@ -346,6 +352,9 @@ export default function StudentMasterList({
           setActiveStudentId(s.id);
           setActiveDocId(undefined);
           setMobileTab('DOSSIER');
+          if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+            scrollToTop('instant');
+          }
         }}
         className={`p-3.5 rounded-xl border-[1.5px] cursor-pointer transition-all duration-200 ${
           isSelected
@@ -361,6 +370,11 @@ export default function StudentMasterList({
             {s.empresa && (
               <p className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 truncate mt-0.5">
                 {s.empresa}
+              </p>
+            )}
+            {s.instituicao && currentRole === 'SUPERADMIN' && (
+              <p className="text-[10px] font-semibold text-purple-700 dark:text-purple-300 truncate mt-0.5 flex items-center gap-1">
+                <span>🏢 {s.instituicao}</span>
               </p>
             )}
           </div>

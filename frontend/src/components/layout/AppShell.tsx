@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import Sidebar from '@/components/layout/Sidebar';
@@ -10,6 +10,14 @@ import AccessDenied from '@/components/common/AccessDenied';
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { currentRole, isSidebarOpen, closeSidebar } = useApp();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
 
   const isAuthPage = pathname === '/login' || pathname === '/' || pathname === '/landing';
 
@@ -56,7 +64,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Main area scrolls independently */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      <div
+        id="main-scroll-container"
+        ref={scrollContainerRef}
+        className="flex-1 flex flex-col min-w-0 overflow-y-auto"
+      >
         <Header />
         <main className="flex-1 p-3.5 sm:p-6 md:p-8 max-w-7xl w-full mx-auto">
           {isDenied ? <AccessDenied requiredRoleName={requiredRoleLabel} /> : children}

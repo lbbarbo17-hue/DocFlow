@@ -57,7 +57,7 @@ export default function AuditTable() {
 
         <button
           onClick={handleExportLogs}
-          className="px-4 py-2.5 rounded-xl bg-white text-[#065373] font-bold text-xs hover:bg-slate-100 transition-colors flex items-center gap-2 shadow-sm shrink-0"
+          className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-[#065373] dark:text-cyan-300 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-2 shadow-sm shrink-0 cursor-pointer"
         >
           <Download className="w-4 h-4" />
           <span>Exportar Trilha (JSON)</span>
@@ -65,15 +65,15 @@ export default function AuditTable() {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3 transition-colors">
         <div className="relative w-full md:w-96">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Buscar por operador, IP, hash SHA-256 ou recurso..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#065373]"
+            className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
           />
         </div>
 
@@ -81,7 +81,7 @@ export default function AuditTable() {
           <select
             value={actionFilter}
             onChange={(e) => setActionFilter(e.target.value)}
-            className="text-xs p-2 rounded-xl border border-slate-300 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#065373]"
+            className="text-xs p-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
           >
             <option value="ALL">Todas as Ações</option>
             <option value="DOCUMENT_UPLOAD">Upload de Documento</option>
@@ -95,11 +95,11 @@ export default function AuditTable() {
       </div>
 
       {/* Audit Logs Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+              <tr className="bg-slate-50 dark:bg-slate-800/60 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
                 <th className="py-3 px-5">Timestamp (UTC)</th>
                 <th className="py-3 px-5">Operador / Papel</th>
                 <th className="py-3 px-5">Ação Executada</th>
@@ -109,33 +109,33 @@ export default function AuditTable() {
                 <th className="py-3 px-5 text-right">Forense</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
               {filteredLogs.map((log) => {
                 return (
-                  <tr key={log.id} className="hover:bg-slate-50/80 transition-colors font-sans">
-                    <td className="py-3.5 px-5 font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                  <tr key={log.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors font-sans">
+                    <td className="py-3.5 px-5 font-mono text-[11px] text-slate-600 dark:text-slate-400 whitespace-nowrap">
                       {new Date(log.timestampUtc).toLocaleString('pt-BR')}
                     </td>
 
                     <td className="py-3.5 px-5">
                       <div>
-                        <p className="font-bold text-slate-900">{log.userNome}</p>
-                        <span className="text-[10px] font-mono text-[#065373] bg-[#065373]/10 px-1.5 py-0.2 rounded font-semibold">
+                        <p className="font-bold text-slate-900 dark:text-white">{log.userNome}</p>
+                        <span className="text-[10px] font-mono text-[#065373] dark:text-cyan-300 bg-[#065373]/10 dark:bg-cyan-950/60 px-1.5 py-0.2 rounded font-semibold">
                           {log.userRole}
                         </span>
                       </div>
                     </td>
 
-                    <td className="py-3.5 px-5 font-mono text-[11px] font-semibold text-slate-800">
+                    <td className="py-3.5 px-5 font-mono text-[11px] font-semibold text-slate-800 dark:text-slate-200">
                       {log.action}
                     </td>
 
                     <td className="py-3.5 px-5 max-w-xs truncate">
-                      <p className="font-semibold text-slate-800 truncate">{log.resourceTipo}</p>
-                      <p className="text-[10px] text-slate-400 truncate">{log.detalhes}</p>
+                      <p className="font-semibold text-slate-800 dark:text-slate-200 truncate">{log.resourceTipo}</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">{log.detalhes}</p>
                     </td>
 
-                    <td className="py-3.5 px-5 font-mono text-slate-600 text-[11px]">
+                    <td className="py-3.5 px-5 font-mono text-slate-600 dark:text-slate-400 text-[11px]">
                       {log.ipAddress}
                     </td>
 
@@ -143,10 +143,10 @@ export default function AuditTable() {
                       <span
                         className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                           log.status === 'SUCCESS'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
                             : log.status === 'BLOCKED'
-                            ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                            : 'bg-amber-50 text-amber-700 border border-amber-200'
+                            ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
+                            : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
                         }`}
                       >
                         {log.status === 'SUCCESS' && <CheckCircle2 className="w-3 h-3" />}
@@ -158,9 +158,9 @@ export default function AuditTable() {
                     <td className="py-3.5 px-5 text-right">
                       <button
                         onClick={() => setInspectingLog(log)}
-                        className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors inline-flex items-center gap-1.5"
+                        className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
                       >
-                        <Eye className="w-3.5 h-3.5 text-slate-500" />
+                        <Eye className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                         <span>Inspecionar</span>
                       </button>
                     </td>

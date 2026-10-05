@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import PageBanner from '@/components/layout/PageBanner';
 import {
   UploadCloud,
   Upload,
@@ -255,30 +256,16 @@ export default function AdicionarDocumentoPage() {
   return (
     <div className="space-y-6 pb-12">
       {/* 1. Banner de Título da Página */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#065373] to-[#226a8b] text-white flex items-center justify-center shadow-md shrink-0">
-            <UploadCloud className="w-6 h-6 text-cyan-300" />
-          </div>
-          <div>
-            <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">
-              Adicionar e Enviar Documentos
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Envio com conferência de autenticidade e custódia digital
-            </p>
-          </div>
-        </div>
-
-        <Link
-          href="/estudante/checklist"
-          className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors shrink-0"
-        >
-          <FileText className="w-4 h-4 text-[#065373] dark:text-cyan-400" />
-          <span>Ver Documentos</span>
-          <ArrowRight className="w-3.5 h-3.5 ml-1" />
-        </Link>
-      </div>
+      <PageBanner
+        title="Adicionar e Enviar Documentos"
+        subtitle="Envio com conferência de autenticidade e custódia digital"
+        icon={UploadCloud}
+        action={{
+          label: 'Ver Documentos',
+          href: '/estudante/checklist',
+          icon: FileText,
+        }}
+      />
 
       {/* 3. Tela de Sucesso após Envio */}
       {uploadSuccess ? (

@@ -16,6 +16,7 @@ import {
   UploadCloud,
   PanelLeftClose,
   UserPlus,
+  Settings,
 } from 'lucide-react';
 import { cn, scrollToTop } from '@/lib/utils';
 
@@ -27,7 +28,7 @@ export default function Sidebar() {
     studentsList,
     closeSidebar,
     activeInstitution,
-    currentCoordinatorUser,
+    currentUserProfile,
   } = useApp();
 
   // Pending docs for student
@@ -113,25 +114,14 @@ export default function Sidebar() {
 
   const navItems = getNavItemsForRole();
 
-  const userInitials =
-    currentRole === 'ESTUDANTE'
-      ? student.nome
-          .split(' ')
-          .filter(Boolean)
-          .slice(0, 2)
-          .map((n) => n[0])
-          .join('')
-          .toUpperCase()
-      : currentRole === 'COORDENADOR'
-      ? currentCoordinatorUser.nome
-          .replace(/^(Profª\.|Prof\.|Dr\.|Dra\.)\s*/, '')
-          .split(' ')
-          .filter(Boolean)
-          .slice(0, 2)
-          .map((n) => n[0])
-          .join('')
-          .toUpperCase()
-      : 'AD';
+  const userInitials = (currentUserProfile.nome || 'DocFlow')
+    .replace(/^(Profª\.|Prof\.|Dr\.|Dra\.)\s*/, '')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase();
 
   return (
     <aside className="w-64 bg-[#065373] text-white flex flex-col shrink-0 border-r border-[#043c53] shadow-xl z-30 min-h-screen">
@@ -228,12 +218,36 @@ export default function Sidebar() {
 
       {/* Footer Profile & Logout Button */}
       <div className="p-3.5 border-t border-[#226a8b]/60 bg-[#043c53]/50 space-y-3">
-        {/* User Card with Profile Picture Circle */}
-        <div className="flex items-center gap-3">
+        {/* User Card with Profile Picture Circle - Navigates to /perfil page */}
+        <Link
+          href="/perfil"
+          onClick={() => {
+            scrollToTop('instant');
+            if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+              closeSidebar();
+            }
+          }}
+          className={cn(
+            'w-full flex items-center gap-3 p-2 -m-2 rounded-2xl transition-all text-left group cursor-pointer border',
+            pathname === '/perfil'
+              ? 'bg-[#226a8b] border-[#77afd3] shadow-md'
+              : 'hover:bg-[#226a8b]/60 border-transparent hover:border-[#77afd3]/40'
+          )}
+          title="Clique para gerenciar seu perfil, alterar dados, senha e foto"
+          aria-label="Abrir página de configurações de perfil"
+        >
           {/* Foto de Perfil (Avatar Circle) */}
           <div className="relative shrink-0">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#226a8b] via-[#3f81a3] to-[#77afd3] text-white flex items-center justify-center font-black text-xs shadow-md border-2 border-white/20">
-              {userInitials}
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#226a8b] via-[#3f81a3] to-[#77afd3] text-white flex items-center justify-center font-black text-xs shadow-md border-2 border-white/20 overflow-hidden group-hover:border-white transition-all">
+              {currentUserProfile.avatarUrl ? (
+                <img
+                  src={currentUserProfile.avatarUrl}
+                  alt={currentUserProfile.nome}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                userInitials
+              )}
             </div>
             {/* Online status indicator */}
             <div
@@ -244,22 +258,15 @@ export default function Sidebar() {
 
           {/* User info */}
           <div className="flex-1 min-w-0">
-            <span
-              className="block text-white font-bold text-xs truncate"
-              title={
-                currentRole === 'ESTUDANTE'
-                  ? student.nome
-                  : currentRole === 'COORDENADOR'
-                  ? currentCoordinatorUser.nome
-                  : 'Super Administrador'
-              }
-            >
-              {currentRole === 'ESTUDANTE'
-                ? student.nome
-                : currentRole === 'COORDENADOR'
-                ? currentCoordinatorUser.nome
-                : 'Super Administrador'}
-            </span>
+            <div className="flex items-center justify-between gap-1">
+              <span
+                className="block text-white font-bold text-xs truncate group-hover:text-cyan-200 transition-colors"
+                title={currentUserProfile.nome}
+              >
+                {currentUserProfile.nome}
+              </span>
+              <Settings className="w-3.5 h-3.5 text-[#77afd3]/60 group-hover:text-cyan-300 transition-transform group-hover:rotate-45 shrink-0" />
+            </div>
             <span
               className="text-[11px] text-[#77afd3] block truncate font-medium"
               title={
@@ -279,7 +286,7 @@ export default function Sidebar() {
                 : 'Escopo Global (Multi-Instituição)'}
             </span>
           </div>
-        </div>
+        </Link>
 
         {/* Logout Button */}
         <Link

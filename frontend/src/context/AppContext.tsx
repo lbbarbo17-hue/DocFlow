@@ -11,6 +11,7 @@ import {
   DocumentItem,
   StatusDocumento,
   SystemUser,
+  UserProfileData,
 } from '@/lib/types';
 import {
   CURRENT_STUDENT,
@@ -48,6 +49,13 @@ interface AppContextType {
   setIsSidebarOpen: (open: boolean) => void;
   toggleSidebar: () => void;
   closeSidebar: () => void;
+  isProfileModalOpen: boolean;
+  setIsProfileModalOpen: (open: boolean) => void;
+  openProfileModal: () => void;
+  closeProfileModal: () => void;
+  currentUserProfile: UserProfileData;
+  updateCurrentUserProfile: (data: UserProfileData) => void;
+  updateCurrentUserPassword: (currentPass: string, newPass: string) => Promise<boolean>;
   toastMessage: { title: string; desc: string; type: 'success' | 'error' | 'info' } | null;
   setToastMessage: (msg: { title: string; desc: string; type: 'success' | 'error' | 'info' } | null) => void;
   uploadStudentDocument: (docId: string, file: File) => Promise<boolean>;
@@ -100,6 +108,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isLgpdRedactionActive, setIsLgpdRedactionActive] = useState<boolean>(false);
   const [theme, setThemeState] = useState<'light' | 'dark'>('light');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
+  const openProfileModal = () => setIsProfileModalOpen(true);
+  const closeProfileModal = () => setIsProfileModalOpen(false);
   const [toastMessage, setToastMessage] = useState<{
     title: string;
     desc: string;
@@ -735,6 +746,155 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const currentUserProfile: UserProfileData = useMemo(() => {
+    if (currentRole === 'ESTUDANTE') {
+      return {
+        nome: student.nome,
+        email: student.email,
+        telefone: student.telefone || '(11) 98765-4321',
+        cpf: student.cpf,
+        avatarUrl: student.avatarUrl || '',
+        cargo: student.tipoVinculo === 'APRENDIZ' ? 'Jovem Aprendiz' : 'Estagiário',
+      };
+    }
+    if (currentRole === 'COORDENADOR') {
+      return {
+        nome: currentCoordinatorUser.nome,
+        email: currentCoordinatorUser.email,
+        telefone: currentCoordinatorUser.telefone || '(11) 99876-5432',
+        cpf: currentCoordinatorUser.cpf || '123.456.789-00',
+        avatarUrl: currentCoordinatorUser.avatarUrl || '',
+        cargo: currentCoordinatorUser.cargo,
+      };
+    }
+    // SUPERADMIN
+    const adminUser = systemUsers.find((u) => u.role === 'SUPERADMIN') || systemUsers[0];
+    return {
+      nome: adminUser?.nome || 'Super Administrador DocFlow',
+      email: adminUser?.email || 'admin.global@docflow.com.br',
+      telefone: adminUser?.telefone || '(11) 91234-5678',
+      cpf: adminUser?.cpf || '000.111.222-33',
+      avatarUrl: adminUser?.avatarUrl || '',
+      cargo: adminUser?.cargo || 'Diretor de Conformidade & Tecnologia',
+    };
+  }, [currentRole, student, currentCoordinatorUser, systemUsers]);
+
+  const updateCurrentUserProfile = (data: UserProfileData) => {
+    const trimmedNome = data.nome.trim();
+    const trimmedEmail = data.email.trim();
+    const trimmedTelefone = data.telefone?.trim();
+    const trimmedCpf = data.cpf?.trim();
+
+    if (currentRole === 'ESTUDANTE') {
+      setStudent((prev) => ({
+        ...prev,
+        nome: trimmedNome || prev.nome,
+        email: trimmedEmail || prev.email,
+        telefone: trimmedTelefone || prev.telefone,
+        avatarUrl: data.avatarUrl !== undefined ? data.avatarUrl : prev.avatarUrl,
+        cpf: trimmedCpf || prev.cpf,
+      }));
+      setRawStudentsList((prev) =>
+        prev.map((s) =>
+          s.id === student.id
+            ? {
+                ...s,
+                nome: trimmedNome || s.nome,
+                email: trimmedEmail || s.email,
+                telefone: trimmedTelefone || s.telefone,
+                avatarUrl: data.avatarUrl !== undefined ? data.avatarUrl : s.avatarUrl,
+                cpf: trimmedCpf || s.cpf,
+              }
+            : s
+        )
+      );
+    } else if (currentRole === 'COORDENADOR') {
+      setSystemUsers((prev) =>
+        prev.map((u) =>
+          u.id === currentCoordinatorUser.id
+            ? {
+                ...u,
+                nome: trimmedNome || u.nome,
+                email: trimmedEmail || u.email,
+                telefone: trimmedTelefone || u.telefone,
+                avatarUrl: data.avatarUrl !== undefined ? data.avatarUrl : u.avatarUrl,
+                cpf: trimmedCpf || u.cpf,
+                cargo: data.cargo?.trim() || u.cargo,
+              }
+            : u
+        )
+      );
+    } else {
+      // SUPERADMIN
+      setSystemUsers((prev) =>
+        prev.map((u) =>
+          u.role === 'SUPERADMIN'
+            ? {
+                ...u,
+                nome: trimmedNome || u.nome,
+                email: trimmedEmail || u.email,
+                telefone: trimmedTelefone || u.telefone,
+                avatarUrl: data.avatarUrl !== undefined ? data.avatarUrl : u.avatarUrl,
+                cpf: trimmedCpf || u.cpf,
+                cargo: data.cargo?.trim() || u.cargo,
+              }
+            : u
+        )
+      );
+    }
+
+    addAuditEntry({
+      userId: currentRole === 'ESTUDANTE' ? student.id : currentCoordinatorUser.id,
+      userNome: trimmedNome || currentUserProfile.nome,
+      userRole: currentRole,
+      action: 'SYSTEM_CONFIG_UPDATED',
+      resourceId: currentRole === 'ESTUDANTE' ? student.id : currentCoordinatorUser.id,
+      resourceTipo: 'Perfil Cadastral & Avatar',
+      ipAddress: '189.45.112.55',
+      status: 'SUCCESS',
+      detalhes: `Atualização de perfil efetuada com sucesso: ${trimmedNome || currentUserProfile.nome} (${currentRole}).`,
+      sha256Hash: `HASH-PERFIL-${Date.now()}`,
+    });
+
+    setToastMessage({
+      title: 'Perfil Atualizado! 👤',
+      desc: 'Suas informações cadastrais e foto foram salvas com sucesso.',
+      type: 'success',
+    });
+  };
+
+  const updateCurrentUserPassword = async (currentPass: string, newPass: string): Promise<boolean> => {
+    if (!newPass || newPass.length < 6) {
+      setToastMessage({
+        title: 'Senha muito curta',
+        desc: 'A nova senha deve ter no mínimo 6 caracteres.',
+        type: 'error',
+      });
+      return false;
+    }
+
+    addAuditEntry({
+      userId: currentRole === 'ESTUDANTE' ? student.id : currentCoordinatorUser.id,
+      userNome: currentUserProfile.nome,
+      userRole: currentRole,
+      action: 'SYSTEM_CONFIG_UPDATED',
+      resourceId: currentRole === 'ESTUDANTE' ? student.id : currentCoordinatorUser.id,
+      resourceTipo: 'Credenciais de Acesso',
+      ipAddress: '189.45.112.55',
+      status: 'SUCCESS',
+      detalhes: `Senha de acesso alterada com sucesso para o usuário ${currentUserProfile.nome}.`,
+      sha256Hash: `HASH-PASSWORD-${Date.now()}`,
+    });
+
+    setToastMessage({
+      title: 'Senha Alterada com Sucesso! 🔒',
+      desc: 'Sua nova senha de acesso foi configurada e protegida.',
+      type: 'success',
+    });
+
+    return true;
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -763,6 +923,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setIsSidebarOpen,
         toggleSidebar,
         closeSidebar,
+        isProfileModalOpen,
+        setIsProfileModalOpen,
+        openProfileModal,
+        closeProfileModal,
+        currentUserProfile,
+        updateCurrentUserProfile,
+        updateCurrentUserPassword,
         toastMessage,
         setToastMessage,
         uploadStudentDocument,

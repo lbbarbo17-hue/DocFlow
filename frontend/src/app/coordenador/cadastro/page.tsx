@@ -12,6 +12,7 @@ import {
   FolderPlus,
   Building2,
   Check,
+  ShieldCheck,
 } from 'lucide-react';
 
 const formatCPF = (val: string) => {
@@ -144,6 +145,12 @@ export default function CadastroPage() {
         title="Cadastro & Admissão"
         subtitle="Cadastramento de novos estudantes aprendizes e abertura de turmas"
         icon={UserPlus}
+        backHref="/coordenador"
+        backLabel="Voltar ao Painel"
+        badge={{
+          label: 'Ambiente da Coordenação',
+          icon: ShieldCheck,
+        }}
         action={{
           label: 'Ver Aprendizes',
           href: '/coordenador/dossies',
@@ -152,20 +159,20 @@ export default function CadastroPage() {
       />
 
       {/* Tab Switcher */}
-      <div className="flex bg-slate-100 dark:bg-slate-800/60 p-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+      <div className="flex bg-slate-100 dark:bg-slate-800/60 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <button
           type="button"
           onClick={() => {
             setActiveTab('ALUNO');
             scrollToTop('instant');
           }}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
             activeTab === 'ALUNO'
-              ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-300 dark:border-slate-700'
-              : 'text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white'
+              ? 'bg-white dark:bg-slate-900 text-[#0284c7] dark:text-[#00b4d8] shadow-xs border border-slate-200 dark:border-slate-700'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
           }`}
         >
-          <UserPlus className="w-3.5 h-3.5" />
+          <UserPlus className="w-4 h-4 text-[#0284c7] dark:text-[#00b4d8]" />
           <span>Estudante</span>
         </button>
 
@@ -175,19 +182,19 @@ export default function CadastroPage() {
             setActiveTab('TURMA');
             scrollToTop('instant');
           }}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
             activeTab === 'TURMA'
-              ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-300 dark:border-slate-700'
-              : 'text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white'
+              ? 'bg-white dark:bg-slate-900 text-[#0284c7] dark:text-[#00b4d8] shadow-xs border border-slate-200 dark:border-slate-700'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
           }`}
         >
-          <FolderPlus className="w-3.5 h-3.5" />
+          <FolderPlus className="w-4 h-4 text-[#0284c7] dark:text-[#00b4d8]" />
           <span>Turma</span>
         </button>
       </div>
 
       {/* Main Form Container */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm p-6 sm:p-8">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 sm:p-8">
         {/* TAB 1: ESTUDANTE */}
         {activeTab === 'ALUNO' && (
           <form onSubmit={handleAlunoSubmit} className="space-y-5">
@@ -355,18 +362,18 @@ export default function CadastroPage() {
             </div>
 
             {/* Actions */}
-            <div className="pt-4 flex items-center justify-end gap-3">
+            <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => router.push('/coordenador/dossies')}
-                className="px-4 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
+                className="px-5 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={isSubmittingAluno}
-                className="px-5 py-2 text-xs font-bold text-white bg-[#065373] hover:bg-[#0a6d96] dark:bg-cyan-600 dark:hover:bg-cyan-500 rounded-xl transition-all cursor-pointer disabled:opacity-50"
+                className="px-7 py-3 text-xs font-extrabold text-white bg-gradient-to-r from-[#0284c7] to-[#00b4d8] hover:from-sky-600 hover:to-sky-500 rounded-2xl shadow-lg shadow-[#0284c7]/25 hover:shadow-xl transition-all cursor-pointer disabled:opacity-50"
               >
                 {isSubmittingAluno ? 'Cadastrando...' : 'Cadastrar Estudante'}
               </button>
@@ -450,18 +457,18 @@ export default function CadastroPage() {
               </select>
             </div>
 
-            <div className="pt-4 flex items-center justify-end gap-3">
+            <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => router.push('/analytics')}
-                className="px-4 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
+                className="px-5 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={isSubmittingTurma}
-                className="px-5 py-2 text-xs font-bold text-white bg-[#065373] hover:bg-[#0a6d96] dark:bg-cyan-600 dark:hover:bg-cyan-500 rounded-xl transition-all cursor-pointer disabled:opacity-50"
+                className="px-7 py-3 text-xs font-extrabold text-white bg-gradient-to-r from-[#0284c7] to-[#00b4d8] hover:from-sky-600 hover:to-sky-500 rounded-2xl shadow-lg shadow-[#0284c7]/25 hover:shadow-xl transition-all cursor-pointer disabled:opacity-50"
               >
                 {isSubmittingTurma ? 'Criando...' : 'Cadastrar Turma'}
               </button>

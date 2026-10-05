@@ -17,6 +17,7 @@ import {
   MapPin,
   Building,
   PlusCircle,
+  ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -185,26 +186,27 @@ export default function CadastrarCoordenadorPage() {
         title="Gestão de Coordenadores & Empresas"
         subtitle="Credenciamento centralizado de gestores educacionais, analistas de RH e empresas parceiras conveniadas"
         icon={Building2}
-        action={{
-          label: 'Painel Global',
-          href: '/admin',
-          icon: Shield,
+        backHref="/admin"
+        backLabel="Voltar ao Painel Principal"
+        badge={{
+          label: 'Super Administrador',
+          icon: ShieldCheck,
         }}
       />
 
       {/* Tab Switcher */}
-      <div className="flex bg-slate-100 dark:bg-slate-800/60 p-1.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm max-w-xl">
+      <div className="flex bg-slate-100 dark:bg-slate-800/60 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm max-w-xl">
         <button
           type="button"
           onClick={() => setActiveTab('COORDENADORES')}
           className={cn(
             'flex-1 py-2.5 px-4 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer',
             activeTab === 'COORDENADORES'
-              ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-300 dark:border-slate-700'
+              ? 'bg-white dark:bg-slate-900 text-[#0284c7] dark:text-[#00b4d8] shadow-xs border border-slate-200 dark:border-slate-700'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
           )}
         >
-          <UserPlus className="w-4 h-4 text-[#065373] dark:text-cyan-400" />
+          <UserPlus className="w-4 h-4 text-[#0284c7] dark:text-[#00b4d8]" />
           <span>Coordenadores & RH</span>
           <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-950 text-[#0284c7] dark:text-sky-300 font-bold ml-1">
             {coordinators.length}
@@ -217,7 +219,7 @@ export default function CadastrarCoordenadorPage() {
           className={cn(
             'flex-1 py-2.5 px-4 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer',
             activeTab === 'EMPRESAS'
-              ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-300 dark:border-slate-700'
+              ? 'bg-white dark:bg-slate-900 text-purple-600 dark:text-purple-400 shadow-xs border border-slate-200 dark:border-slate-700'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
           )}
         >
@@ -233,7 +235,7 @@ export default function CadastrarCoordenadorPage() {
       {activeTab === 'COORDENADORES' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-fadeIn">
           {/* Left Column: Registration Form (5 cols on lg) */}
-          <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm p-6 space-y-5 transition-colors">
+          <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 sm:p-7 space-y-5 transition-colors">
             <div className="border-b border-slate-200 dark:border-slate-800 pb-4">
               <h3 className="font-bold text-base text-slate-950 dark:text-white flex items-center gap-2">
                 <UserPlus className="w-5 h-5 text-[#065373] dark:text-cyan-400" />
@@ -394,7 +396,7 @@ export default function CadastrarCoordenadorPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#065373] hover:bg-[#086b94] dark:bg-cyan-600 dark:hover:bg-cyan-500 text-white font-bold text-xs shadow-md transition-all active:scale-98 disabled:opacity-50 cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-[#0284c7] to-[#00b4d8] hover:from-sky-600 hover:to-sky-500 text-white font-extrabold text-xs shadow-lg shadow-[#0284c7]/25 hover:shadow-xl transition-all active:scale-98 disabled:opacity-50 cursor-pointer"
               >
                 <UserPlus className="w-4 h-4" />
                 <span>{isSubmitting ? 'Cadastrando...' : 'Cadastrar Coordenador / RH'}</span>
@@ -406,7 +408,7 @@ export default function CadastrarCoordenadorPage() {
           <div className="lg:col-span-7 space-y-4">
             {/* Quick Stats Banner */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm flex items-center justify-between">
+              <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
                 <div>
                   <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     Total Coordenadores & RH
@@ -415,12 +417,12 @@ export default function CadastrarCoordenadorPage() {
                     {coordinators.length}
                   </p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-[#065373]/10 dark:bg-cyan-950/60 text-[#065373] dark:text-cyan-300">
+                <div className="p-3 rounded-2xl bg-sky-50 dark:bg-sky-950/60 text-[#0284c7] dark:text-sky-300">
                   <Users className="w-5 h-5" />
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm flex items-center justify-between">
+              <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
                 <div>
                   <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     Instituições Atendidas
@@ -429,14 +431,14 @@ export default function CadastrarCoordenadorPage() {
                     {availableInstitutions.length}
                   </p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-cyan-50 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300">
+                <div className="p-3 rounded-2xl bg-cyan-50 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300">
                   <Building2 className="w-5 h-5" />
                 </div>
               </div>
             </div>
 
             {/* Coordinators Table Card */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
               <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h4 className="font-bold text-sm text-slate-950 dark:text-white">
@@ -553,7 +555,7 @@ export default function CadastrarCoordenadorPage() {
       {activeTab === 'EMPRESAS' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-fadeIn">
           {/* Left Column: Form de Cadastro de Empresa (5 cols on lg) */}
-          <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm p-6 space-y-5 transition-colors">
+          <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 sm:p-7 space-y-5 transition-colors">
             <div className="border-b border-slate-200 dark:border-slate-800 pb-4">
               <h3 className="font-bold text-base text-slate-950 dark:text-white flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
@@ -686,7 +688,7 @@ export default function CadastrarCoordenadorPage() {
               <button
                 type="submit"
                 disabled={isSubmittingEmpresa}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs shadow-md transition-all active:scale-98 disabled:opacity-50 cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-purple-700 to-indigo-600 hover:from-purple-800 hover:to-indigo-700 text-white font-extrabold text-xs shadow-lg shadow-purple-600/25 hover:shadow-xl transition-all active:scale-98 disabled:opacity-50 cursor-pointer"
               >
                 <PlusCircle className="w-4 h-4" />
                 <span>{isSubmittingEmpresa ? 'Cadastrando...' : 'Cadastrar Empresa Conveniada'}</span>
@@ -698,7 +700,7 @@ export default function CadastrarCoordenadorPage() {
           <div className="lg:col-span-7 space-y-4">
             {/* Quick Stats Banner */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm flex items-center justify-between">
+              <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
                 <div>
                   <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     Total de Empresas Parceiras
@@ -707,12 +709,12 @@ export default function CadastrarCoordenadorPage() {
                     {empresas.length}
                   </p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300">
+                <div className="p-3 rounded-2xl bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300">
                   <Building className="w-5 h-5" />
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm flex items-center justify-between">
+              <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
                 <div>
                   <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     Status dos Convênios
@@ -721,14 +723,14 @@ export default function CadastrarCoordenadorPage() {
                     100% Ativos
                   </p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
+                <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
               </div>
             </div>
 
             {/* Empresas Table / List */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
               <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h4 className="font-bold text-sm text-slate-950 dark:text-white">

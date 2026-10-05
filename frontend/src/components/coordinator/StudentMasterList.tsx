@@ -118,16 +118,16 @@ export default function StudentMasterList({
   return (
     <div className="space-y-4">
       {/* Filter Bar */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm flex flex-col md:flex-row gap-2.5 items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
         {/* Search Input */}
         <div className="relative w-full md:w-80">
-          <Search className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Buscar por nome, matrícula ou empresa..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white transition-colors shadow-2xs"
+            className="w-full pl-9 pr-3.5 py-2 text-xs rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800 text-slate-950 dark:text-white placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#0284c7] focus:ring-2 focus:ring-[#0284c7]/20 transition-all"
           />
         </div>
 
@@ -245,7 +245,7 @@ export default function StudentMasterList({
         {/* Left Column: Students Grouped by Turma */}
         <div className={cn('lg:col-span-4 space-y-3 max-h-[750px] overflow-y-auto pr-1', mobileTab !== 'LIST' && 'hidden lg:block')}>
           {processedStudents.length === 0 ? (
-            <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium text-xs">
+            <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-medium text-xs">
               Nenhum estudante encontrado.
             </div>
           ) : selectedTurma !== 'ALL' ? (
@@ -263,7 +263,7 @@ export default function StudentMasterList({
               return (
                 <div
                   key={turmaId}
-                  className="bg-white dark:bg-slate-900 rounded-xl border-[1.5px] border-slate-400 dark:border-slate-700 overflow-hidden shadow-sm"
+                  className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm"
                 >
                   {/* Turma Section Header (Clickable to collapse/expand) */}
                   <button
@@ -319,7 +319,7 @@ export default function StudentMasterList({
           {activeStudent ? (
             <DossierViewer student={activeStudent} initialDocId={activeDocId} />
           ) : (
-            <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium text-xs shadow-sm">
+            <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 font-medium text-xs shadow-sm">
               Selecione um estudante para visualizar o dossiê.
             </div>
           )}
@@ -356,10 +356,10 @@ export default function StudentMasterList({
             scrollToTop('instant');
           }
         }}
-        className={`p-3.5 rounded-xl border-[1.5px] cursor-pointer transition-all duration-200 ${
+        className={`p-3.5 rounded-2xl border cursor-pointer transition-all duration-200 ${
           isSelected
-            ? 'bg-white dark:bg-slate-800 border-[#065373] dark:border-cyan-400 shadow-sm ring-1 ring-[#065373]'
-            : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 border-slate-400 dark:border-slate-700 text-slate-950 dark:text-slate-100 shadow-2xs hover:shadow-sm'
+            ? 'bg-white dark:bg-slate-800 border-[#0284c7] dark:border-[#00b4d8] shadow-sm ring-1 ring-[#0284c7]'
+            : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 border-slate-200 dark:border-slate-800 text-slate-950 dark:text-slate-100 shadow-2xs hover:shadow-sm'
         }`}
       >
         <div className="flex items-start justify-between gap-2">

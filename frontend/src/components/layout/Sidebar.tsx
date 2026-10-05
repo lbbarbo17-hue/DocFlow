@@ -100,7 +100,7 @@ export default function Sidebar() {
         icon: Shield,
       },
       {
-        label: 'Cadastrar Coordenador',
+        label: 'Coordenadores & Empresas',
         href: '/admin/coordenadores',
         icon: UserPlus,
       },

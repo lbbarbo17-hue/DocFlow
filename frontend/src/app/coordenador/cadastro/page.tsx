@@ -22,27 +22,6 @@ const formatCPF = (val: string) => {
     .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 };
 
-const formatCNPJ = (val: string) => {
-  const digits = val.replace(/\D/g, '').slice(0, 14);
-  return digits
-    .replace(/^(\d{2})(\d)/, '$1.$2')
-    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
-    .replace(/\.(\d{3})(\d)/, '.$1/$2')
-    .replace(/(\d{4})(\d)/, '$1-$2');
-};
-
-const formatPhone = (val: string) => {
-  const digits = val.replace(/\D/g, '').slice(0, 11);
-  if (digits.length <= 10) {
-    return digits
-      .replace(/(\d{2})(\d)/, '($1) $2')
-      .replace(/(\d{4})(\d)/, '$1-$2');
-  }
-  return digits
-    .replace(/(\d{2})(\d)/, '($1) $2')
-    .replace(/(\d{5})(\d)/, '$1-$2');
-};
-
 export default function CadastroPage() {
   const router = useRouter();
   const {
@@ -53,11 +32,10 @@ export default function CadastroPage() {
     empresas,
     addNewStudent,
     addNewTurma,
-    addNewEmpresa,
     setToastMessage,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'ALUNO' | 'TURMA' | 'EMPRESA'>('ALUNO');
+  const [activeTab, setActiveTab] = useState<'ALUNO' | 'TURMA'>('ALUNO');
 
   // Form - Aluno
   const [nome, setNome] = useState('');
@@ -80,17 +58,6 @@ export default function CadastroPage() {
   const [nomeCursoTurma, setNomeCursoTurma] = useState('');
   const [periodoTurma, setPeriodoTurma] = useState('2026.2 - Manhã');
   const [isSubmittingTurma, setIsSubmittingTurma] = useState(false);
-
-  // Form - Empresa
-  const [razaoSocial, setRazaoSocial] = useState('');
-  const [nomeFantasia, setNomeFantasia] = useState('');
-  const [cnpj, setCnpj] = useState('');
-  const [ramoAtuacao, setRamoAtuacao] = useState('Tecnologia da Informação');
-  const [contatoRh, setContatoRh] = useState('');
-  const [emailRh, setEmailRh] = useState('');
-  const [telefone, setTelefone] = useState('');
-  const [cidadeUf, setCidadeUf] = useState('São Paulo / SP');
-  const [isSubmittingEmpresa, setIsSubmittingEmpresa] = useState(false);
 
   const handleTurmaChange = (newTurmaId: string) => {
     setTurmaId(newTurmaId);
@@ -170,48 +137,12 @@ export default function CadastroPage() {
     router.push('/analytics');
   };
 
-  const handleEmpresaSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!razaoSocial.trim() || !cnpj.trim()) {
-      setToastMessage({
-        title: 'Campos obrigatórios',
-        desc: 'Preencha Razão Social e CNPJ.',
-        type: 'error',
-      });
-      return;
-    }
-
-    setIsSubmittingEmpresa(true);
-    const newEmpresaId = `emp-${Date.now()}`;
-    addNewEmpresa({
-      id: newEmpresaId,
-      razaoSocial: razaoSocial.trim(),
-      nomeFantasia: nomeFantasia.trim() || razaoSocial.trim(),
-      cnpj: cnpj.trim(),
-      ramoAtuacao: ramoAtuacao.trim(),
-      contatoRh: contatoRh.trim(),
-      emailRh: emailRh.trim(),
-      telefone: telefone.trim(),
-      cidadeUf: cidadeUf.trim(),
-    });
-
-    setToastMessage({
-      title: 'Empresa cadastrada',
-      desc: razaoSocial,
-      type: 'success',
-    });
-
-    setIsSubmittingEmpresa(false);
-    setEmpresa(razaoSocial.trim());
-    setActiveTab('ALUNO');
-  };
-
   return (
     <div className="max-w-2xl mx-auto py-2 px-2 sm:px-0 animate-fadeIn space-y-6">
       {/* Page Header Banner */}
       <PageBanner
         title="Cadastro & Admissão"
-        subtitle="Cadastramento de novos estudantes aprendizes, turmas e empresas parceiras"
+        subtitle="Cadastramento de novos estudantes aprendizes e abertura de turmas"
         icon={UserPlus}
         action={{
           label: 'Ver Aprendizes',
@@ -252,22 +183,6 @@ export default function CadastroPage() {
         >
           <FolderPlus className="w-3.5 h-3.5" />
           <span>Turma</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => {
-            setActiveTab('EMPRESA');
-            scrollToTop('instant');
-          }}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-            activeTab === 'EMPRESA'
-              ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-300 dark:border-slate-700'
-              : 'text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white'
-          }`}
-        >
-          <Building2 className="w-3.5 h-3.5" />
-          <span>Empresa</span>
         </button>
       </div>
 
@@ -393,18 +308,9 @@ export default function CadastroPage() {
               </div>
 
               <div className="sm:col-span-2">
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="font-bold text-slate-900 dark:text-slate-100">
-                    Empresa Concedente
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('EMPRESA')}
-                    className="text-[11px] font-bold text-[#065373] dark:text-cyan-400 hover:underline"
-                  >
-                    + Nova Empresa
-                  </button>
-                </div>
+                <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
+                  Empresa Concedente
+                </label>
                 <select
                   value={empresa}
                   onChange={(e) => setEmpresa(e.target.value)}
@@ -558,138 +464,6 @@ export default function CadastroPage() {
                 className="px-5 py-2 text-xs font-bold text-white bg-[#065373] hover:bg-[#0a6d96] dark:bg-cyan-600 dark:hover:bg-cyan-500 rounded-xl transition-all cursor-pointer disabled:opacity-50"
               >
                 {isSubmittingTurma ? 'Criando...' : 'Cadastrar Turma'}
-              </button>
-            </div>
-          </form>
-        )}
-
-        {/* TAB 3: EMPRESA */}
-        {activeTab === 'EMPRESA' && (
-          <form onSubmit={handleEmpresaSubmit} className="space-y-4 text-xs">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="sm:col-span-2">
-                <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
-                  Razão Social
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={razaoSocial}
-                  onChange={(e) => setRazaoSocial(e.target.value)}
-                  placeholder="Razão social da empresa"
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
-                  Nome Fantasia
-                </label>
-                <input
-                  type="text"
-                  value={nomeFantasia}
-                  onChange={(e) => setNomeFantasia(e.target.value)}
-                  placeholder="Nome fantasia"
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
-                  CNPJ
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={cnpj}
-                  onChange={(e) => setCnpj(formatCNPJ(e.target.value))}
-                  placeholder="00.000.000/0001-00"
-                  maxLength={18}
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
-                  Ramo de Atuação
-                </label>
-                <input
-                  type="text"
-                  value={ramoAtuacao}
-                  onChange={(e) => setRamoAtuacao(e.target.value)}
-                  placeholder="Ex: Tecnologia"
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
-                  Cidade / UF
-                </label>
-                <input
-                  type="text"
-                  value={cidadeUf}
-                  onChange={(e) => setCidadeUf(e.target.value)}
-                  placeholder="São Paulo / SP"
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
-                  Responsável RH
-                </label>
-                <input
-                  type="text"
-                  value={contatoRh}
-                  onChange={(e) => setContatoRh(e.target.value)}
-                  placeholder="Nome do contato"
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
-                  E-mail do RH
-                </label>
-                <input
-                  type="email"
-                  value={emailRh}
-                  onChange={(e) => setEmailRh(e.target.value)}
-                  placeholder="rh@empresa.com.br"
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
-                  Telefone
-                </label>
-                <input
-                  type="text"
-                  value={telefone}
-                  onChange={(e) => setTelefone(formatPhone(e.target.value))}
-                  placeholder="(11) 3456-7890"
-                  maxLength={15}
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                />
-              </div>
-            </div>
-
-            <div className="pt-4 flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setActiveTab('ALUNO')}
-                className="px-4 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
-              >
-                Voltar
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmittingEmpresa}
-                className="px-5 py-2 text-xs font-bold text-white bg-[#065373] hover:bg-[#0a6d96] dark:bg-cyan-600 dark:hover:bg-cyan-500 rounded-xl transition-all cursor-pointer disabled:opacity-50"
-              >
-                {isSubmittingEmpresa ? 'Cadastrando...' : 'Cadastrar Empresa'}
               </button>
             </div>
           </form>

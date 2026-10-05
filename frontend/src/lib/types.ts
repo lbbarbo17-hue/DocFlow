@@ -68,6 +68,7 @@ export interface Student {
   nome: string;
   cpf: string;
   email: string;
+  telefone?: string;
   matricula: string;
   tipoVinculo: TipoVinculo;
   dataNascimento?: string;
@@ -120,6 +121,18 @@ export interface SystemUser {
   status: 'ATIVO' | 'INATIVO';
   ultimoAcesso: string;
   instituicao?: string;
+  avatarUrl?: string;
+  telefone?: string;
+  cpf?: string;
+}
+
+export interface UserProfileData {
+  nome: string;
+  email: string;
+  telefone?: string;
+  cpf?: string;
+  avatarUrl?: string;
+  cargo?: string;
 }
 
 export type AuditAction =

@@ -4,7 +4,7 @@ import React, { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import StudentMasterList from '@/components/coordinator/StudentMasterList';
 import PageBanner from '@/components/layout/PageBanner';
-import { Loader2, UserCheck, UserPlus } from 'lucide-react';
+import { Loader2, UserCheck, UserPlus, ShieldCheck } from 'lucide-react';
 
 function DossiesContent() {
   const searchParams = useSearchParams();
@@ -19,6 +19,12 @@ function DossiesContent() {
         title="Aprendizes e Estagiários"
         subtitle="Gestão de dossiês documentais, validação de arquivos e acompanhamento individual"
         icon={UserCheck}
+        backHref="/coordenador"
+        backLabel="Voltar ao Painel"
+        badge={{
+          label: 'Ambiente da Coordenação',
+          icon: ShieldCheck,
+        }}
         action={{
           label: 'Novo Cadastro',
           href: '/coordenador/cadastro',

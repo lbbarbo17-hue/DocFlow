@@ -13,6 +13,10 @@ export default function AdminPage() {
         title="Painel do Super Administrador"
         subtitle="Gerenciamento de usuários, permissões globais e governança de segurança"
         icon={Shield}
+        badge={{
+          label: 'Super Administrador',
+          icon: ShieldCheck,
+        }}
         action={{
           label: 'Trilha de Auditoria',
           href: '/auditoria',

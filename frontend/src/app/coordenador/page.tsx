@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import CoordinatorDashboard from '@/components/coordinator/CoordinatorDashboard';
 
 import PageBanner from '@/components/layout/PageBanner';
-import { LayoutDashboard, FolderKanban } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, ShieldCheck } from 'lucide-react';
 
 export default function CoordenadorPage() {
   const router = useRouter();
@@ -18,9 +18,13 @@ export default function CoordenadorPage() {
     <div className="space-y-6 animate-fadeIn">
       {/* Page Header Banner */}
       <PageBanner
-        title="Dashboard do Coordenador & RH"
+        title="Dashboard da Coordenação & RH"
         subtitle="Visão executiva em tempo real de conformidade, pendências críticas e prioridades"
         icon={LayoutDashboard}
+        badge={{
+          label: 'Ambiente da Coordenação',
+          icon: ShieldCheck,
+        }}
         action={{
           label: 'Explorar Dossiês',
           href: '/coordenador/dossies',

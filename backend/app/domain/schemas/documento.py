@@ -21,6 +21,11 @@ class DocumentoUpdate(BaseModel):
     validado_por_user_id: Optional[uuid.UUID] = None
     data_validade: Optional[date] = None
 
+class DocumentoValidate(BaseModel):
+    status: StatusDocumento
+    justificativa_recusa: Optional[str] = None
+    validado_por_user_id: Optional[uuid.UUID] = None
+
 class DocumentoRead(DocumentoBase):
     model_config = ConfigDict(from_attributes=True)
 

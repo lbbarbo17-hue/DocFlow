@@ -12,7 +12,6 @@ export default function AnalyticsPage() {
       {/* Page Header Banner */}
       <PageBanner
         title="Gestão e Monitoramento de Turmas"
-        subtitle="Indicadores de conformidade geral, análise de risco e comparativo analítico"
         icon={BarChart3}
         backHref="/coordenador"
         backLabel="Voltar ao Painel"

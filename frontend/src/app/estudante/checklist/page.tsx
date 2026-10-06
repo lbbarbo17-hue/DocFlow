@@ -11,7 +11,6 @@ export default function StudentChecklistPage() {
       {/* Page Header Banner Padronizado */}
       <PageBanner
         title="Meus Documentos & Checklist"
-        subtitle="Guarda digital rápida e conferência de documentos essenciais e complementares"
         icon={FileCheck}
         backHref="/estudante"
         backLabel="Voltar ao Painel Principal"

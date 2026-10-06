@@ -17,7 +17,6 @@ function DossiesContent() {
       {/* Page Header Banner */}
       <PageBanner
         title="Aprendizes e Estagiários"
-        subtitle="Gestão de dossiês documentais, validação de arquivos e acompanhamento individual"
         icon={UserCheck}
         backHref="/coordenador"
         backLabel="Voltar ao Painel"

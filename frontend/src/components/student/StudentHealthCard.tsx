@@ -61,9 +61,6 @@ export default function StudentHealthCard() {
               <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight">
                 Status da Documentação
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Acompanhamento da conformidade
-              </p>
             </div>
           </div>
 

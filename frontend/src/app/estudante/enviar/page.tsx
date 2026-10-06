@@ -258,7 +258,6 @@ export default function AdicionarDocumentoPage() {
       {/* 1. Banner de Título da Página */}
       <PageBanner
         title="Adicionar e Enviar Documentos"
-        subtitle="Envio com conferência de autenticidade e custódia digital"
         icon={UploadCloud}
         backHref="/estudante"
         backLabel="Voltar ao Painel Principal"

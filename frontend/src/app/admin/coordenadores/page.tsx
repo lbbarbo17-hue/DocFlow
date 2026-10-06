@@ -184,7 +184,6 @@ export default function CadastrarCoordenadorPage() {
       {/* Page Header Banner */}
       <PageBanner
         title="Gestão de Coordenadores & Empresas"
-        subtitle="Credenciamento centralizado de gestores educacionais, analistas de RH e empresas parceiras conveniadas"
         icon={Building2}
         backHref="/admin"
         backLabel="Voltar ao Painel Principal"

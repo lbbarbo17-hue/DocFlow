@@ -18,7 +18,7 @@ export interface PageBannerBadge {
 
 export interface PageBannerProps {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   icon: LucideIcon;
   backHref?: string;
   backLabel?: string;
@@ -71,9 +71,11 @@ export default function PageBanner({
           <span className="truncate sm:whitespace-normal">{title}</span>
         </h1>
 
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">
-          {subtitle}
-        </p>
+        {subtitle && (
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">
+            {subtitle}
+          </p>
+        )}
       </div>
 
       <div className="flex items-center gap-3 self-start sm:self-auto flex-wrap shrink-0">

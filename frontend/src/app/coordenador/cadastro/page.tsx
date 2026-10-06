@@ -143,7 +143,6 @@ export default function CadastroPage() {
       {/* Page Header Banner */}
       <PageBanner
         title="Cadastro & Admissão"
-        subtitle="Cadastramento de novos estudantes aprendizes e abertura de turmas"
         icon={UserPlus}
         backHref="/coordenador"
         backLabel="Voltar ao Painel"

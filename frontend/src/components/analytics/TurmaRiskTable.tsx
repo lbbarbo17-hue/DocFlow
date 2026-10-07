@@ -15,9 +15,6 @@ export default function TurmaRiskTable() {
           <h3 className="font-bold text-base text-slate-950 dark:text-white">
             Monitoramento por Turma
           </h3>
-          <p className="text-xs font-medium text-slate-600 dark:text-slate-300">
-            Visão detalhada e índice de conformidade de cada turma
-          </p>
         </div>
         <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 shadow-2xs">
           Total: {turmas.length} Turmas Monitoradas

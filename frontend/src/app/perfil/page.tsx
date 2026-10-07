@@ -204,9 +204,6 @@ export default function PerfilPage() {
             <IdCard className="w-6 h-6 text-[#0284c7] dark:text-[#00b4d8]" />
             <span>Meu Perfil & Configurações</span>
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Gerencie sua foto de exibição, dados cadastrais e credenciais de segurança.
-          </p>
         </div>
 
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-sky-50 dark:bg-[#122634] border border-sky-200 dark:border-[#1c3547] text-xs font-semibold text-[#065373] dark:text-cyan-300 self-start sm:self-auto">

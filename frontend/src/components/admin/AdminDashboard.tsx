@@ -133,10 +133,10 @@ export default function AdminDashboard() {
         <button
           type="button"
           onClick={() => setMemberTab('TODOS')}
-          className={`p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer w-full relative overflow-hidden group ${
+          className={`p-5 rounded-3xl border text-left transition-all duration-200 cursor-pointer w-full relative overflow-hidden group shadow-sm ${
             memberTab === 'TODOS'
-              ? 'bg-white dark:bg-slate-800 border-[#065373] dark:border-cyan-400 shadow-md ring-2 ring-[#065373]/15 dark:ring-cyan-400/20'
-              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs'
+              ? 'bg-white dark:bg-slate-800 border-[#0284c7] dark:border-[#00b4d8] ring-2 ring-[#0284c7]/20'
+              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
           }`}
         >
           <div className="flex items-center justify-between gap-2">
@@ -147,22 +147,22 @@ export default function AdminDashboard() {
               <p className="text-2xl font-black text-slate-950 dark:text-white mt-0.5 tracking-tight">
                 {countTodos}
               </p>
-              <span className="text-[11px] text-[#065373] dark:text-cyan-400 font-semibold block truncate mt-0.5">
+              <span className="text-[11px] text-[#0284c7] dark:text-[#00b4d8] font-semibold block truncate mt-0.5">
                 Base consolidada geral
               </span>
             </div>
             <div
-              className={`p-2.5 rounded-xl shrink-0 transition-colors ${
+              className={`p-3 rounded-2xl shrink-0 transition-colors ${
                 memberTab === 'TODOS'
-                  ? 'bg-[#065373] text-white shadow-xs'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-[#065373]/10 group-hover:text-[#065373]'
+                  ? 'bg-[#0284c7] text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-[#0284c7]/10 group-hover:text-[#0284c7]'
               }`}
             >
               <Users className="w-5 h-5" />
             </div>
           </div>
           {memberTab === 'TODOS' && (
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#065373] dark:bg-cyan-400" />
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#0284c7] to-[#00b4d8]" />
           )}
         </button>
 
@@ -170,10 +170,10 @@ export default function AdminDashboard() {
         <button
           type="button"
           onClick={() => setMemberTab('COORDENADORES')}
-          className={`p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer w-full relative overflow-hidden group ${
+          className={`p-5 rounded-3xl border text-left transition-all duration-200 cursor-pointer w-full relative overflow-hidden group shadow-sm ${
             memberTab === 'COORDENADORES'
-              ? 'bg-white dark:bg-slate-800 border-[#065373] dark:border-cyan-400 shadow-md ring-2 ring-[#065373]/15 dark:ring-cyan-400/20'
-              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs'
+              ? 'bg-white dark:bg-slate-800 border-[#0284c7] dark:border-[#00b4d8] ring-2 ring-[#0284c7]/20'
+              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
           }`}
         >
           <div className="flex items-center justify-between gap-2">
@@ -189,17 +189,17 @@ export default function AdminDashboard() {
               </span>
             </div>
             <div
-              className={`p-2.5 rounded-xl shrink-0 transition-colors ${
+              className={`p-3 rounded-2xl shrink-0 transition-colors ${
                 memberTab === 'COORDENADORES'
-                  ? 'bg-[#065373] text-white shadow-xs'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-[#065373]/10 group-hover:text-[#065373]'
+                  ? 'bg-[#0284c7] text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-[#0284c7]/10 group-hover:text-[#0284c7]'
               }`}
             >
               <Building2 className="w-5 h-5" />
             </div>
           </div>
           {memberTab === 'COORDENADORES' && (
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#065373] dark:bg-cyan-400" />
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#0284c7] to-[#00b4d8]" />
           )}
         </button>
 
@@ -207,10 +207,10 @@ export default function AdminDashboard() {
         <button
           type="button"
           onClick={() => setMemberTab('ESTAGIARIOS')}
-          className={`p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer w-full relative overflow-hidden group ${
+          className={`p-5 rounded-3xl border text-left transition-all duration-200 cursor-pointer w-full relative overflow-hidden group shadow-sm ${
             memberTab === 'ESTAGIARIOS'
-              ? 'bg-white dark:bg-slate-800 border-[#065373] dark:border-cyan-400 shadow-md ring-2 ring-[#065373]/15 dark:ring-cyan-400/20'
-              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs'
+              ? 'bg-white dark:bg-slate-800 border-[#0284c7] dark:border-[#00b4d8] ring-2 ring-[#0284c7]/20'
+              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
           }`}
         >
           <div className="flex items-center justify-between gap-2">
@@ -226,7 +226,7 @@ export default function AdminDashboard() {
               </span>
             </div>
             <div
-              className={`p-2.5 rounded-xl shrink-0 transition-colors ${
+              className={`p-3 rounded-2xl shrink-0 transition-colors ${
                 memberTab === 'ESTAGIARIOS'
                   ? 'bg-blue-600 text-white shadow-xs'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-950/40 group-hover:text-blue-600'
@@ -236,7 +236,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           {memberTab === 'ESTAGIARIOS' && (
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 dark:bg-blue-400" />
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#0284c7] to-[#00b4d8]" />
           )}
         </button>
 
@@ -244,10 +244,10 @@ export default function AdminDashboard() {
         <button
           type="button"
           onClick={() => setMemberTab('APRENDIZES')}
-          className={`p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer w-full relative overflow-hidden group ${
+          className={`p-5 rounded-3xl border text-left transition-all duration-200 cursor-pointer w-full relative overflow-hidden group shadow-sm ${
             memberTab === 'APRENDIZES'
-              ? 'bg-white dark:bg-slate-800 border-[#065373] dark:border-cyan-400 shadow-md ring-2 ring-[#065373]/15 dark:ring-cyan-400/20'
-              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs'
+              ? 'bg-white dark:bg-slate-800 border-[#0284c7] dark:border-[#00b4d8] ring-2 ring-[#0284c7]/20'
+              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
           }`}
         >
           <div className="flex items-center justify-between gap-2">
@@ -263,7 +263,7 @@ export default function AdminDashboard() {
               </span>
             </div>
             <div
-              className={`p-2.5 rounded-xl shrink-0 transition-colors ${
+              className={`p-3 rounded-2xl shrink-0 transition-colors ${
                 memberTab === 'APRENDIZES'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-950/40 group-hover:text-emerald-600'
@@ -273,13 +273,13 @@ export default function AdminDashboard() {
             </div>
           </div>
           {memberTab === 'APRENDIZES' && (
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-600 dark:bg-emerald-400" />
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#0284c7] to-[#00b4d8]" />
           )}
         </button>
       </div>
 
       {/* Clean Unified Filter Bar */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
         {/* Left Side: Search Input + Entity Select */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-1 min-w-0">
           {/* Search Box */}
@@ -355,7 +355,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Unified Table Card — Sized with clean separated columns: Vínculo, Situação, Dossiê */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden transition-colors w-full">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors w-full">
         <div className="w-full overflow-hidden">
           <table className="w-full table-fixed text-left border-collapse">
             <thead>

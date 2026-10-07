@@ -11,11 +11,16 @@ export default function AuditoriaPage() {
       {/* Page Header Banner */}
       <PageBanner
         title="Trilha de Auditoria & Registro de Atividades"
-        subtitle="Rastreabilidade completa de todas as operações e validações de documentos no sistema"
         icon={ShieldCheck}
+        backHref="/admin"
+        backLabel="Voltar ao Painel Principal"
+        badge={{
+          label: 'Super Administrador',
+          icon: ShieldCheck,
+        }}
         action={{
           label: 'Ir para Dashboard',
-          href: '/coordenador',
+          href: '/admin',
           icon: LayoutDashboard,
         }}
       />

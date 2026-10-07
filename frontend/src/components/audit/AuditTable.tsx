@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import {
-  ShieldCheck,
   Search,
   Download,
   Eye,
@@ -43,29 +42,8 @@ export default function AuditTable() {
 
   return (
     <div className="space-y-6">
-      {/* Header Info Banner */}
-      <div className="bg-[#065373] text-white p-6 rounded-2xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-cyan-300" />
-            <h2 className="text-lg font-bold">Trilha de Auditoria e Registro de Atividades</h2>
-          </div>
-          <p className="text-xs text-cyan-100/80">
-            Registro detalhado de eventos de visualização, validação e custódia de documentos.
-          </p>
-        </div>
-
-        <button
-          onClick={handleExportLogs}
-          className="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-[#065373] dark:text-cyan-300 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-2 shadow-sm shrink-0 cursor-pointer"
-        >
-          <Download className="w-4 h-4" />
-          <span>Exportar Trilha (JSON)</span>
-        </button>
-      </div>
-
       {/* Filter and Search Bar */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3 transition-colors">
+      <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3 transition-colors">
         <div className="relative w-full md:w-96">
           <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -73,15 +51,15 @@ export default function AuditTable() {
             placeholder="Buscar por operador, IP, hash SHA-256 ou recurso..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+            className="w-full pl-10 pr-3.5 py-2.5 text-xs rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] font-medium transition-all"
           />
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex items-center gap-3 w-full md:w-auto justify-between sm:justify-end">
           <select
             value={actionFilter}
             onChange={(e) => setActionFilter(e.target.value)}
-            className="text-xs p-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
+            className="text-xs py-2.5 px-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] cursor-pointer"
           >
             <option value="ALL">Todas as Ações</option>
             <option value="DOCUMENT_UPLOAD">Upload de Documento</option>
@@ -91,11 +69,19 @@ export default function AuditTable() {
             <option value="DOSSIER_BULK_DOWNLOAD">Download em Lote</option>
             <option value="SYSTEM_MAGIC_BYTES_VALIDATION">Inspeção Magic Bytes</option>
           </select>
+
+          <button
+            onClick={handleExportLogs}
+            className="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-bold text-xs transition-colors flex items-center gap-2 shadow-xs shrink-0 cursor-pointer"
+          >
+            <Download className="w-4 h-4 text-[#0284c7] dark:text-[#00b4d8]" />
+            <span>Exportar (JSON)</span>
+          </button>
         </div>
       </div>
 
       {/* Audit Logs Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>

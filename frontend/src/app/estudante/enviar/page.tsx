@@ -258,8 +258,13 @@ export default function AdicionarDocumentoPage() {
       {/* 1. Banner de Título da Página */}
       <PageBanner
         title="Adicionar e Enviar Documentos"
-        subtitle="Envio com conferência de autenticidade e custódia digital"
         icon={UploadCloud}
+        backHref="/estudante"
+        backLabel="Voltar ao Painel Principal"
+        badge={{
+          label: 'Ambiente do Aluno',
+          icon: ShieldCheck,
+        }}
         action={{
           label: 'Ver Documentos',
           href: '/estudante/checklist',

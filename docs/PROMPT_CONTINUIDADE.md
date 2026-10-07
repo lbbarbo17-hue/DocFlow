@@ -22,11 +22,11 @@ O repositório já possui uma infraestrutura robusta, testada e conectada ao Sup
    - Chaves primárias em UUIDv4 nativo (`gen_random_uuid()`) e isolamento lógico por `tenant_id` em todas as tabelas.
 
 2. **Web API RESTful (FastAPI + Swagger UI):**
-   - Servidor FastAPI configurado em `backend/app/main.py` com CORS liberado para o frontend (`localhost:3000`) e Swagger ativo em `http://localhost:8000/docs` (com 21 operações mapeadas).
+   - Servidor FastAPI configurado em `backend/app/main.py` com CORS liberado para o frontend (`localhost:3000`) e Swagger ativo em `http://localhost:8000/docs` (com 29 operações mapeadas cobrindo 100% das entidades).
    - **Módulos Já Implementados e Testados:**
      - `Health:` `GET /api/v1/health` (valida conexão assíncrona com Supabase via `SELECT 1`).
-     - `Tenants:` `POST /api/v1/tenants`, `GET /api/v1/tenants`, `GET /api/v1/tenants/{id}`.
-     - `Alunos:` CRUD completo (`POST /api/v1/alunos`, `GET /api/v1/alunos`, `GET /api/v1/alunos/{id}`, `PATCH /api/v1/alunos/{id}`, `DELETE /api/v1/alunos/{id}`).
+     - `Tenants:` `POST /api/v1/tenants`, `GET /api/v1/tenants`, `GET /api/v1/tenants/{id}`, `POST /tenants/{id}/logo`, `GET /tenants/{id}/logo-url`.
+     - `Alunos:` CRUD completo (`POST`, `GET`, `GET /{id}`, `PATCH /{id}`, `DELETE /{id}`), `POST /{id}/avatar`, `GET /{id}/avatar-url`.
      - `Documentos (Bloco 1):` 
        - `POST /api/v1/documentos/upload`: Upload multipart real integrado ao Cloudflare R2 com validação de *Magic Bytes* (PDF, JPEG, PNG) e gravação de metadados.
        - `GET /api/v1/documentos/aluno/{aluno_id}`: Listagem dos documentos de um aluno.
@@ -34,21 +34,14 @@ O repositório já possui uma infraestrutura robusta, testada e conectada ao Sup
        - `GET /api/v1/documentos/{documento_id}/download-url`: Geração de URL assinada temporária para download seguro direto do Cloudflare R2.
        - `POST /api/v1/documentos/{documento_id}/validate`: Aprovação ou recusa com justificativa obrigatória.
      - `Turmas (Bloco 2):`
-       - `POST /api/v1/turmas`: Cadastro de turma com validação de código único no tenant.
-       - `GET /api/v1/turmas`: Listagem paginada de turmas.
-       - `GET /api/v1/turmas/{turma_id}`: Detalhes da turma.
-       - `PATCH /api/v1/turmas/{turma_id}`: Atualização de turma.
-       - `DELETE /api/v1/turmas/{turma_id}`: Desativação de turma.
-       - `GET /api/v1/turmas/{turma_id}/conformidade`: Endpoint analítico que calcula a taxa de conformidade dos dossiês da turma (alunos regulares vs alunos em risco e % de conformidade).
+       - CRUD completo de turmas + `GET /api/v1/turmas/{turma_id}/conformidade` (taxa de conformidade de dossiês).
      - `Autenticação & Usuários (Bloco 3):`
-       - `POST /api/v1/auth/register`: Cadastro de usuário com perfil (ADMIN, COORDENADOR, RH, ESTUDANTE) associado ao tenant.
-       - `POST /api/v1/auth/login`: Autenticação e emissão de token Bearer via Supabase Auth.
-       - `GET /api/v1/auth/me`: Retorna o perfil e o tenant do usuário logado via JWT.
-       - `POST /api/v1/auth/me/avatar`: Upload de avatar no Cloudflare R2.
-       - `GET /api/v1/auth/me/avatar-url`: URL assinada da foto do perfil.
-     - `Avatares & Logotipos:`
-       - `POST /api/v1/alunos/{aluno_id}/avatar` e `GET /api/v1/alunos/{aluno_id}/avatar-url`.
-       - `POST /api/v1/tenants/{tenant_id}/logo` e `GET /api/v1/tenants/{tenant_id}/logo-url`.
+       - `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, `GET /api/v1/auth/me`, `POST /auth/me/avatar`, `GET /auth/me/avatar-url`.
+     - `Instituições Formadoras & Empresas Parceiras:`
+       - `POST /api/v1/instituicoes`, `GET /api/v1/instituicoes`, `GET /api/v1/instituicoes/{id}`, `PATCH`, `DELETE`.
+       - `POST /api/v1/empresas`, `GET /api/v1/empresas`, `GET /api/v1/empresas/{id}`, `PATCH`, `DELETE`.
+     - `Contratos de Estágio / Aprendizagem:`
+       - `POST /api/v1/contratos`, `GET /api/v1/contratos`, `GET /api/v1/contratos/aluno/{aluno_id}`, `GET /{id}`, `PATCH`, `DELETE`.
 
 3. **Frontend (Next.js 15):**
    - Todas as páginas desenvolvidas e compilando (`npm run build` gerou as 18 rotas com sucesso).

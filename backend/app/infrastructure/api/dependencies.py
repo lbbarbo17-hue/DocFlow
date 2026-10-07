@@ -11,6 +11,8 @@ from app.infrastructure.repositories.aluno_repository import SQLAlchemyAlunoRepo
 from app.infrastructure.repositories.documento_repository import SQLAlchemyDocumentoRepository
 from app.infrastructure.repositories.turma_repository import SQLAlchemyTurmaRepository
 from app.infrastructure.repositories.usuario_repository import SQLAlchemyUsuarioRepository
+from app.infrastructure.repositories.catalogo_repository import SQLAlchemyInstituicaoRepository, SQLAlchemyEmpresaRepository
+from app.infrastructure.repositories.contrato_repository import SQLAlchemyContratoRepository
 from app.application.services.storage_service import R2StorageService
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").rstrip("/")
@@ -57,6 +59,21 @@ async def get_usuario_repository(
     session: AsyncSession = Depends(get_db)
 ) -> SQLAlchemyUsuarioRepository:
     return SQLAlchemyUsuarioRepository(session)
+
+async def get_instituicao_repository(
+    session: AsyncSession = Depends(get_db)
+) -> SQLAlchemyInstituicaoRepository:
+    return SQLAlchemyInstituicaoRepository(session)
+
+async def get_empresa_repository(
+    session: AsyncSession = Depends(get_db)
+) -> SQLAlchemyEmpresaRepository:
+    return SQLAlchemyEmpresaRepository(session)
+
+async def get_contrato_repository(
+    session: AsyncSession = Depends(get_db)
+) -> SQLAlchemyContratoRepository:
+    return SQLAlchemyContratoRepository(session)
 
 async def get_current_user(
     authorization: Optional[str] = Header(None),

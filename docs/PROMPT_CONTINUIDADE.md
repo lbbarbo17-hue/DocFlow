@@ -28,9 +28,10 @@ O repositório já possui uma infraestrutura robusta, testada e conectada ao Sup
      - `Tenants:` `POST /api/v1/tenants`, `GET /api/v1/tenants`, `GET /api/v1/tenants/{id}`.
      - `Alunos:` CRUD completo (`POST /api/v1/alunos`, `GET /api/v1/alunos`, `GET /api/v1/alunos/{id}`, `PATCH /api/v1/alunos/{id}`, `DELETE /api/v1/alunos/{id}`).
      - `Documentos (Bloco 1):` 
-       - `POST /api/v1/documentos/upload`: Upload multipart com inspeção de *Magic Bytes* (PDF, JPEG, PNG), cálculo do hash SHA-256 e gravação de metadados.
+       - `POST /api/v1/documentos/upload`: Upload multipart real integrado ao Cloudflare R2 com validação de *Magic Bytes* (PDF, JPEG, PNG) e gravação de metadados.
        - `GET /api/v1/documentos/aluno/{aluno_id}`: Listagem dos documentos de um aluno.
        - `GET /api/v1/documentos/{documento_id}`: Detalhes do documento.
+       - `GET /api/v1/documentos/{documento_id}/download-url`: Geração de URL assinada temporária para download seguro direto do Cloudflare R2.
        - `POST /api/v1/documentos/{documento_id}/validate`: Aprovação ou recusa com justificativa obrigatória.
      - `Turmas (Bloco 2):`
        - `POST /api/v1/turmas`: Cadastro de turma com validação de código único no tenant.
@@ -43,6 +44,11 @@ O repositório já possui uma infraestrutura robusta, testada e conectada ao Sup
        - `POST /api/v1/auth/register`: Cadastro de usuário com perfil (ADMIN, COORDENADOR, RH, ESTUDANTE) associado ao tenant.
        - `POST /api/v1/auth/login`: Autenticação e emissão de token Bearer via Supabase Auth.
        - `GET /api/v1/auth/me`: Retorna o perfil e o tenant do usuário logado via JWT.
+       - `POST /api/v1/auth/me/avatar`: Upload de avatar no Cloudflare R2.
+       - `GET /api/v1/auth/me/avatar-url`: URL assinada da foto do perfil.
+     - `Avatares & Logotipos:`
+       - `POST /api/v1/alunos/{aluno_id}/avatar` e `GET /api/v1/alunos/{aluno_id}/avatar-url`.
+       - `POST /api/v1/tenants/{tenant_id}/logo` e `GET /api/v1/tenants/{tenant_id}/logo-url`.
 
 3. **Frontend (Next.js 15):**
    - Todas as páginas desenvolvidas e compilando (`npm run build` gerou as 18 rotas com sucesso).

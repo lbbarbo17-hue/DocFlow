@@ -11,6 +11,7 @@ from app.infrastructure.repositories.aluno_repository import SQLAlchemyAlunoRepo
 from app.infrastructure.repositories.documento_repository import SQLAlchemyDocumentoRepository
 from app.infrastructure.repositories.turma_repository import SQLAlchemyTurmaRepository
 from app.infrastructure.repositories.usuario_repository import SQLAlchemyUsuarioRepository
+from app.application.services.storage_service import R2StorageService
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").rstrip("/")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
@@ -89,3 +90,6 @@ async def get_current_user(
     except Exception:
         pass
     return None
+
+def get_storage_service() -> R2StorageService:
+    return R2StorageService()

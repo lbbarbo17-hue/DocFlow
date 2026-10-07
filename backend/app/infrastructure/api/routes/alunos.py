@@ -1,10 +1,12 @@
 import uuid
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, status
 from app.domain.schemas.aluno import AlunoCreate, AlunoUpdate, AlunoRead
 from app.infrastructure.database.models.aluno import Aluno
 from app.infrastructure.repositories.aluno_repository import SQLAlchemyAlunoRepository
-from app.infrastructure.api.dependencies import get_current_tenant_id, get_aluno_repository
+from app.infrastructure.api.dependencies import get_current_tenant_id, get_aluno_repository, get_storage_service
+from app.application.services.file_validator import compute_file_hash_and_size
+from app.application.services.storage_service import R2StorageService
 
 router = APIRouter(prefix="/alunos", tags=["Alunos"])
 
@@ -100,3 +102,69 @@ async def delete_aluno(
             detail="Aluno nao encontrado."
         )
     return None
+
+@router.post("/{aluno_id}/avatar", response_model=AlunoRead, status_code=status.HTTP_200_OK)
+async def upload_aluno_avatar(
+    aluno_id: uuid.UUID,
+    file: UploadFile = File(...),
+    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    repo: SQLAlchemyAlunoRepository = Depends(get_aluno_repository),
+    storage_service: R2StorageService = Depends(get_storage_service)
+):
+    aluno = await repo.get_by_id(entity_id=aluno_id, tenant_id=tenant_id)
+    if not aluno:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Aluno nao encontrado."
+        )
+
+    content = await file.read()
+    try:
+        sha256_hash, _, mime_type = compute_file_hash_and_size(content)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc)
+        )
+
+    if mime_type not in ["image/jpeg", "image/png"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Foto de perfil deve ser imagem JPEG ou PNG."
+        )
+
+    ext = "jpg" if mime_type == "image/jpeg" else "png"
+    storage_path = f"tenants/{tenant_id}/alunos/{aluno_id}/avatar_{sha256_hash[:8]}.{ext}"
+
+    storage_service.upload_file(
+        file_bytes=content,
+        file_path=storage_path,
+        content_type=mime_type
+    )
+
+    aluno.avatar_path = storage_path
+    aluno_atualizado = await repo.update(aluno)
+    return aluno_atualizado
+
+@router.get("/{aluno_id}/avatar-url", status_code=status.HTTP_200_OK)
+async def get_aluno_avatar_url(
+    aluno_id: uuid.UUID,
+    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    repo: SQLAlchemyAlunoRepository = Depends(get_aluno_repository),
+    storage_service: R2StorageService = Depends(get_storage_service)
+):
+    aluno = await repo.get_by_id(entity_id=aluno_id, tenant_id=tenant_id)
+    if not aluno:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Aluno nao encontrado."
+        )
+
+    if not aluno.avatar_path:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Aluno nao possui foto de perfil."
+        )
+
+    url = storage_service.generate_download_url(file_path=aluno.avatar_path)
+    return {"avatar_url": url}

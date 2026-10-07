@@ -1,9 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 from app.domain.schemas.usuario import UsuarioCreate, UsuarioRead, LoginRequest, TokenResponse
 from app.infrastructure.database.models.usuario import Usuario
 from app.infrastructure.repositories.usuario_repository import SQLAlchemyUsuarioRepository
 from app.application.services.auth_service import SupabaseAuthService
-from app.infrastructure.api.dependencies import get_usuario_repository, get_current_user
+from app.infrastructure.api.dependencies import get_usuario_repository, get_current_user, get_storage_service
+from app.application.services.file_validator import compute_file_hash_and_size
+from app.application.services.storage_service import R2StorageService
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
 
@@ -64,3 +66,63 @@ async def get_me(
             detail="Token de autenticacao invalido ou ausente."
         )
     return current_user
+
+@router.post("/me/avatar", response_model=UsuarioRead, status_code=status.HTTP_200_OK)
+async def upload_my_avatar(
+    file: UploadFile = File(...),
+    current_user: Usuario = Depends(get_current_user),
+    user_repo: SQLAlchemyUsuarioRepository = Depends(get_usuario_repository),
+    storage_service: R2StorageService = Depends(get_storage_service)
+):
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token de autenticacao invalido ou ausente."
+        )
+
+    content = await file.read()
+    try:
+        sha256_hash, _, mime_type = compute_file_hash_and_size(content)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc)
+        )
+
+    if mime_type not in ["image/jpeg", "image/png"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Foto de perfil deve ser imagem JPEG ou PNG."
+        )
+
+    ext = "jpg" if mime_type == "image/jpeg" else "png"
+    storage_path = f"tenants/{current_user.tenant_id}/usuarios/{current_user.id}/avatar_{sha256_hash[:8]}.{ext}"
+
+    storage_service.upload_file(
+        file_bytes=content,
+        file_path=storage_path,
+        content_type=mime_type
+    )
+
+    current_user.avatar_path = storage_path
+    return await user_repo.update(current_user)
+
+@router.get("/me/avatar-url", status_code=status.HTTP_200_OK)
+async def get_my_avatar_url(
+    current_user: Usuario = Depends(get_current_user),
+    storage_service: R2StorageService = Depends(get_storage_service)
+):
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token de autenticacao invalido ou ausente."
+        )
+
+    if not current_user.avatar_path:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Usuario nao possui foto de perfil."
+        )
+
+    url = storage_service.generate_download_url(file_path=current_user.avatar_path)
+    return {"avatar_url": url}

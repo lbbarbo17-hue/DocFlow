@@ -5,13 +5,15 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, s
 from app.domain.enums import TipoDocumento, StatusDocumento
 from app.domain.schemas.documento import DocumentoRead, DocumentoValidate
 from app.application.services.file_validator import compute_file_hash_and_size
+from app.application.services.storage_service import R2StorageService
 from app.infrastructure.database.models.documento import Documento
 from app.infrastructure.repositories.documento_repository import SQLAlchemyDocumentoRepository
 from app.infrastructure.repositories.aluno_repository import SQLAlchemyAlunoRepository
 from app.infrastructure.api.dependencies import (
     get_current_tenant_id,
     get_documento_repository,
-    get_aluno_repository
+    get_aluno_repository,
+    get_storage_service
 )
 
 router = APIRouter(prefix="/documentos", tags=["Documentos"])
@@ -24,7 +26,8 @@ async def upload_documento(
     data_validade: Optional[date] = Form(None),
     tenant_id: uuid.UUID = Depends(get_current_tenant_id),
     aluno_repo: SQLAlchemyAlunoRepository = Depends(get_aluno_repository),
-    doc_repo: SQLAlchemyDocumentoRepository = Depends(get_documento_repository)
+    doc_repo: SQLAlchemyDocumentoRepository = Depends(get_documento_repository),
+    storage_service: R2StorageService = Depends(get_storage_service)
 ):
     aluno = await aluno_repo.get_by_id(entity_id=aluno_id, tenant_id=tenant_id)
     if not aluno:
@@ -51,6 +54,12 @@ async def upload_documento(
 
     safe_filename = file.filename or "documento"
     storage_path = f"tenants/{tenant_id}/alunos/{aluno_id}/{sha256_hash[:16]}_{safe_filename}"
+
+    storage_service.upload_file(
+        file_bytes=content,
+        file_path=storage_path,
+        content_type=mime_type
+    )
 
     novo_documento = Documento(
         tenant_id=tenant_id,
@@ -88,6 +97,22 @@ async def get_documento(
             detail="Documento nao encontrado."
         )
     return doc
+
+@router.get("/{documento_id}/download-url", status_code=status.HTTP_200_OK)
+async def get_documento_download_url(
+    documento_id: uuid.UUID,
+    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    doc_repo: SQLAlchemyDocumentoRepository = Depends(get_documento_repository),
+    storage_service: R2StorageService = Depends(get_storage_service)
+):
+    doc = await doc_repo.get_by_id(entity_id=documento_id, tenant_id=tenant_id)
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Documento nao encontrado."
+        )
+    url = storage_service.generate_download_url(file_path=doc.storage_path)
+    return {"download_url": url}
 
 @router.post("/{documento_id}/validate", response_model=DocumentoRead, status_code=status.HTTP_200_OK)
 async def validate_documento(

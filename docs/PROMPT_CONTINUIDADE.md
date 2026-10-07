@@ -60,32 +60,28 @@ O repositório já possui uma infraestrutura robusta, testada e conectada ao Sup
 
 ---
 
-### 3. Próximos Passos Prioritários: Conexão do Frontend com a API Real
+### 3. Integração Frontend ↔ Backend: Status & Próximas Etapas
 
-O frontend já foi sincronizado com a branch `develop` (todas as 18 rotas compiladas e validadas), e o backend conta com 29 endpoints ativos no Swagger integrando Supabase e Cloudflare R2. Os dois conteúdos prioritários a serem executados quando retomarmos são:
+#### ✅ Etapas Concluídas nesta Sessão:
+1. **Etapa 1 — Cliente HTTP Centralizado (`frontend/src/lib/api.ts`):**
+   - Utilitário baseado em `fetch` com tipagem rigorosa sem `any` para conformidade total com o ESLint.
+   - Injeção automática de `Authorization: Bearer <token>` e do header `X-Tenant-ID`.
+   - Módulos de API: `authApi`, `documentosApi`, `turmasApi`, `alunosApi`.
+   - Interceptação de erro 401 com limpeza de sessão e redirecionamento para `/login`.
+2. **Etapa 2 — Fluxo de Login Conectado (`frontend/src/app/login/page.tsx`):**
+   - Submissão conectada ao `authApi.login(identifier, password)`.
+   - Persistência de token e `tenant_id` no localStorage.
+   - Mapeamento automático de papéis (`ADMIN` -> `SUPERADMIN`, `COORDENADOR`/`RH`, `ESTUDANTE`).
+   - Fallback de demonstração resiliente caso a API esteja offline durante apresentações.
+   - `npm run build` testado com sucesso gerando todas as 18 rotas do Next.js sem erros.
 
-#### FRENTE 1: Criação do Cliente HTTP Centralizado (`frontend/src/lib/api.ts`)
-1. **Configuração Base:**
-   - Criar `frontend/src/lib/api.ts` apontando para `process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'`.
-2. **Interceptação de Headers Obrigatórios:**
-   - Injeção automática do Bearer token JWT extraído da sessão/localStorage no header `Authorization`.
-   - Injeção do header de isolamento multi-tenant `X-Tenant-ID` em todas as requisições autenticadas.
-3. **Tratamento Padronizado:**
-   - Tratamento de status 401 (redirecionamento automático para `/login`).
-   - Tratamento de erros 422 e 400 com repasse das mensagens da API para os toasts do `AppContext`.
+#### ⚠️ PONTO DE POSSÍVEL ALTERAÇÃO FUTURA (Anotado para atenção da equipe):
+> **Super Admin & Gestão Institucional:**
+> - O painel `/admin` e o cadastro de coordenadores/empresas foram identificados como instáveis e passarão por revisões/refatorações futuras pela equipe de frontend.
+> - **Alinhamento Técnico:** No backend, o enum de perfil é `PerfilUsuario.ADMIN`, enquanto no frontend é tipado como `SUPERADMIN`. O login já resolve esse mapeamento (`perfil === 'ADMIN' ? 'SUPERADMIN' : ...`). Caso a rota do Super Admin mude de `/admin` para `/superadmin` ou a tipagem mude no front, apenas esse mapeamento no `login/page.tsx` precisará de ajuste simples (menos de 5 min).
 
-#### FRENTE 2: Substituição dos Mocks pelas Chamadas Reais da API
-1. **Fluxo Real de Autenticação (`frontend/src/app/login/page.tsx`):**
-   - Ligar o formulário ao endpoint `POST /api/v1/auth/login`.
-   - Armazenar o `access_token` retornado e chamar `GET /api/v1/auth/me` para carregar o perfil e o `tenant_id` real do usuário logado.
-   - Redirecionar para o painel correspondente de acordo com o perfil retornado (`ESTUDANTE`, `COORDENADOR`, `ADMIN`).
-2. **Painel do Estudante (`frontend/src/app/estudante/checklist/page.tsx` & `enviar/page.tsx`):**
-   - Listar documentos reais do aluno chamando `GET /api/v1/documentos/aluno/{aluno_id}`.
-   - Realizar o envio real de PDFs e fotos chamando `POST /api/v1/documentos/upload` com gravação direta no bucket do Cloudflare R2.
-   - Gerar links de visualização com URLs assinadas via `GET /api/v1/documentos/{id}/download-url`.
-3. **Painel do Coordenador (`frontend/src/app/coordenador/dossies/page.tsx` & dashboard):**
-   - Buscar as turmas reais via `GET /api/v1/turmas` e o cálculo analítico de conformidade via `GET /api/v1/turmas/{turma_id}/conformidade`.
-   - Permitir que o coordenador aprove ou recuse documentos em tempo real via `POST /api/v1/documentos/{id}/validate`.
+#### 🔜 Próxima Etapa Prioritária (Quando retomar):
+- **Etapa 3 — Painel do Estudante:** Conectar o checklist e o formulário de envio em `frontend/src/app/estudante/checklist/page.tsx` para carregar documentos reais e enviar arquivos diretamente ao bucket do Cloudflare R2 via `POST /api/v1/documentos/upload`.
 
 ---
 
@@ -100,5 +96,5 @@ O frontend já foi sincronizado com a branch `develop` (todas as 18 rotas compil
    cd frontend
    npm run dev
    ```
-3. Acessar `http://localhost:3000` e validar as telas interagindo diretamente com os dados reais do Supabase e Cloudflare R2!
+3. Acessar `http://localhost:3000` e validar o login e as telas integradas!
 ```

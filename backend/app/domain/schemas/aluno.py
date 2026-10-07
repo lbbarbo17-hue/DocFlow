@@ -26,6 +26,7 @@ class AlunoUpdate(BaseModel):
     empresa_id: Optional[uuid.UUID] = None
     turma_id: Optional[uuid.UUID] = None
     ativo: Optional[bool] = None
+    avatar_path: Optional[str] = None
 
 class AlunoRead(AlunoBase):
     model_config = ConfigDict(from_attributes=True)
@@ -36,5 +37,6 @@ class AlunoRead(AlunoBase):
     empresa_id: Optional[uuid.UUID] = None
     turma_id: Optional[uuid.UUID] = None
     ativo: bool
+    avatar_path: Optional[str] = None
     created_at: datetime
     updated_at: datetime

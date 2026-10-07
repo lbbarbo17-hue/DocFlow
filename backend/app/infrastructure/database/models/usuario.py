@@ -31,6 +31,7 @@ class Usuario(Base, UUIDPrimaryKeyMixin, TimestampMixin, TenantScopedMixin):
         index=True
     )
     ativo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    avatar_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     tenant: Mapped["Tenant"] = relationship(back_populates="usuarios")
     audit_logs: Mapped[List["AuditLog"]] = relationship(back_populates="usuario")

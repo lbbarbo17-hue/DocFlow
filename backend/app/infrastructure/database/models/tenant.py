@@ -1,4 +1,4 @@
-from typing import List, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING
 from sqlalchemy import String, Boolean, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.domain.enums import TipoTenant
@@ -23,6 +23,7 @@ class Tenant(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         nullable=False
     )
     ativo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    logo_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     usuarios: Mapped[List["Usuario"]] = relationship(back_populates="tenant", cascade="all, delete-orphan")
     instituicoes: Mapped[List["Instituicao"]] = relationship(back_populates="tenant", cascade="all, delete-orphan")

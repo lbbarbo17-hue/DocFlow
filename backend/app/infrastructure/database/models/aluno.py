@@ -50,6 +50,7 @@ class Aluno(Base, UUIDPrimaryKeyMixin, TimestampMixin, TenantScopedMixin):
         nullable=False
     )
     ativo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    avatar_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     tenant: Mapped["Tenant"] = relationship(back_populates="alunos")
     instituicao: Mapped[Optional["Instituicao"]] = relationship(back_populates="alunos")

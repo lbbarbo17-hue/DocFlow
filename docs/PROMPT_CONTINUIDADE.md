@@ -60,20 +60,45 @@ O repositório já possui uma infraestrutura robusta, testada e conectada ao Sup
 
 ---
 
-### 3. Sua Próxima Tarefa Imediata: BLOCO 4 — Conectar o Frontend Next.js à API Real
+### 3. Próximos Passos Prioritários: Conexão do Frontend com a API Real
 
-Os Blocos 1 (Documentos), 2 (Turmas) e 3 (Autenticação) já estão concluídos e testados com sucesso no backend. Sua tarefa agora é **conectar o Frontend às rotas reais**:
+O frontend já foi sincronizado com a branch `develop` (todas as 18 rotas compiladas e validadas), e o backend conta com 29 endpoints ativos no Swagger integrando Supabase e Cloudflare R2. Os dois conteúdos prioritários a serem executados quando retomarmos são:
 
-1. **Criar Cliente de API (`frontend/src/lib/api.ts`):**
-   - Função utilitária com `fetch` configurada para `http://localhost:8000/api/v1`.
-   - Injeção automática do `X-Tenant-ID` ou token JWT no header.
+#### FRENTE 1: Criação do Cliente HTTP Centralizado (`frontend/src/lib/api.ts`)
+1. **Configuração Base:**
+   - Criar `frontend/src/lib/api.ts` apontando para `process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'`.
+2. **Interceptação de Headers Obrigatórios:**
+   - Injeção automática do Bearer token JWT extraído da sessão/localStorage no header `Authorization`.
+   - Injeção do header de isolamento multi-tenant `X-Tenant-ID` em todas as requisições autenticadas.
+3. **Tratamento Padronizado:**
+   - Tratamento de status 401 (redirecionamento automático para `/login`).
+   - Tratamento de erros 422 e 400 com repasse das mensagens da API para os toasts do `AppContext`.
 
-2. **Substituir Mocks pelas Chamadas Reais:**
-   - Na tela do Estudante (`frontend/src/app/estudante/checklist/page.tsx`): buscar documentos reais da API.
-   - Na tela do Coordenador (`frontend/src/app/coordenador/dossies/page.tsx` ou dashboard): buscar turmas e conformidade da API.
+#### FRENTE 2: Substituição dos Mocks pelas Chamadas Reais da API
+1. **Fluxo Real de Autenticação (`frontend/src/app/login/page.tsx`):**
+   - Ligar o formulário ao endpoint `POST /api/v1/auth/login`.
+   - Armazenar o `access_token` retornado e chamar `GET /api/v1/auth/me` para carregar o perfil e o `tenant_id` real do usuário logado.
+   - Redirecionar para o painel correspondente de acordo com o perfil retornado (`ESTUDANTE`, `COORDENADOR`, `ADMIN`).
+2. **Painel do Estudante (`frontend/src/app/estudante/checklist/page.tsx` & `enviar/page.tsx`):**
+   - Listar documentos reais do aluno chamando `GET /api/v1/documentos/aluno/{aluno_id}`.
+   - Realizar o envio real de PDFs e fotos chamando `POST /api/v1/documentos/upload` com gravação direta no bucket do Cloudflare R2.
+   - Gerar links de visualização com URLs assinadas via `GET /api/v1/documentos/{id}/download-url`.
+3. **Painel do Coordenador (`frontend/src/app/coordenador/dossies/page.tsx` & dashboard):**
+   - Buscar as turmas reais via `GET /api/v1/turmas` e o cálculo analítico de conformidade via `GET /api/v1/turmas/{turma_id}/conformidade`.
+   - Permitir que o coordenador aprove ou recuse documentos em tempo real via `POST /api/v1/documentos/{id}/validate`.
 
-3. **Verificação:**
-   - Rodar `npm run dev` no frontend e confirmar a exibição dos dados reais do Supabase nas telas!
+---
 
-Por favor, execute essas etapas com base nessas diretrizes!
+### 4. Como Executar e Validar
+1. Iniciar o backend:
+   ```bash
+   cd backend
+   .venv\Scripts\uvicorn app.main:app --reload --port 8000
+   ```
+2. Iniciar o frontend:
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+3. Acessar `http://localhost:3000` e validar as telas interagindo diretamente com os dados reais do Supabase e Cloudflare R2!
 ```

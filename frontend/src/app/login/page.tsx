@@ -26,10 +26,10 @@ export default function LoginPage() {
   const router = useRouter();
   const { setCurrentRole, setToastMessage } = useApp();
 
-  const [identifier, setIdentifier] = useState('lucas.gabriel@empresa-tech.com.br');
-  const [password, setPassword] = useState('DocFlow@2026');
+  const [identifier, setIdentifier] = useState('admin@docflow.com.br');
+  const [password, setPassword] = useState('Admin@DocFlow2026');
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedRolePreset, setSelectedRolePreset] = useState<UserRole>('ESTUDANTE');
+  const [selectedRolePreset, setSelectedRolePreset] = useState<UserRole>('SUPERADMIN');
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
 
@@ -56,15 +56,15 @@ export default function LoginPage() {
   // Quick Preset Selector handler (3 Profiles)
   const handleSelectPreset = (role: UserRole) => {
     setSelectedRolePreset(role);
-    if (role === 'ESTUDANTE') {
-      setIdentifier('lucas.gabriel@empresa-tech.com.br');
-      setPassword('DocFlow@2026');
+    if (role === 'SUPERADMIN') {
+      setIdentifier('admin@docflow.com.br');
+      setPassword('Admin@DocFlow2026');
     } else if (role === 'COORDENADOR') {
       setIdentifier('mariana.coordenacao@etec.sp.gov.br');
       setPassword('Coord@DocFlow2026');
-    } else if (role === 'SUPERADMIN') {
-      setIdentifier('admin@docflow.security');
-      setPassword('Admin#DocFlow2026');
+    } else if (role === 'ESTUDANTE') {
+      setIdentifier('lucas.gabriel@empresa-tech.com.br');
+      setPassword('DocFlow@2026');
     }
   };
 
@@ -223,10 +223,10 @@ export default function LoginPage() {
               <div className="grid grid-cols-3 gap-2">
                 {[
                   {
-                    role: 'ESTUDANTE' as UserRole,
-                    label: 'Aprendiz / Estagiário',
-                    icon: GraduationCap,
-                    color: 'text-cyan-300',
+                    role: 'SUPERADMIN' as UserRole,
+                    label: 'Super Admin',
+                    icon: Shield,
+                    color: 'text-emerald-300',
                   },
                   {
                     role: 'COORDENADOR' as UserRole,
@@ -236,10 +236,10 @@ export default function LoginPage() {
                     color: 'text-purple-300',
                   },
                   {
-                    role: 'SUPERADMIN' as UserRole,
-                    label: 'Super Admin',
-                    icon: Shield,
-                    color: 'text-emerald-300',
+                    role: 'ESTUDANTE' as UserRole,
+                    label: 'Aprendiz / Estagiário',
+                    icon: GraduationCap,
+                    color: 'text-cyan-300',
                   },
                 ].map((item) => {
                   const isSelected = selectedRolePreset === item.role;

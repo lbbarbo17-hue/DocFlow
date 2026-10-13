@@ -8,7 +8,6 @@ import { useApp } from '@/context/AppContext';
 import {
   UserCheck,
   BarChart3,
-  ShieldCheck,
   LogOut,
   Shield,
   LayoutDashboard,
@@ -17,6 +16,7 @@ import {
   PanelLeftClose,
   UserPlus,
   Settings,
+  History,
 } from 'lucide-react';
 import { cn, scrollToTop } from '@/lib/utils';
 
@@ -105,9 +105,9 @@ export default function Sidebar() {
         icon: UserPlus,
       },
       {
-        label: 'Trilha de Auditoria',
+        label: 'Histórico de Atividades',
         href: '/auditoria',
-        icon: ShieldCheck,
+        icon: History,
       },
     ];
   };

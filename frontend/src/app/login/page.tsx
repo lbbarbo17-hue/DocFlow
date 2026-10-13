@@ -15,9 +15,6 @@ import {
   ArrowRight,
   ShieldCheck,
   Zap,
-  GraduationCap,
-  UserCheck,
-  Shield,
   Clock,
   KeyRound,
   Loader2,
@@ -27,12 +24,11 @@ export default function LoginPage() {
   const router = useRouter();
   const { setCurrentRole, setToastMessage } = useApp();
 
-  const [identifier, setIdentifier] = useState('lucas.gabriel@empresa-tech.com.br');
-  const [password, setPassword] = useState('DocFlow@2026');
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedRolePreset, setSelectedRolePreset] = useState<UserRole>('ESTUDANTE');
   const [isLoading, setIsLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
+  const [rememberMe, setRememberMe] = useState(false);
 
   // Dynamic Password Strength Meter
   const calculatePasswordStrength = (pass: string) => {
@@ -54,84 +50,45 @@ export default function LoginPage() {
     { label: 'Suprema & Segura', color: 'bg-emerald-400 text-emerald-300', emoji: '🛡️' },
   ];
 
-  // Quick Preset Selector handler (3 Profiles)
-  const handleSelectPreset = (role: UserRole) => {
-    setSelectedRolePreset(role);
-    if (role === 'ESTUDANTE') {
-      setIdentifier('lucas.gabriel@empresa-tech.com.br');
-      setPassword('DocFlow@2026');
-    } else if (role === 'COORDENADOR') {
-      setIdentifier('mariana.coordenacao@etec.sp.gov.br');
-      setPassword('Coord@DocFlow2026');
-    } else if (role === 'SUPERADMIN') {
-      setIdentifier('admin@docflow.security');
-      setPassword('Admin#DocFlow2026');
-    }
-  };
-
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      const data = await authApi.login(identifier, password);
-      setAuthToken(data.access_token);
-      if (data.user?.tenant_id) {
-        setTenantId(data.user.tenant_id);
-      }
+    // TODO: Conectar com o endpoint da API / banco de dados aqui
+    // Exemplo: const res = await fetch('/api/auth/login', { method: 'POST', body: JSON.stringify({ email: identifier, password }) });
+    await new Promise((resolve) => setTimeout(resolve, 600));
 
-      let role: UserRole = 'ESTUDANTE';
-      if (data.user?.perfil === 'ADMIN') {
-        role = 'SUPERADMIN';
-      } else if (data.user?.perfil === 'COORDENADOR' || data.user?.perfil === 'RH') {
-        role = 'COORDENADOR';
-      } else if (data.user?.perfil === 'ESTUDANTE') {
-        role = 'ESTUDANTE';
-      }
+    // Determina a rota conforme o papel/e-mail (ou padrão Super Admin até plugar a API)
+    const emailLower = identifier.toLowerCase().trim();
+    let targetRole: UserRole = 'SUPERADMIN';
+    let targetRoute = '/admin';
 
-      setCurrentRole(role);
-
-      try {
-        confetti({
-          particleCount: 60,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#065373', '#226a8b', '#3f81a3', '#5b98bb', '#77afd3', '#38bdf8'],
-        });
-      } catch {}
-
-      setToastMessage({
-        title: 'Bem-vindo ao DocFlow! 🚀',
-        desc: `Sessão autenticada como ${data.user?.nome || 'Usuário'}.`,
-        type: 'success',
-      });
-
-      if (role === 'ESTUDANTE') {
-        router.push('/estudante');
-      } else if (role === 'COORDENADOR') {
-        router.push('/coordenador');
-      } else {
-        router.push('/admin');
-      }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'API offline';
-      setCurrentRole(selectedRolePreset);
-      setToastMessage({
-        title: 'Modo Demonstração Ativo',
-        desc: `${errorMessage}. Sessão simulada como ${selectedRolePreset}.`,
-        type: 'info',
-      });
-
-      if (selectedRolePreset === 'ESTUDANTE') {
-        router.push('/estudante');
-      } else if (selectedRolePreset === 'COORDENADOR') {
-        router.push('/coordenador');
-      } else {
-        router.push('/admin');
-      }
-    } finally {
-      setIsLoading(false);
+    if (emailLower.includes('aluno') || emailLower.includes('estudante') || emailLower.includes('aprendiz')) {
+      targetRole = 'ESTUDANTE';
+      targetRoute = '/estudante';
+    } else if (emailLower.includes('coord') || emailLower.includes('professor')) {
+      targetRole = 'COORDENADOR';
+      targetRoute = '/coordenador';
     }
+
+    setCurrentRole(targetRole);
+
+    try {
+      confetti({
+        particleCount: 50,
+        spread: 60,
+        origin: { y: 0.6 },
+        colors: ['#065373', '#226a8b', '#3f81a3', '#5b98bb', '#77afd3', '#38bdf8'],
+      });
+
+    setToastMessage({
+      title: 'Bem-vindo ao DocFlow!',
+      desc: 'Autenticação realizada com sucesso.',
+      type: 'success',
+    });
+
+    setIsLoading(false);
+    router.push(targetRoute);
   };
 
   return (
@@ -234,58 +191,12 @@ export default function LoginPage() {
             {/* Top Glowing Laser Accent */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-[#77afd3] to-[#226a8b]" />
 
-            {/* Header Persona Presets (3 Profiles) */}
-            <div className="space-y-2 mb-6">
-              <div className="flex items-center justify-between text-[11px] font-bold text-cyan-300 uppercase tracking-wider">
-                <span>Selecione seu Perfil de Acesso:</span>
-              </div>
-
-              {/* 3 Persona Pills */}
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  {
-                    role: 'ESTUDANTE' as UserRole,
-                    label: 'Aprendiz / Estagiário',
-                    icon: GraduationCap,
-                    color: 'text-cyan-300',
-                  },
-                  {
-                    role: 'COORDENADOR' as UserRole,
-                    label: 'Coordenador',
-                    sub: 'Curso / RH',
-                    icon: UserCheck,
-                    color: 'text-purple-300',
-                  },
-                  {
-                    role: 'SUPERADMIN' as UserRole,
-                    label: 'Super Admin',
-                    icon: Shield,
-                    color: 'text-emerald-300',
-                  },
-                ].map((item) => {
-                  const isSelected = selectedRolePreset === item.role;
-                  const Icon = item.icon;
-
-                  return (
-                    <button
-                      key={item.role}
-                      type="button"
-                      onClick={() => handleSelectPreset(item.role)}
-                      className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 border text-center ${
-                        isSelected
-                          ? 'bg-[#065373] text-white border-cyan-400 shadow-lg shadow-cyan-950/50 scale-[1.03]'
-                          : 'bg-slate-800/60 text-slate-400 border-slate-700/60 hover:bg-slate-800 hover:text-white'
-                      }`}
-                    >
-                      <Icon className={`w-4 h-4 ${item.color}`} />
-                      <span className="text-[10.5px] leading-tight font-semibold">{item.label}</span>
-                      {item.sub && (
-                        <span className="text-[9px] text-slate-400 font-normal leading-none">{item.sub}</span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+            {/* Header Login Title */}
+            <div className="space-y-1 mb-6">
+              <h3 className="text-lg font-bold text-white tracking-tight">Entrar na sua conta</h3>
+              <p className="text-xs text-slate-400">
+                Informe seu e-mail e senha cadastrados para acessar a plataforma.
+              </p>
             </div>
 
             {/* Main Form */}
@@ -412,7 +323,7 @@ export default function LoginPage() {
                   </>
                 ) : (
                   <>
-                    <span>Acessar Meu Dossiê Seguro</span>
+                    <span>Acessar Plataforma</span>
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1 text-cyan-300" />
                   </>
                 )}

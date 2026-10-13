@@ -96,7 +96,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [currentRole, setCurrentRole] = useState<UserRole>('ESTUDANTE');
+  const [currentRole, setCurrentRole] = useState<UserRole>('SUPERADMIN');
   const [student, setStudent] = useState<Student>(CURRENT_STUDENT);
   const [rawStudentsList, setRawStudentsList] = useState<Student[]>(INITIAL_STUDENTS);
   const [rawTurmas, setRawTurmas] = useState<Turma[]>(INITIAL_TURMAS);

@@ -419,7 +419,7 @@ export default function PerfilPage() {
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
                       <CreditCard className="w-3.5 h-3.5 text-[#0284c7]" />
-                      <span>CPF (Conformidade LGPD)</span>
+                      <span>CPF (Protegido)</span>
                     </label>
                     <input
                       type="text"

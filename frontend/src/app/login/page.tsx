@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { UserRole } from '@/lib/types';
+import { authApi, setAuthToken, setTenantId } from '@/lib/api';
 import confetti from 'canvas-confetti';
 import {
   Lock,
@@ -79,9 +80,6 @@ export default function LoginPage() {
         origin: { y: 0.6 },
         colors: ['#065373', '#226a8b', '#3f81a3', '#5b98bb', '#77afd3', '#38bdf8'],
       });
-    } catch {
-      // ignore
-    }
 
     setToastMessage({
       title: 'Bem-vindo ao DocFlow!',

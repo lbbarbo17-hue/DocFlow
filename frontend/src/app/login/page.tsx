@@ -14,9 +14,6 @@ import {
   ArrowRight,
   ShieldCheck,
   Zap,
-  GraduationCap,
-  UserCheck,
-  Shield,
   Clock,
   KeyRound,
   Loader2,
@@ -26,12 +23,11 @@ export default function LoginPage() {
   const router = useRouter();
   const { setCurrentRole, setToastMessage } = useApp();
 
-  const [identifier, setIdentifier] = useState('admin@docflow.com.br');
-  const [password, setPassword] = useState('Admin@DocFlow2026');
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedRolePreset, setSelectedRolePreset] = useState<UserRole>('SUPERADMIN');
   const [isLoading, setIsLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
+  const [rememberMe, setRememberMe] = useState(false);
 
   // Dynamic Password Strength Meter
   const calculatePasswordStrength = (pass: string) => {
@@ -53,35 +49,33 @@ export default function LoginPage() {
     { label: 'Suprema & Segura', color: 'bg-emerald-400 text-emerald-300', emoji: '🛡️' },
   ];
 
-  // Quick Preset Selector handler (3 Profiles)
-  const handleSelectPreset = (role: UserRole) => {
-    setSelectedRolePreset(role);
-    if (role === 'SUPERADMIN') {
-      setIdentifier('admin@docflow.com.br');
-      setPassword('Admin@DocFlow2026');
-    } else if (role === 'COORDENADOR') {
-      setIdentifier('mariana.coordenacao@etec.sp.gov.br');
-      setPassword('Coord@DocFlow2026');
-    } else if (role === 'ESTUDANTE') {
-      setIdentifier('lucas.gabriel@empresa-tech.com.br');
-      setPassword('DocFlow@2026');
-    }
-  };
-
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate authentication
-    await new Promise((resolve) => setTimeout(resolve, 700));
+    // TODO: Conectar com o endpoint da API / banco de dados aqui
+    // Exemplo: const res = await fetch('/api/auth/login', { method: 'POST', body: JSON.stringify({ email: identifier, password }) });
+    await new Promise((resolve) => setTimeout(resolve, 600));
 
-    setCurrentRole(selectedRolePreset);
+    // Determina a rota conforme o papel/e-mail (ou padrão Super Admin até plugar a API)
+    const emailLower = identifier.toLowerCase().trim();
+    let targetRole: UserRole = 'SUPERADMIN';
+    let targetRoute = '/admin';
 
-    // Celebratory confetti
+    if (emailLower.includes('aluno') || emailLower.includes('estudante') || emailLower.includes('aprendiz')) {
+      targetRole = 'ESTUDANTE';
+      targetRoute = '/estudante';
+    } else if (emailLower.includes('coord') || emailLower.includes('professor')) {
+      targetRole = 'COORDENADOR';
+      targetRoute = '/coordenador';
+    }
+
+    setCurrentRole(targetRole);
+
     try {
       confetti({
-        particleCount: 60,
-        spread: 70,
+        particleCount: 50,
+        spread: 60,
         origin: { y: 0.6 },
         colors: ['#065373', '#226a8b', '#3f81a3', '#5b98bb', '#77afd3', '#38bdf8'],
       });
@@ -90,27 +84,13 @@ export default function LoginPage() {
     }
 
     setToastMessage({
-      title: `Bem-vindo ao DocFlow! 🚀`,
-      desc: `Sessão autenticada como ${
-        selectedRolePreset === 'ESTUDANTE'
-          ? 'Aprendiz / Estagiário (Lucas Gabriel)'
-          : selectedRolePreset === 'COORDENADOR'
-          ? 'Coordenador (Curso / RH Empresa)'
-          : 'Super Admin'
-      }.`,
+      title: 'Bem-vindo ao DocFlow!',
+      desc: 'Autenticação realizada com sucesso.',
       type: 'success',
     });
 
     setIsLoading(false);
-
-    // Redirect based on role
-    if (selectedRolePreset === 'ESTUDANTE') {
-      router.push('/estudante');
-    } else if (selectedRolePreset === 'COORDENADOR') {
-      router.push('/coordenador');
-    } else {
-      router.push('/admin');
-    }
+    router.push(targetRoute);
   };
 
   return (
@@ -213,58 +193,12 @@ export default function LoginPage() {
             {/* Top Glowing Laser Accent */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-[#77afd3] to-[#226a8b]" />
 
-            {/* Header Persona Presets (3 Profiles) */}
-            <div className="space-y-2 mb-6">
-              <div className="flex items-center justify-between text-[11px] font-bold text-cyan-300 uppercase tracking-wider">
-                <span>Selecione seu Perfil de Acesso:</span>
-              </div>
-
-              {/* 3 Persona Pills */}
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  {
-                    role: 'SUPERADMIN' as UserRole,
-                    label: 'Super Admin',
-                    icon: Shield,
-                    color: 'text-emerald-300',
-                  },
-                  {
-                    role: 'COORDENADOR' as UserRole,
-                    label: 'Coordenador',
-                    sub: 'Curso / RH',
-                    icon: UserCheck,
-                    color: 'text-purple-300',
-                  },
-                  {
-                    role: 'ESTUDANTE' as UserRole,
-                    label: 'Aprendiz / Estagiário',
-                    icon: GraduationCap,
-                    color: 'text-cyan-300',
-                  },
-                ].map((item) => {
-                  const isSelected = selectedRolePreset === item.role;
-                  const Icon = item.icon;
-
-                  return (
-                    <button
-                      key={item.role}
-                      type="button"
-                      onClick={() => handleSelectPreset(item.role)}
-                      className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 border text-center ${
-                        isSelected
-                          ? 'bg-[#065373] text-white border-cyan-400 shadow-lg shadow-cyan-950/50 scale-[1.03]'
-                          : 'bg-slate-800/60 text-slate-400 border-slate-700/60 hover:bg-slate-800 hover:text-white'
-                      }`}
-                    >
-                      <Icon className={`w-4 h-4 ${item.color}`} />
-                      <span className="text-[10.5px] leading-tight font-semibold">{item.label}</span>
-                      {item.sub && (
-                        <span className="text-[9px] text-slate-400 font-normal leading-none">{item.sub}</span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+            {/* Header Login Title */}
+            <div className="space-y-1 mb-6">
+              <h3 className="text-lg font-bold text-white tracking-tight">Entrar na sua conta</h3>
+              <p className="text-xs text-slate-400">
+                Informe seu e-mail e senha cadastrados para acessar a plataforma.
+              </p>
             </div>
 
             {/* Main Form */}
@@ -391,7 +325,7 @@ export default function LoginPage() {
                   </>
                 ) : (
                   <>
-                    <span>Acessar Meu Dossiê Seguro</span>
+                    <span>Acessar Plataforma</span>
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1 text-cyan-300" />
                   </>
                 )}

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { UserRole } from '@/lib/types';
+import { authApi, setAuthToken, setTenantId } from '@/lib/api';
 import confetti from 'canvas-confetti';
 import {
   Lock,
@@ -72,44 +73,64 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate authentication
-    await new Promise((resolve) => setTimeout(resolve, 700));
-
-    setCurrentRole(selectedRolePreset);
-
-    // Celebratory confetti
     try {
-      confetti({
-        particleCount: 60,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#065373', '#226a8b', '#3f81a3', '#5b98bb', '#77afd3', '#38bdf8'],
+      const data = await authApi.login(identifier, password);
+      setAuthToken(data.access_token);
+      if (data.user?.tenant_id) {
+        setTenantId(data.user.tenant_id);
+      }
+
+      let role: UserRole = 'ESTUDANTE';
+      if (data.user?.perfil === 'ADMIN') {
+        role = 'SUPERADMIN';
+      } else if (data.user?.perfil === 'COORDENADOR' || data.user?.perfil === 'RH') {
+        role = 'COORDENADOR';
+      } else if (data.user?.perfil === 'ESTUDANTE') {
+        role = 'ESTUDANTE';
+      }
+
+      setCurrentRole(role);
+
+      try {
+        confetti({
+          particleCount: 60,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#065373', '#226a8b', '#3f81a3', '#5b98bb', '#77afd3', '#38bdf8'],
+        });
+      } catch {}
+
+      setToastMessage({
+        title: 'Bem-vindo ao DocFlow! 🚀',
+        desc: `Sessão autenticada como ${data.user?.nome || 'Usuário'}.`,
+        type: 'success',
       });
-    } catch {
-      // ignore
-    }
 
-    setToastMessage({
-      title: `Bem-vindo ao DocFlow! 🚀`,
-      desc: `Sessão autenticada como ${
-        selectedRolePreset === 'ESTUDANTE'
-          ? 'Aprendiz / Estagiário (Lucas Gabriel)'
-          : selectedRolePreset === 'COORDENADOR'
-          ? 'Coordenador (Curso / RH Empresa)'
-          : 'Super Admin'
-      }.`,
-      type: 'success',
-    });
+      if (role === 'ESTUDANTE') {
+        router.push('/estudante');
+      } else if (role === 'COORDENADOR') {
+        router.push('/coordenador');
+      } else {
+        router.push('/admin');
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'API offline';
+      setCurrentRole(selectedRolePreset);
+      setToastMessage({
+        title: 'Modo Demonstração Ativo',
+        desc: `${errorMessage}. Sessão simulada como ${selectedRolePreset}.`,
+        type: 'info',
+      });
 
-    setIsLoading(false);
-
-    // Redirect based on role
-    if (selectedRolePreset === 'ESTUDANTE') {
-      router.push('/estudante');
-    } else if (selectedRolePreset === 'COORDENADOR') {
-      router.push('/coordenador');
-    } else {
-      router.push('/admin');
+      if (selectedRolePreset === 'ESTUDANTE') {
+        router.push('/estudante');
+      } else if (selectedRolePreset === 'COORDENADOR') {
+        router.push('/coordenador');
+      } else {
+        router.push('/admin');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 

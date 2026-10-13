@@ -1,0 +1,43 @@
+import enum
+
+class TipoTenant(str, enum.Enum):
+    INSTITUICAO = "INSTITUICAO"
+    EMPRESA = "EMPRESA"
+
+class PerfilUsuario(str, enum.Enum):
+    ADMIN = "ADMIN"
+    COORDENADOR = "COORDENADOR"
+    RH = "RH"
+    ESTUDANTE = "ESTUDANTE"
+
+class StatusAluno(str, enum.Enum):
+    ATIVO = "ATIVO"
+    INATIVO = "INATIVO"
+    CONCLUIDO = "CONCLUIDO"
+    TRANCADO = "TRANCADO"
+
+class StatusDocumento(str, enum.Enum):
+    PENDENTE = "PENDENTE"
+    EM_ANALISE = "EM_ANALISE"
+    APROVADO = "APROVADO"
+    RECUSADO = "RECUSADO"
+    EXPIRADO = "EXPIRADO"
+
+class TipoDocumento(str, enum.Enum):
+    RG = "RG"
+    CPF = "CPF"
+    COMPROVANTE_RESIDENCIA = "COMPROVANTE_RESIDENCIA"
+    COMPROVANTE_MATRICULA = "COMPROVANTE_MATRICULA"
+    CONTRATO_APRENDIZAGEM = "CONTRATO_APRENDIZAGEM"
+    TERMO_COMPROMISSO_ESTAGIO = "TERMO_COMPROMISSO_ESTAGIO"
+    OUTROS = "OUTROS"
+
+class AcaoAuditoria(str, enum.Enum):
+    INSERT = "INSERT"
+    UPDATE = "UPDATE"
+    DELETE = "DELETE"
+    LOGIN = "LOGIN"
+    UPLOAD = "UPLOAD"
+    APROVACAO = "APROVACAO"
+    RECUSA = "RECUSA"
+    DOWNLOAD = "DOWNLOAD"

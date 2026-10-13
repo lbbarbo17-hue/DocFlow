@@ -3,15 +3,15 @@
 import React from 'react';
 import AuditTable from '@/components/audit/AuditTable';
 import PageBanner from '@/components/layout/PageBanner';
-import { ShieldCheck, LayoutDashboard } from 'lucide-react';
+import { History, LayoutDashboard, ShieldCheck } from 'lucide-react';
 
 export default function AuditoriaPage() {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Page Header Banner */}
       <PageBanner
-        title="Trilha de Auditoria & Registro de Atividades"
-        icon={ShieldCheck}
+        title="Histórico de Atividades"
+        icon={History}
         backHref="/admin"
         backLabel="Voltar ao Painel Principal"
         badge={{

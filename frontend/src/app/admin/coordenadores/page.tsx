@@ -124,7 +124,7 @@ export default function CadastrarCoordenadorPage() {
         ? customEntity.trim() || 'Instituição Conveniada'
         : entitySelect;
 
-    const tenantId = getTenantId() || '00000000-0000-0000-0000-000000000001';
+    const tenantId = getTenantId() || '6a7eb67b-bddc-4ad1-8898-0106ff268ed5';
     const perfilApi = role === 'SUPERADMIN' ? 'ADMIN' : 'COORDENADOR';
 
     try {

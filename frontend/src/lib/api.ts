@@ -23,7 +23,7 @@ export function clearAuthSession(): void {
 
 export function getTenantId(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('docflow_tenant_id');
+  return localStorage.getItem('docflow_tenant_id') || '6a7eb67b-bddc-4ad1-8898-0106ff268ed5';
 }
 
 export function setTenantId(tenantId: string): void {

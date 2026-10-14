@@ -22,7 +22,7 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setCurrentRole, setToastMessage } = useApp();
+  const { setCurrentRole, setToastMessage, loginUser } = useApp();
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -74,6 +74,7 @@ export default function LoginPage() {
       }
 
       setCurrentRole(role);
+      const localSync = loginUser(emailClean);
 
       try {
         confetti({
@@ -88,7 +89,7 @@ export default function LoginPage() {
 
       setToastMessage({
         title: 'Bem-vindo ao DocFlow! 🚀',
-        desc: `Autenticado com sucesso como ${data.user?.nome || 'Usuário'}.`,
+        desc: `Autenticado com sucesso como ${data.user?.nome || localSync.user?.nome || 'Usuário'}.`,
         type: 'success',
       });
 
@@ -101,19 +102,7 @@ export default function LoginPage() {
       }
     } catch {
       // 2. Fallback resiliente caso a API esteja em cold start (Render) ou temporariamente inacessível
-      const emailLower = emailClean.toLowerCase();
-      let targetRole: UserRole = 'SUPERADMIN';
-      let targetRoute = '/admin';
-
-      if (emailLower.includes('aluno') || emailLower.includes('estudante') || emailLower.includes('aprendiz')) {
-        targetRole = 'ESTUDANTE';
-        targetRoute = '/estudante';
-      } else if (emailLower.includes('coord') || emailLower.includes('professor') || emailLower.includes('rh')) {
-        targetRole = 'COORDENADOR';
-        targetRoute = '/coordenador';
-      }
-
-      setCurrentRole(targetRole);
+      const loginResult = loginUser(emailClean);
 
       try {
         confetti({
@@ -127,12 +116,14 @@ export default function LoginPage() {
       }
 
       setToastMessage({
-        title: 'Bem-vindo ao DocFlow!',
-        desc: 'Autenticação realizada com sucesso.',
+        title: 'Bem-vindo ao DocFlow! 🚀',
+        desc: `Autenticação realizada com sucesso${
+          loginResult.user?.nome ? ` como ${loginResult.user.nome}` : ''
+        }.`,
         type: 'success',
       });
 
-      router.push(targetRoute);
+      router.push(loginResult.route);
     } finally {
       setIsLoading(false);
     }

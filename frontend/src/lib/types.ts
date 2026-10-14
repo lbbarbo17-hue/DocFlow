@@ -117,6 +117,7 @@ export interface SystemUser {
   id: string;
   nome: string;
   email: string;
+  senha?: string;
   role: UserRole;
   cargo: string;
   status: 'ATIVO' | 'INATIVO';

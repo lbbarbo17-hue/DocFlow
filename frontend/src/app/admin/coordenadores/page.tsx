@@ -56,14 +56,19 @@ export default function CadastrarCoordenadorPage() {
 
   const [activeTab, setActiveTab] = useState<'COORDENADORES' | 'EMPRESAS'>('COORDENADORES');
 
-  // Form State - Coordenador
+  const defaultInstitutions = [
+    'ETEC Politécnica de São Paulo',
+    'Fatec Central São Paulo',
+    'Instituto Federal de Educação, Ciência e Tecnologia',
+  ];
+  const institutionsList =
+    availableInstitutions.length > 0 ? availableInstitutions : defaultInstitutions;
+
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
-  const [cargo, setCargo] = useState('Coordenador Acadêmico de Estágios');
+  const [cargo, setCargo] = useState('');
   const [role, setRole] = useState<UserRole>('COORDENADOR');
-  const [entitySelect, setEntitySelect] = useState(
-    availableInstitutions[0] || 'ETEC Politécnica de São Paulo'
-  );
+  const [entitySelect, setEntitySelect] = useState('ETEC Politécnica de São Paulo');
   const [customEntity, setCustomEntity] = useState('');
   const [status, setStatus] = useState<'ATIVO' | 'INATIVO'>('ATIVO');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -149,9 +154,9 @@ export default function CadastrarCoordenadorPage() {
 
     setNome('');
     setEmail('');
-    setCargo('Coordenador Acadêmico de Estágios');
+    setCargo('');
     setRole('COORDENADOR');
-    setEntitySelect(availableInstitutions[0] || 'ETEC Politécnica de São Paulo');
+    setEntitySelect(institutionsList[0] || 'ETEC Politécnica de São Paulo');
     setCustomEntity('');
     setIsSubmitting(false);
   };
@@ -359,7 +364,7 @@ export default function CadastrarCoordenadorPage() {
                     className="w-full bg-white dark:bg-slate-900 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3 py-2.5 text-slate-950 dark:text-white font-semibold focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 cursor-pointer"
                   >
                     <optgroup label="Instituições de Ensino / Polos">
-                      {availableInstitutions.map((inst) => (
+                      {institutionsList.map((inst) => (
                         <option key={inst} value={inst}>
                           🏫 {inst}
                         </option>

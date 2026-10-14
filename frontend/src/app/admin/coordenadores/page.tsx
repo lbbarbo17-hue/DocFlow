@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { UserRole } from '@/lib/types';
+import { authApi, getTenantId } from '@/lib/api';
 import PageBanner from '@/components/layout/PageBanner';
 import {
   UserPlus,
@@ -103,7 +104,7 @@ export default function CadastrarCoordenadorPage() {
       (emp.cidadeUf && emp.cidadeUf.toLowerCase().includes(empresaSearchTerm.toLowerCase()))
   );
 
-  const handleCoordinatorSubmit = (e: React.FormEvent) => {
+  const handleCoordinatorSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nome.trim() || !email.trim()) {
       setToastMessage({
@@ -123,6 +124,20 @@ export default function CadastrarCoordenadorPage() {
         ? customEntity.trim() || 'Instituição Conveniada'
         : entitySelect;
 
+    const tenantId = getTenantId() || '00000000-0000-0000-0000-000000000001';
+    const perfilApi = role === 'SUPERADMIN' ? 'ADMIN' : 'COORDENADOR';
+
+    try {
+      await authApi.register({
+        tenant_id: tenantId,
+        email: email.trim(),
+        nome: nome.trim(),
+        perfil: perfilApi,
+        senha: 'DocFlow@2026',
+      });
+    } catch {
+    }
+
     addNewSystemUser({
       nome: nome.trim(),
       email: email.trim(),
@@ -132,7 +147,6 @@ export default function CadastrarCoordenadorPage() {
       status,
     });
 
-    // Reset Form
     setNome('');
     setEmail('');
     setCargo('Coordenador Acadêmico de Estágios');

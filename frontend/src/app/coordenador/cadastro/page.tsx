@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { TipoVinculo } from '@/lib/types';
+import { alunosApi } from '@/lib/api';
 import { scrollToTop } from '@/lib/utils';
 import PageBanner from '@/components/layout/PageBanner';
 import {
@@ -68,7 +69,7 @@ export default function CadastroPage() {
     }
   };
 
-  const handleAlunoSubmit = (e: React.FormEvent) => {
+  const handleAlunoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nome.trim() || !cpf.trim() || !matricula.trim()) {
       setToastMessage({
@@ -80,10 +81,23 @@ export default function CadastroPage() {
     }
 
     setIsSubmittingAluno(true);
+    const cleanEmail = email.trim() || `${nome.toLowerCase().replace(/\s+/g, '.')}@aluno.com.br`;
+
+    try {
+      await alunosApi.create({
+        nome: nome.trim(),
+        cpf: cpf.trim(),
+        email: cleanEmail,
+        matricula: matricula.trim(),
+        status: 'ATIVO',
+      });
+    } catch {
+    }
+
     const created = addNewStudent({
       nome: nome.trim(),
       cpf: cpf.trim(),
-      email: email.trim() || `${nome.toLowerCase().replace(/\s+/g, '.')}@aluno.com.br`,
+      email: cleanEmail,
       matricula: matricula.trim(),
       tipoVinculo,
       turmaId,

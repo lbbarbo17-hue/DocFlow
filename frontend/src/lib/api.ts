@@ -248,6 +248,21 @@ export const alunosApi = {
   getById: async (alunoId: string): Promise<AlunoResponse> => {
     return apiRequest<AlunoResponse>(`/alunos/${alunoId}`);
   },
+  create: async (payload: {
+    nome: string;
+    cpf: string;
+    email: string;
+    matricula: string;
+    status?: string;
+    turma_id?: string;
+    instituicao_id?: string;
+    empresa_id?: string;
+  }): Promise<AlunoResponse> => {
+    return apiRequest<AlunoResponse>('/alunos', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
   uploadAvatar: async (alunoId: string, file: File): Promise<AlunoResponse> => {
     const formData = new FormData();
     formData.append('file', file);

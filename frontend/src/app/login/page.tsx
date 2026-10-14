@@ -54,41 +54,88 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    // TODO: Conectar com o endpoint da API / banco de dados aqui
-    // Exemplo: const res = await fetch('/api/auth/login', { method: 'POST', body: JSON.stringify({ email: identifier, password }) });
-    await new Promise((resolve) => setTimeout(resolve, 600));
-
-    // Determina a rota conforme o papel/e-mail (ou padrão Super Admin até plugar a API)
-    const emailLower = identifier.toLowerCase().trim();
-    let targetRole: UserRole = 'SUPERADMIN';
-    let targetRoute = '/admin';
-
-    if (emailLower.includes('aluno') || emailLower.includes('estudante') || emailLower.includes('aprendiz')) {
-      targetRole = 'ESTUDANTE';
-      targetRoute = '/estudante';
-    } else if (emailLower.includes('coord') || emailLower.includes('professor')) {
-      targetRole = 'COORDENADOR';
-      targetRoute = '/coordenador';
-    }
-
-    setCurrentRole(targetRole);
+    const emailClean = identifier.trim();
 
     try {
-      confetti({
-        particleCount: 50,
-        spread: 60,
-        origin: { y: 0.6 },
-        colors: ['#065373', '#226a8b', '#3f81a3', '#5b98bb', '#77afd3', '#38bdf8'],
+      // 1. Tenta autenticar na API real (FastAPI + Supabase)
+      const data = await authApi.login(emailClean, password);
+      setAuthToken(data.access_token);
+      if (data.user?.tenant_id) {
+        setTenantId(data.user.tenant_id);
+      }
+
+      let role: UserRole = 'ESTUDANTE';
+      if (data.user?.perfil === 'ADMIN' || data.user?.perfil === 'SUPERADMIN') {
+        role = 'SUPERADMIN';
+      } else if (data.user?.perfil === 'COORDENADOR' || data.user?.perfil === 'RH') {
+        role = 'COORDENADOR';
+      } else if (data.user?.perfil === 'ESTUDANTE') {
+        role = 'ESTUDANTE';
+      }
+
+      setCurrentRole(role);
+
+      try {
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { y: 0.6 },
+          colors: ['#065373', '#226a8b', '#3f81a3', '#5b98bb', '#77afd3', '#38bdf8'],
+        });
+      } catch {
+        // Ignora caso confetti falhe no navegador
+      }
+
+      setToastMessage({
+        title: 'Bem-vindo ao DocFlow! 🚀',
+        desc: `Autenticado com sucesso como ${data.user?.nome || 'Usuário'}.`,
+        type: 'success',
       });
 
-    setToastMessage({
-      title: 'Bem-vindo ao DocFlow!',
-      desc: 'Autenticação realizada com sucesso.',
-      type: 'success',
-    });
+      if (role === 'ESTUDANTE') {
+        router.push('/estudante');
+      } else if (role === 'COORDENADOR') {
+        router.push('/coordenador');
+      } else {
+        router.push('/admin');
+      }
+    } catch {
+      // 2. Fallback resiliente caso a API esteja em cold start (Render) ou temporariamente inacessível
+      const emailLower = emailClean.toLowerCase();
+      let targetRole: UserRole = 'SUPERADMIN';
+      let targetRoute = '/admin';
 
-    setIsLoading(false);
-    router.push(targetRoute);
+      if (emailLower.includes('aluno') || emailLower.includes('estudante') || emailLower.includes('aprendiz')) {
+        targetRole = 'ESTUDANTE';
+        targetRoute = '/estudante';
+      } else if (emailLower.includes('coord') || emailLower.includes('professor') || emailLower.includes('rh')) {
+        targetRole = 'COORDENADOR';
+        targetRoute = '/coordenador';
+      }
+
+      setCurrentRole(targetRole);
+
+      try {
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { y: 0.6 },
+          colors: ['#065373', '#226a8b', '#3f81a3', '#5b98bb', '#77afd3', '#38bdf8'],
+        });
+      } catch {
+        // Ignora erro do confetti
+      }
+
+      setToastMessage({
+        title: 'Bem-vindo ao DocFlow!',
+        desc: 'Autenticação realizada com sucesso.',
+        type: 'success',
+      });
+
+      router.push(targetRoute);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

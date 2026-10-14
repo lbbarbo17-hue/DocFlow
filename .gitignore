@@ -23,6 +23,7 @@ alembic/versions/*.pyc
 .env.local
 .env.production
 .env.staging
+!.env.example
 
 # IDEs
 .idea/

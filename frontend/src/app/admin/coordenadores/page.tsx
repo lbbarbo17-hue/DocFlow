@@ -18,6 +18,10 @@ import {
   Building,
   PlusCircle,
   ShieldCheck,
+  KeyRound,
+  Eye,
+  EyeOff,
+  Check,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -58,6 +62,8 @@ export default function CadastrarCoordenadorPage() {
   // Form State - Coordenador
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [showSenha, setShowSenha] = useState(false);
   const [cargo, setCargo] = useState('Coordenador Acadêmico de Estágios');
   const [role, setRole] = useState<UserRole>('COORDENADOR');
   const [entitySelect, setEntitySelect] = useState(
@@ -108,7 +114,16 @@ export default function CadastrarCoordenadorPage() {
     if (!nome.trim() || !email.trim()) {
       setToastMessage({
         title: 'Campos Obrigatórios',
-        desc: 'Preencha o Nome Completo e o E-mail Profissional.',
+        desc: 'Preencha o Nome Completo e o E-mail de Acesso.',
+        type: 'error',
+      });
+      return;
+    }
+
+    if (!senha.trim() || senha.length < 6) {
+      setToastMessage({
+        title: 'Senha Obrigatória',
+        desc: 'Defina uma senha com no mínimo 6 caracteres para o usuário.',
         type: 'error',
       });
       return;
@@ -126,6 +141,7 @@ export default function CadastrarCoordenadorPage() {
     addNewSystemUser({
       nome: nome.trim(),
       email: email.trim(),
+      senha: senha.trim(),
       cargo: cargo.trim() || 'Coordenador / RH',
       role,
       instituicao: finalEntity,
@@ -135,6 +151,7 @@ export default function CadastrarCoordenadorPage() {
     // Reset Form
     setNome('');
     setEmail('');
+    setSenha('');
     setCargo('Coordenador Acadêmico de Estágios');
     setRole('COORDENADOR');
     setEntitySelect(availableInstitutions[0] || 'ETEC Politécnica de São Paulo');
@@ -234,172 +251,220 @@ export default function CadastrarCoordenadorPage() {
       {activeTab === 'COORDENADORES' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-fadeIn">
           {/* Left Column: Registration Form (5 cols on lg) */}
-          <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 sm:p-7 space-y-5 transition-colors">
-            <div className="border-b border-slate-200 dark:border-slate-800 pb-4">
-              <h3 className="font-bold text-base text-slate-950 dark:text-white flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-[#065373] dark:text-cyan-400" />
-                <span>Novo Coordenador ou RH</span>
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                Preencha os dados de credenciamento do operador no DocFlow
-              </p>
+          <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
+                  Novo Coordenador ou RH
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Credencie um gestor pedagógico ou operador de RH
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800/60">
+                <Check className="w-3 h-3" />
+                <span>Gestão</span>
+              </span>
             </div>
 
-            <form onSubmit={handleCoordinatorSubmit} className="space-y-4 text-xs">
-              {/* Nome Completo */}
-              <div className="space-y-1">
-                <label className="font-bold text-slate-900 dark:text-slate-100 block">
-                  Nome Completo *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ex: Profª. Mariana Alcantara ou Camila Peixoto"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                />
-              </div>
+            <form onSubmit={handleCoordinatorSubmit}>
+              <div className="p-6 space-y-6">
+                {/* Seção 1: Dados Pessoais & Login */}
+                <div className="space-y-4">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+                    1. Dados de Acesso
+                  </span>
 
-              {/* E-mail */}
-              <div className="space-y-1">
-                <label className="font-bold text-slate-900 dark:text-slate-100 block">
-                  E-mail Profissional *
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="email"
-                    required
-                    placeholder="coordenacao@etec.sp.gov.br ou rh@empresa.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                  />
-                </div>
-              </div>
-
-              {/* Cargo / Função */}
-              <div className="space-y-1">
-                <label className="font-bold text-slate-900 dark:text-slate-100 block">
-                  Cargo / Função na Entidade *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ex: Coordenador Pedagógico, Gestora de RH, Supervisor de Estágios"
-                  value={cargo}
-                  onChange={(e) => setCargo(e.target.value)}
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                {/* Perfil */}
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-900 dark:text-slate-100 block">
-                    Perfil de Acesso
-                  </label>
-                  <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value as UserRole)}
-                    className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3 py-2.5 text-slate-950 dark:text-white font-semibold focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 cursor-pointer"
-                  >
-                    <option value="COORDENADOR">Coordenador / RH (Isolado)</option>
-                    <option value="SUPERADMIN">Super Admin (Global)</option>
-                  </select>
-                </div>
-
-                {/* Status */}
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-900 dark:text-slate-100 block">
-                    Status
-                  </label>
-                  <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value as 'ATIVO' | 'INATIVO')}
-                    className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3 py-2.5 text-slate-950 dark:text-white font-semibold focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 cursor-pointer"
-                  >
-                    <option value="ATIVO">Ativo</option>
-                    <option value="INATIVO">Inativo</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Instituição ou Empresa Vinculada */}
-              {role !== 'SUPERADMIN' ? (
-                <div className="space-y-2 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-300 dark:border-slate-700">
-                  <div className="flex items-center justify-between">
-                    <label className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                      <Building2 className="w-3.5 h-3.5 text-[#065373] dark:text-cyan-400" />
-                      <span>Instituição ou Empresa a que Pertence:</span>
+                  {/* Nome Completo */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                      Nome Completo <span className="text-rose-500">*</span>
                     </label>
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-bold border border-amber-200 dark:border-amber-800">
-                      Isolamento Ativo
-                    </span>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ex: Profª. Mariana Alcantara ou Camila Peixoto"
+                      value={nome}
+                      onChange={(e) => setNome(e.target.value)}
+                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                    />
                   </div>
 
-                  <select
-                    value={entitySelect}
-                    onChange={(e) => setEntitySelect(e.target.value)}
-                    className="w-full bg-white dark:bg-slate-900 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3 py-2.5 text-slate-950 dark:text-white font-semibold focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 cursor-pointer"
-                  >
-                    <optgroup label="Instituições de Ensino / Polos">
-                      {availableInstitutions.map((inst) => (
-                        <option key={inst} value={inst}>
-                          🏫 {inst}
-                        </option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="Empresas Parceiras (RH Concedente)">
-                      {empresas.map((emp) => (
-                        <option key={emp.id} value={emp.razaoSocial}>
-                          🏢 {emp.nomeFantasia || emp.razaoSocial}
-                        </option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="Nova Entidade">
-                      <option value="__CUSTOM__">➕ Digitar Outra Instituição ou Empresa...</option>
-                    </optgroup>
-                  </select>
-
-                  {entitySelect === '__CUSTOM__' && (
-                    <div className="pt-2 animate-fadeIn">
+                  {/* E-mail */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                      E-mail de Login <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                       <input
-                        type="text"
+                        type="email"
                         required
-                        placeholder="Digite o nome completo da nova instituição ou empresa..."
-                        value={customEntity}
-                        onChange={(e) => setCustomEntity(e.target.value)}
-                        className="w-full bg-white dark:bg-slate-900 border-[1.5px] border-[#065373] dark:border-cyan-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-[#065373]"
+                        placeholder="coordenacao@etec.sp.gov.br ou rh@empresa.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full h-10 pl-9 pr-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                       />
                     </div>
+                  </div>
+
+                  {/* Senha */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                      <span>Senha de Acesso <span className="text-rose-500">*</span></span>
+                      <span className="text-[10px] text-slate-400">Mínimo 6 caracteres</span>
+                    </label>
+                    <div className="relative">
+                      <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        type={showSenha ? 'text' : 'password'}
+                        required
+                        placeholder="Defina a senha do operador..."
+                        value={senha}
+                        onChange={(e) => setSenha(e.target.value)}
+                        className="w-full h-10 pl-9 pr-10 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowSenha(!showSenha)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+                        title={showSenha ? 'Ocultar senha' : 'Ver senha'}
+                      >
+                        {showSenha ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Seção 2: Atribuição & Escopo */}
+                <div className="space-y-4">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+                    2. Cargo & Instituição
+                  </span>
+
+                  {/* Cargo */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                      Cargo ou Função na Entidade <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ex: Coordenador Pedagógico, Gestora de RH"
+                      value={cargo}
+                      onChange={(e) => setCargo(e.target.value)}
+                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                    />
+                  </div>
+
+                  {/* Grid Perfil e Status */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                        Nível de Acesso
+                      </label>
+                      <select
+                        value={role}
+                        onChange={(e) => setRole(e.target.value as UserRole)}
+                        className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
+                      >
+                        <option value="COORDENADOR">Coordenador / RH</option>
+                        <option value="SUPERADMIN">Super Admin (Global)</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                        Situação da Conta
+                      </label>
+                      <select
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value as 'ATIVO' | 'INATIVO')}
+                        className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
+                      >
+                        <option value="ATIVO">Ativo</option>
+                        <option value="INATIVO">Inativo</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Instituição Vinculada */}
+                  {role !== 'SUPERADMIN' ? (
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                        Instituição ou Empresa Vinculada
+                      </label>
+                      <select
+                        value={entitySelect}
+                        onChange={(e) => setEntitySelect(e.target.value)}
+                        className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
+                      >
+                        <optgroup label="Instituições de Ensino / Polos">
+                          {availableInstitutions.map((inst) => (
+                            <option key={inst} value={inst}>
+                              🏫 {inst}
+                            </option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="Empresas Parceiras (RH Concedente)">
+                          {empresas.map((emp) => (
+                            <option key={emp.id} value={emp.razaoSocial}>
+                              🏢 {emp.nomeFantasia || emp.razaoSocial}
+                            </option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="Nova Entidade">
+                          <option value="__CUSTOM__">➕ Digitar Outra Instituição ou Empresa...</option>
+                        </optgroup>
+                      </select>
+
+                      {entitySelect === '__CUSTOM__' && (
+                        <input
+                          type="text"
+                          required
+                          placeholder="Digite o nome da nova instituição..."
+                          value={customEntity}
+                          onChange={(e) => setCustomEntity(e.target.value)}
+                          className="w-full h-10 px-3 text-xs bg-white dark:bg-slate-900 border border-[#065373] dark:border-cyan-400 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373]"
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800/60 text-xs text-purple-900 dark:text-purple-200">
+                      <span className="font-bold flex items-center gap-1.5">
+                        <Shield className="w-3.5 h-3.5" />
+                        <span>Acesso Global</span>
+                      </span>
+                      <p className="text-[11px] text-purple-700 dark:text-purple-300 mt-0.5">
+                        Super administradores possuem visibilidade irrestrita sobre todas as entidades.
+                      </p>
+                    </div>
                   )}
-
-                  <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                    O coordenador terá acesso <strong>apenas</strong> aos aprendizes, estagiários e turmas pertencentes a esta entidade.
-                  </p>
                 </div>
-              ) : (
-                <div className="p-3.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-purple-900 dark:text-purple-200 text-xs">
-                  <p className="font-bold flex items-center gap-1.5">
-                    <Shield className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                    <span>Escopo Global Automático</span>
-                  </p>
-                  <p className="text-[11px] mt-1 text-purple-800 dark:text-purple-300">
-                    Super administradores têm visualização irrestrita sobre todas as instituições e empresas do ecossistema DocFlow.
-                  </p>
-                </div>
-              )}
+              </div>
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-[#0284c7] to-[#00b4d8] hover:from-sky-600 hover:to-sky-500 text-white font-extrabold text-xs shadow-lg shadow-[#0284c7]/25 hover:shadow-xl transition-all active:scale-98 disabled:opacity-50 cursor-pointer"
-              >
-                <UserPlus className="w-4 h-4" />
-                <span>{isSubmitting ? 'Cadastrando...' : 'Cadastrar Coordenador / RH'}</span>
-              </button>
+              {/* Footer */}
+              <div className="px-6 py-4 bg-slate-50/80 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNome('');
+                    setEmail('');
+                    setSenha('');
+                  }}
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                >
+                  Limpar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 dark:bg-cyan-500 dark:text-slate-950 dark:hover:bg-cyan-400 rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Cadastrando...' : 'Salvar Operador'}
+                </button>
+              </div>
             </form>
           </div>
 
@@ -554,22 +619,32 @@ export default function CadastrarCoordenadorPage() {
       {activeTab === 'EMPRESAS' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-fadeIn">
           {/* Left Column: Form de Cadastro de Empresa (5 cols on lg) */}
-          <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 sm:p-7 space-y-5 transition-colors">
-            <div className="border-b border-slate-200 dark:border-slate-800 pb-4">
-              <h3 className="font-bold text-base text-slate-950 dark:text-white flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                <span>Nova Empresa Concedente</span>
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                Cadastre empresas conveniadas para contratação de aprendizes e estagiários
-              </p>
+          <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm p-6 sm:p-7 space-y-6 transition-colors">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">
+                  <Building2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base text-slate-950 dark:text-white tracking-tight">
+                    Nova Empresa Concedente
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Cadastre empresas conveniadas para contratação
+                  </p>
+                </div>
+              </div>
+              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                Convênio Ativo
+              </span>
             </div>
 
             <form onSubmit={handleEmpresaSubmit} className="space-y-4 text-xs">
               {/* Razão Social */}
-              <div className="space-y-1">
-                <label className="font-bold text-slate-900 dark:text-slate-100 block">
-                  Razão Social *
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
+                  <span>Razão Social *</span>
+                  <span className="text-[10px] font-normal text-slate-400">Obrigatório</span>
                 </label>
                 <input
                   type="text"
@@ -577,13 +652,13 @@ export default function CadastrarCoordenadorPage() {
                   placeholder="Ex: TechCorp Soluções Digitais S.A."
                   value={razaoSocial}
                   onChange={(e) => setRazaoSocial(e.target.value)}
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-purple-600 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/70 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/30 dark:focus:ring-purple-400/30 focus:border-purple-600 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-slate-900 transition-all text-xs"
                 />
               </div>
 
               {/* Nome Fantasia */}
-              <div className="space-y-1">
-                <label className="font-bold text-slate-900 dark:text-slate-100 block">
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-800 dark:text-slate-200 block">
                   Nome Fantasia
                 </label>
                 <input
@@ -591,13 +666,13 @@ export default function CadastrarCoordenadorPage() {
                   placeholder="Ex: TechCorp Digital"
                   value={nomeFantasia}
                   onChange={(e) => setNomeFantasia(e.target.value)}
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-purple-600 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/70 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/30 dark:focus:ring-purple-400/30 focus:border-purple-600 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-slate-900 transition-all text-xs"
                 />
               </div>
 
               {/* CNPJ */}
-              <div className="space-y-1">
-                <label className="font-bold text-slate-900 dark:text-slate-100 block">
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-800 dark:text-slate-200 block">
                   CNPJ *
                 </label>
                 <input
@@ -607,14 +682,14 @@ export default function CadastrarCoordenadorPage() {
                   maxLength={18}
                   value={cnpj}
                   onChange={(e) => setCnpj(formatCNPJ(e.target.value))}
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-purple-600 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/70 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 rounded-xl px-3.5 py-2.5 font-mono text-slate-950 dark:text-white placeholder:text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/30 dark:focus:ring-purple-400/30 focus:border-purple-600 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-slate-900 transition-all text-xs"
                 />
               </div>
 
               {/* Ramo e Cidade */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-900 dark:text-slate-100 block">
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-800 dark:text-slate-200 block">
                     Ramo de Atuação
                   </label>
                   <input
@@ -622,12 +697,12 @@ export default function CadastrarCoordenadorPage() {
                     placeholder="Ex: Tecnologia"
                     value={ramoAtuacao}
                     onChange={(e) => setRamoAtuacao(e.target.value)}
-                    className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-purple-600 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                    className="w-full bg-slate-50/70 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/30 dark:focus:ring-purple-400/30 focus:border-purple-600 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-slate-900 transition-all text-xs"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-900 dark:text-slate-100 block">
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-800 dark:text-slate-200 block">
                     Cidade / UF
                   </label>
                   <input
@@ -635,14 +710,14 @@ export default function CadastrarCoordenadorPage() {
                     placeholder="Ex: São Paulo / SP"
                     value={cidadeUf}
                     onChange={(e) => setCidadeUf(e.target.value)}
-                    className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-purple-600 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                    className="w-full bg-slate-50/70 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/30 dark:focus:ring-purple-400/30 focus:border-purple-600 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-slate-900 transition-all text-xs"
                   />
                 </div>
               </div>
 
               {/* Contato RH */}
-              <div className="space-y-1">
-                <label className="font-bold text-slate-900 dark:text-slate-100 block">
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-800 dark:text-slate-200 block">
                   Responsável / Contato de RH
                 </label>
                 <input
@@ -650,14 +725,14 @@ export default function CadastrarCoordenadorPage() {
                   placeholder="Ex: Camila Peixoto (Gestora de RH)"
                   value={contatoRh}
                   onChange={(e) => setContatoRh(e.target.value)}
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-purple-600 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/70 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/30 dark:focus:ring-purple-400/30 focus:border-purple-600 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-slate-900 transition-all text-xs"
                 />
               </div>
 
               {/* E-mail e Telefone RH */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-900 dark:text-slate-100 block">
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-800 dark:text-slate-200 block">
                     E-mail do RH
                   </label>
                   <input
@@ -665,12 +740,12 @@ export default function CadastrarCoordenadorPage() {
                     placeholder="rh@empresa.com.br"
                     value={emailRh}
                     onChange={(e) => setEmailRh(e.target.value)}
-                    className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-purple-600 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                    className="w-full bg-slate-50/70 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/30 dark:focus:ring-purple-400/30 focus:border-purple-600 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-slate-900 transition-all text-xs"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-900 dark:text-slate-100 block">
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-800 dark:text-slate-200 block">
                     Telefone
                   </label>
                   <input
@@ -679,19 +754,21 @@ export default function CadastrarCoordenadorPage() {
                     maxLength={15}
                     value={telefone}
                     onChange={(e) => setTelefone(formatPhone(e.target.value))}
-                    className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-purple-600 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                    className="w-full bg-slate-50/70 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/30 dark:focus:ring-purple-400/30 focus:border-purple-600 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-slate-900 transition-all text-xs"
                   />
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={isSubmittingEmpresa}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-purple-700 to-indigo-600 hover:from-purple-800 hover:to-indigo-700 text-white font-extrabold text-xs shadow-lg shadow-purple-600/25 hover:shadow-xl transition-all active:scale-98 disabled:opacity-50 cursor-pointer"
-              >
-                <PlusCircle className="w-4 h-4" />
-                <span>{isSubmittingEmpresa ? 'Cadastrando...' : 'Cadastrar Empresa Conveniada'}</span>
-              </button>
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={isSubmittingEmpresa}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-purple-700 to-indigo-600 hover:from-purple-800 hover:to-indigo-700 text-white font-bold text-xs shadow-md shadow-purple-600/20 hover:shadow-lg transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>{isSubmittingEmpresa ? 'Cadastrando...' : 'Cadastrar Empresa Parceira'}</span>
+                </button>
+              </div>
             </form>
           </div>
 

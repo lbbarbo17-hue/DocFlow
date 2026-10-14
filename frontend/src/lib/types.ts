@@ -68,6 +68,7 @@ export interface Student {
   nome: string;
   cpf: string;
   email: string;
+  senha?: string;
   telefone?: string;
   matricula: string;
   tipoVinculo: TipoVinculo;

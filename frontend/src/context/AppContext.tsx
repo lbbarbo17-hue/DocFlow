@@ -73,6 +73,7 @@ interface AppContextType {
   addNewSystemUser: (data: {
     nome: string;
     email: string;
+    senha?: string;
     cargo: string;
     role: UserRole;
     instituicao: string;
@@ -82,6 +83,7 @@ interface AppContextType {
     nome: string;
     cpf: string;
     email: string;
+    senha?: string;
     matricula: string;
     tipoVinculo: TipoVinculo;
     dataAdmissao?: string;
@@ -534,6 +536,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addNewSystemUser = (data: {
     nome: string;
     email: string;
+    senha?: string;
     cargo: string;
     role: UserRole;
     instituicao: string;
@@ -594,6 +597,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     nome: string;
     cpf: string;
     email: string;
+    senha?: string;
     matricula: string;
     tipoVinculo: TipoVinculo;
     dataAdmissao?: string;
@@ -614,6 +618,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       nome: data.nome,
       cpf: data.cpf,
       email: data.email,
+      senha: data.senha,
       matricula: data.matricula,
       tipoVinculo: data.tipoVinculo,
       dataAdmissao: data.dataAdmissao || new Date().toISOString().split('T')[0],

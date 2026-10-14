@@ -19,15 +19,6 @@ import {
   GraduationCap,
   Briefcase,
   Mail,
-  Calendar,
-  Layers,
-  Sparkles,
-  User,
-  CreditCard,
-  Hash,
-  Clock,
-  ChevronRight,
-  Info,
 } from 'lucide-react';
 
 const formatCPF = (val: string) => {

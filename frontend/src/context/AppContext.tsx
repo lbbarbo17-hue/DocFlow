@@ -93,7 +93,7 @@ interface AppContextType {
     instituicao?: string;
   }) => Student;
   selectStudent: (studentId: string) => void;
-  loginUser: (email: string) => { role: UserRole; route: string; user?: any };
+  loginUser: (email: string) => { role: UserRole; route: string; user?: SystemUser | Student };
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -155,7 +155,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ultimoAcesso: 'Hoje às 15:00',
       }
     );
-  }, [systemUsers, activeInstitution]);
+  }, [systemUsers, activeInstitution, activeCoordinatorUserId]);
 
   // Filtered lists based on tenant role and active institution
   const allStudentsList = rawStudentsList;
@@ -1015,7 +1015,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return true;
   };
 
-  const loginUser = (email: string): { role: UserRole; route: string; user?: any } => {
+  const loginUser = (
+    email: string
+  ): { role: UserRole; route: string; user?: SystemUser | Student } => {
     const emailClean = email.trim().toLowerCase();
 
     // 1. Procurar em operadores cadastrados (em memória ou no localStorage)

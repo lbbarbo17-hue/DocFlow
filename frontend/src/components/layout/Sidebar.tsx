@@ -240,6 +240,7 @@ export default function Sidebar() {
           <div className="relative shrink-0">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#226a8b] via-[#3f81a3] to-[#77afd3] text-white flex items-center justify-center font-black text-xs shadow-md border-2 border-white/20 overflow-hidden group-hover:border-white transition-all">
               {currentUserProfile.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={currentUserProfile.avatarUrl}
                   alt={currentUserProfile.nome}

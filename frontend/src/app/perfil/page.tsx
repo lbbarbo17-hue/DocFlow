@@ -226,6 +226,7 @@ export default function PerfilPage() {
           <div className="relative inline-block mx-auto group">
             <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-gradient-to-br from-[#065373] via-[#0284c7] to-[#00b4d8] border-4 border-white dark:border-slate-800 shadow-xl flex items-center justify-center text-white font-black text-3xl mx-auto relative">
               {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={avatarUrl}
                   alt={nome}

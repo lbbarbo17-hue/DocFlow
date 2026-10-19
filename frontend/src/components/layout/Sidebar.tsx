@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import {
   UserCheck,
@@ -22,6 +22,7 @@ import { cn, scrollToTop } from '@/lib/utils';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const {
     currentRole,
     student,
@@ -29,6 +30,7 @@ export default function Sidebar() {
     closeSidebar,
     activeInstitution,
     currentUserProfile,
+    logout,
   } = useApp();
 
   // Pending docs for student
@@ -288,14 +290,17 @@ export default function Sidebar() {
           </div>
         </Link>
 
-        {/* Logout Button */}
-        <Link
-          href="/login"
-          className="flex items-center justify-center gap-2 w-full py-2 rounded-xl text-xs font-bold text-rose-200 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/40 transition-colors shadow-xs"
+        <button
+          type="button"
+          onClick={() => {
+            logout();
+            router.push('/login');
+          }}
+          className="flex items-center justify-center gap-2 w-full py-2 rounded-xl text-xs font-bold text-rose-200 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/40 transition-colors shadow-xs cursor-pointer"
         >
           <LogOut className="w-3.5 h-3.5 text-rose-400" />
           <span>Encerrar Sessão</span>
-        </Link>
+        </button>
       </div>
     </aside>
   );

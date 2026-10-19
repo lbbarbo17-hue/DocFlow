@@ -92,12 +92,39 @@ interface AppContextType {
   }) => Student;
   selectStudent: (studentId: string) => void;
   setSystemUsers: React.Dispatch<React.SetStateAction<SystemUser[]>>;
+  logout: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [currentRole, setCurrentRole] = useState<UserRole>('SUPERADMIN');
+  const [currentRole, setCurrentRoleState] = useState<UserRole>('SUPERADMIN');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedRole = localStorage.getItem('docflow_user_role') as UserRole | null;
+      if (savedRole && (savedRole === 'SUPERADMIN' || savedRole === 'COORDENADOR' || savedRole === 'ESTUDANTE')) {
+        setCurrentRoleState(savedRole);
+      }
+    }
+  }, []);
+
+  const setCurrentRole = (role: UserRole) => {
+    setCurrentRoleState(role);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('docflow_user_role', role);
+    }
+  };
+
+  const logout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('docflow_access_token');
+      localStorage.removeItem('docflow_tenant_id');
+      localStorage.removeItem('docflow_current_user');
+      localStorage.removeItem('docflow_user_role');
+    }
+    setCurrentRoleState('ESTUDANTE');
+  };
   const [student, setStudent] = useState<Student>(CURRENT_STUDENT);
   const [rawStudentsList, setRawStudentsList] = useState<Student[]>(INITIAL_STUDENTS);
   const [rawTurmas, setRawTurmas] = useState<Turma[]>(INITIAL_TURMAS);
@@ -944,6 +971,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addNewEmpresa,
         addNewStudent,
         selectStudent,
+        logout,
       }}
     >
       {children}

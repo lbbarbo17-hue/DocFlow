@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { UserRole } from '@/lib/types';
-import { authApi, setAuthToken, setTenantId } from '@/lib/api';
+import { authApi, setAuthToken, setTenantId, ApiError } from '@/lib/api';
 import confetti from 'canvas-confetti';
 import {
   Lock,
@@ -22,7 +22,7 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setCurrentRole, setToastMessage } = useApp();
+  const { setCurrentRole, setToastMessage, systemUsers } = useApp();
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -57,7 +57,6 @@ export default function LoginPage() {
     const emailClean = identifier.trim();
 
     try {
-      // 1. Tenta autenticar na API real (FastAPI + Supabase)
       const data = await authApi.login(emailClean, password);
       setAuthToken(data.access_token);
       if (data.user?.tenant_id) {
@@ -83,7 +82,6 @@ export default function LoginPage() {
           colors: ['#065373', '#226a8b', '#3f81a3', '#5b98bb', '#77afd3', '#38bdf8'],
         });
       } catch {
-        // Ignora caso confetti falhe no navegador
       }
 
       setToastMessage({
@@ -99,16 +97,44 @@ export default function LoginPage() {
       } else {
         router.push('/admin');
       }
-    } catch {
-      // 2. Fallback resiliente caso a API esteja em cold start (Render) ou temporariamente inacessível
-      const emailLower = emailClean.toLowerCase();
-      let targetRole: UserRole = 'SUPERADMIN';
-      let targetRoute = '/admin';
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setToastMessage({
+          title: 'Falha na Autenticação',
+          desc: err.message || 'Credenciais inválidas no DocFlow.',
+          type: 'error',
+        });
+        return;
+      }
 
-      if (emailLower.includes('aluno') || emailLower.includes('estudante') || emailLower.includes('aprendiz')) {
-        targetRole = 'ESTUDANTE';
-        targetRoute = '/estudante';
-      } else if (emailLower.includes('coord') || emailLower.includes('professor') || emailLower.includes('rh')) {
+      const emailLower = emailClean.toLowerCase();
+      const matchedUser = systemUsers.find(
+        (u) => u.email.toLowerCase() === emailLower
+      );
+
+      let targetRole: UserRole = 'ESTUDANTE';
+      let targetRoute = '/estudante';
+
+      if (matchedUser) {
+        targetRole = matchedUser.role;
+        targetRoute =
+          matchedUser.role === 'SUPERADMIN'
+            ? '/admin'
+            : matchedUser.role === 'COORDENADOR'
+            ? '/coordenador'
+            : '/estudante';
+      } else if (
+        emailLower.includes('admin') ||
+        emailLower === 'admin@docflow.com.br'
+      ) {
+        targetRole = 'SUPERADMIN';
+        targetRoute = '/admin';
+      } else if (
+        emailLower.includes('coord') ||
+        emailLower.includes('professor') ||
+        emailLower.includes('docente') ||
+        emailLower.includes('rh')
+      ) {
         targetRole = 'COORDENADOR';
         targetRoute = '/coordenador';
       }
@@ -123,13 +149,12 @@ export default function LoginPage() {
           colors: ['#065373', '#226a8b', '#3f81a3', '#5b98bb', '#77afd3', '#38bdf8'],
         });
       } catch {
-        // Ignora erro do confetti
       }
 
       setToastMessage({
-        title: 'Bem-vindo ao DocFlow!',
-        desc: 'Autenticação realizada com sucesso.',
-        type: 'success',
+        title: 'Bem-vindo ao DocFlow! (Modo Demonstração)',
+        desc: 'Autenticação realizada com sucesso no ambiente local.',
+        type: 'info',
       });
 
       router.push(targetRoute);

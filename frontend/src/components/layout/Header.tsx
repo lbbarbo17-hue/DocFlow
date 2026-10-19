@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import {
   CheckCircle2,
@@ -18,6 +18,7 @@ import {
 import { cn } from '@/lib/utils';
 
 export default function Header() {
+  const router = useRouter();
   const {
     currentRole,
     student,
@@ -32,6 +33,7 @@ export default function Header() {
     toggleTheme,
     isSidebarOpen,
     toggleSidebar,
+    logout,
   } = useApp();
 
   return (
@@ -148,15 +150,18 @@ export default function Header() {
             )}
           </button>
 
-          {/* Logout Button */}
-          <Link
-            href="/login"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-800/60 transition-colors shadow-2xs"
+          <button
+            type="button"
+            onClick={() => {
+              logout();
+              router.push('/login');
+            }}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-800/60 transition-colors shadow-2xs cursor-pointer"
             title="Encerrar sessão e trocar de conta"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Sair</span>
-          </Link>
+          </button>
         </div>
       </div>
 

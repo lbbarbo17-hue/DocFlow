@@ -22,7 +22,7 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setCurrentRole, setToastMessage, systemUsers } = useApp();
+  const { setCurrentRole, setToastMessage, systemUsers, studentsList, selectStudent } = useApp();
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -91,6 +91,12 @@ export default function LoginPage() {
       });
 
       if (role === 'ESTUDANTE') {
+        const matched = studentsList.find(
+          (s) => s.email.toLowerCase() === emailClean.toLowerCase()
+        );
+        if (matched) {
+          selectStudent(matched.id);
+        }
         router.push('/estudante');
       } else if (role === 'COORDENADOR') {
         router.push('/coordenador');

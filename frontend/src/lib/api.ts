@@ -208,6 +208,9 @@ export const authApi = {
 };
 
 export const documentosApi = {
+  listAll: async (skip = 0, limit = 100): Promise<DocumentoResponse[]> => {
+    return apiRequest<DocumentoResponse[]>(`/documentos?skip=${skip}&limit=${limit}`);
+  },
   listByAluno: async (alunoId: string): Promise<DocumentoResponse[]> => {
     return apiRequest<DocumentoResponse[]>(`/documentos/aluno/${alunoId}`);
   },
@@ -219,6 +222,11 @@ export const documentosApi = {
   },
   getDownloadUrl: async (docId: string): Promise<{ download_url: string }> => {
     return apiRequest<{ download_url: string }>(`/documentos/${docId}/download-url`);
+  },
+  delete: async (docId: string): Promise<{ message: string }> => {
+    return apiRequest<{ message: string }>(`/documentos/${docId}`, {
+      method: 'DELETE',
+    });
   },
   validate: async (
     docId: string,
@@ -232,6 +240,30 @@ export const documentosApi = {
       method: 'POST',
       body: JSON.stringify(payload),
     });
+  },
+};
+
+export interface HealthConnectionsResponse {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  database: {
+    connected: boolean;
+    latency_ms: number;
+    provider: string;
+  };
+  auth: {
+    connected: boolean;
+    provider: string;
+  };
+  storage: {
+    connected: boolean;
+    bucket: string;
+    provider: string;
+  };
+}
+
+export const healthApi = {
+  checkConnections: async (): Promise<HealthConnectionsResponse> => {
+    return apiRequest<HealthConnectionsResponse>('/health/connections');
   },
 };
 

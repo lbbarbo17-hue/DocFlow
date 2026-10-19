@@ -17,6 +17,7 @@ import {
   UserPlus,
   Settings,
   History,
+  HardDrive,
 } from 'lucide-react';
 import { cn, scrollToTop } from '@/lib/utils';
 
@@ -105,6 +106,11 @@ export default function Sidebar() {
         label: 'Coordenadores & Empresas',
         href: '/admin/coordenadores',
         icon: UserPlus,
+      },
+      {
+        label: 'Arquivos & Conexões',
+        href: '/admin/arquivos',
+        icon: HardDrive,
       },
       {
         label: 'Histórico de Atividades',

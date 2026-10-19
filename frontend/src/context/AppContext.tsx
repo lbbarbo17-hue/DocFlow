@@ -91,6 +91,7 @@ interface AppContextType {
     instituicao?: string;
   }) => Student;
   selectStudent: (studentId: string) => void;
+  setSystemUsers: React.Dispatch<React.SetStateAction<SystemUser[]>>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -907,6 +908,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         allTurmas,
         empresas,
         systemUsers,
+        setSystemUsers,
         auditLogs,
         activeInstitution,
         setActiveInstitution,

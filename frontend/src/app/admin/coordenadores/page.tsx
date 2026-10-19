@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { UserRole } from '@/lib/types';
 import { authApi, getTenantId } from '@/lib/api';
@@ -12,6 +12,7 @@ import {
   Users,
   CheckCircle2,
   Mail,
+  Lock,
   GraduationCap,
   Briefcase,
   Search,
@@ -46,6 +47,7 @@ const formatPhone = (val: string) => {
 export default function CadastrarCoordenadorPage() {
   const {
     systemUsers,
+    setSystemUsers,
     addNewSystemUser,
     updateUserRole,
     availableInstitutions,
@@ -66,12 +68,47 @@ export default function CadastrarCoordenadorPage() {
 
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
   const [cargo, setCargo] = useState('');
   const [role, setRole] = useState<UserRole>('COORDENADOR');
   const [entitySelect, setEntitySelect] = useState('ETEC Politécnica de São Paulo');
   const [customEntity, setCustomEntity] = useState('');
   const [status, setStatus] = useState<'ATIVO' | 'INATIVO'>('ATIVO');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadCoordinators() {
+      try {
+        const users = await authApi.listUsers();
+        if (!isMounted) return;
+        setSystemUsers((prev) => {
+          const newUsers: typeof prev = [];
+          users.forEach((u) => {
+            if (u.perfil === 'COORDENADOR' && !prev.some((su) => su.email === u.email)) {
+              newUsers.push({
+                id: u.id,
+                nome: u.nome,
+                email: u.email,
+                role: 'COORDENADOR',
+                cargo: 'Coordenador Acadêmico de Estágios',
+                instituicao: 'ETEC Politécnica de São Paulo',
+                status: u.ativo ? 'ATIVO' : 'INATIVO',
+                ultimoAcesso: 'Recentemente',
+              });
+            }
+          });
+          if (newUsers.length === 0) return prev;
+          return [...prev, ...newUsers];
+        });
+      } catch {
+      }
+    }
+    loadCoordinators();
+    return () => {
+      isMounted = false;
+    };
+  }, [setSystemUsers]);
 
   // Search Filter for Coordinator List
   const [searchTerm, setSearchTerm] = useState('');
@@ -138,7 +175,7 @@ export default function CadastrarCoordenadorPage() {
         email: email.trim(),
         nome: nome.trim(),
         perfil: perfilApi,
-        senha: 'DocFlow@2026',
+        senha: senha.trim() || 'DocFlow@2026',
       });
     } catch {
     }
@@ -154,6 +191,7 @@ export default function CadastrarCoordenadorPage() {
 
     setNome('');
     setEmail('');
+    setSenha('');
     setCargo('');
     setRole('COORDENADOR');
     setEntitySelect(institutionsList[0] || 'ETEC Politécnica de São Paulo');
@@ -280,7 +318,6 @@ export default function CadastrarCoordenadorPage() {
                 />
               </div>
 
-              {/* E-mail */}
               <div className="space-y-1">
                 <label className="font-bold text-slate-900 dark:text-slate-100 block">
                   E-mail Profissional *
@@ -293,6 +330,24 @@ export default function CadastrarCoordenadorPage() {
                     placeholder="coordenacao@etec.sp.gov.br ou rh@empresa.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-slate-900 dark:text-slate-100 block">
+                  Senha Provisória de Acesso *
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="password"
+                    required
+                    placeholder="Mínimo 6 caracteres (Ex: Coord@2026)"
+                    value={senha}
+                    onChange={(e) => setSenha(e.target.value)}
+                    minLength={6}
                     className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                   />
                 </div>

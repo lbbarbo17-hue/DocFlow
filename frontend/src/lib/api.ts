@@ -191,6 +191,9 @@ export const authApi = {
   getMe: async (): Promise<AuthUserResponse> => {
     return apiRequest<AuthUserResponse>('/auth/me');
   },
+  listUsers: async (): Promise<AuthUserResponse[]> => {
+    return apiRequest<AuthUserResponse[]>('/auth/users');
+  },
   uploadAvatar: async (file: File): Promise<AuthUserResponse> => {
     const formData = new FormData();
     formData.append('file', file);

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { TipoVinculo } from '@/lib/types';
@@ -24,6 +24,24 @@ const formatCPF = (val: string) => {
     .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 };
 
+const DEFAULT_EMPRESAS_GRUPO = [
+  'TechCorp Soluções Digitais S.A.',
+  'Inovação & Sistemas Brasil Ltda',
+  'Alpha Logística & Distribuição',
+  'Nexus Engenharia e Projetos',
+  'Banco Itaú Unibanco S.A.',
+  'Ambev Brasil S.A.',
+  'Accenture Soluções Tecnológicas',
+  'Hospital & Centro Médico São Luiz',
+];
+
+const DEFAULT_TURMAS = [
+  { id: 'turma-ds-01', codigo: 'DS-2026.1', nomeCurso: 'Técnico em Desenvolvimento de Sistemas' },
+  { id: 'turma-adm-01', codigo: 'ADM-2026.1', nomeCurso: 'Técnico em Administração' },
+  { id: 'turma-log-01', codigo: 'LOG-2026.1', nomeCurso: 'Técnico em Logística' },
+  { id: 'turma-rh-01', codigo: 'RH-2026.1', nomeCurso: 'Técnico em Recursos Humanos' },
+];
+
 export default function CadastroPage() {
   const router = useRouter();
   const {
@@ -39,15 +57,37 @@ export default function CadastroPage() {
 
   const [activeTab, setActiveTab] = useState<'ALUNO' | 'TURMA'>('ALUNO');
 
-  // Form - Aluno
+  const companiesList = useMemo(() => {
+    const set = new Set<string>(DEFAULT_EMPRESAS_GRUPO);
+    empresas.forEach((e) => {
+      if (e.razaoSocial) set.add(e.razaoSocial);
+    });
+    return Array.from(set);
+  }, [empresas]);
+
+  const availableTurmasList = useMemo(() => {
+    if (turmas.length > 0) return turmas;
+    return DEFAULT_TURMAS.map((dt) => ({
+      ...dt,
+      periodo: '2026.1 - Manhã',
+      instituicao: activeInstitution,
+      totalAlunos: 0,
+      alunosEmRisco: 0,
+      alunosRegulares: 0,
+      conformidadeMedia: 100,
+    }));
+  }, [turmas, activeInstitution]);
+
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
   const [email, setEmail] = useState('');
   const [matricula, setMatricula] = useState('');
   const [tipoVinculo, setTipoVinculo] = useState<TipoVinculo>('APRENDIZ');
-  const [turmaId, setTurmaId] = useState(turmas[0]?.id || '');
-  const [curso, setCurso] = useState(turmas[0]?.nomeCurso || 'Técnico em Desenvolvimento de Sistemas');
-  const [empresa, setEmpresa] = useState(empresas[0]?.razaoSocial || 'TechCorp Soluções Digitais S.A.');
+  const [turmaSelect, setTurmaSelect] = useState<string>(availableTurmasList[0]?.id || 'turma-ds-01');
+  const [customTurma, setCustomTurma] = useState<string>('');
+  const [curso, setCurso] = useState(availableTurmasList[0]?.nomeCurso || 'Técnico em Desenvolvimento de Sistemas');
+  const [empresaSelect, setEmpresaSelect] = useState<string>(companiesList[0] || 'TechCorp Soluções Digitais S.A.');
+  const [customEmpresa, setCustomEmpresa] = useState<string>('');
   const [instituicao, setInstituicao] = useState(activeInstitution);
   const [instituicaoTurma, setInstituicaoTurma] = useState(activeInstitution);
   const [dataAdmissao, setDataAdmissao] = useState(
@@ -55,17 +95,18 @@ export default function CadastroPage() {
   );
   const [isSubmittingAluno, setIsSubmittingAluno] = useState(false);
 
-  // Form - Turma
   const [codigoTurma, setCodigoTurma] = useState('');
   const [nomeCursoTurma, setNomeCursoTurma] = useState('');
   const [periodoTurma, setPeriodoTurma] = useState('2026.2 - Manhã');
   const [isSubmittingTurma, setIsSubmittingTurma] = useState(false);
 
   const handleTurmaChange = (newTurmaId: string) => {
-    setTurmaId(newTurmaId);
-    const selected = turmas.find((t) => t.id === newTurmaId);
-    if (selected) {
-      setCurso(selected.nomeCurso);
+    setTurmaSelect(newTurmaId);
+    if (newTurmaId !== '__CUSTOM_TURMA__') {
+      const selected = availableTurmasList.find((t) => t.id === newTurmaId);
+      if (selected) {
+        setCurso(selected.nomeCurso);
+      }
     }
   };
 
@@ -79,6 +120,21 @@ export default function CadastroPage() {
       });
       return;
     }
+
+    const finalTurmaId =
+      turmaSelect === '__CUSTOM_TURMA__'
+        ? `turma-custom-${Date.now()}`
+        : turmaSelect;
+
+    const finalCurso =
+      turmaSelect === '__CUSTOM_TURMA__'
+        ? customTurma.trim() || 'Curso Técnico'
+        : curso;
+
+    const finalEmpresa =
+      empresaSelect === '__CUSTOM__'
+        ? customEmpresa.trim() || 'Empresa Concedente'
+        : empresaSelect;
 
     setIsSubmittingAluno(true);
     const cleanEmail = email.trim() || `${nome.toLowerCase().replace(/\s+/g, '.')}@aluno.com.br`;
@@ -100,9 +156,9 @@ export default function CadastroPage() {
       email: cleanEmail,
       matricula: matricula.trim(),
       tipoVinculo,
-      turmaId,
-      curso,
-      empresa: empresa || 'Empresa Parceira',
+      turmaId: finalTurmaId,
+      curso: finalCurso,
+      empresa: finalEmpresa,
       instituicao: currentRole === 'COORDENADOR' ? activeInstitution : instituicao,
       dataAdmissao,
     });
@@ -154,7 +210,6 @@ export default function CadastroPage() {
 
   return (
     <div className="max-w-2xl mx-auto py-2 px-2 sm:px-0 animate-fadeIn space-y-6">
-      {/* Page Header Banner */}
       <PageBanner
         title="Cadastro & Admissão"
         icon={UserPlus}
@@ -171,7 +226,6 @@ export default function CadastroPage() {
         }}
       />
 
-      {/* Tab Switcher */}
       <div className="flex bg-slate-100 dark:bg-slate-800/60 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <button
           type="button"
@@ -206,12 +260,9 @@ export default function CadastroPage() {
         </button>
       </div>
 
-      {/* Main Form Container */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 sm:p-8">
-        {/* TAB 1: ESTUDANTE */}
         {activeTab === 'ALUNO' && (
           <form onSubmit={handleAlunoSubmit} className="space-y-5">
-            {/* Vínculo Switch */}
             <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-xl border border-slate-200/80 dark:border-slate-800">
               <button
                 type="button"
@@ -239,7 +290,6 @@ export default function CadastroPage() {
               </button>
             </div>
 
-            {/* Inputs Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div className="sm:col-span-2">
                 <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
@@ -302,17 +352,37 @@ export default function CadastroPage() {
                   Turma
                 </label>
                 <select
-                  required
-                  value={turmaId}
+                  value={turmaSelect}
                   onChange={(e) => handleTurmaChange(e.target.value)}
                   className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all cursor-pointer"
                 >
-                  {turmas.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.codigo} — {t.nomeCurso}
-                    </option>
-                  ))}
+                  <optgroup label="Turmas Disponíveis">
+                    {availableTurmasList.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.codigo} — {t.nomeCurso}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <option value="__CUSTOM_TURMA__">
+                    + Informar Outra Turma / Curso (Digitação Livre)
+                  </option>
                 </select>
+
+                {turmaSelect === '__CUSTOM_TURMA__' && (
+                  <div className="mt-2.5">
+                    <input
+                      type="text"
+                      required
+                      value={customTurma}
+                      onChange={(e) => {
+                        setCustomTurma(e.target.value);
+                        setCurso(e.target.value);
+                      }}
+                      placeholder="Código e Nome da Turma (Ex: DS-2026 / Redes) *"
+                      className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                    />
+                  </div>
+                )}
               </div>
 
               <div>
@@ -332,16 +402,34 @@ export default function CadastroPage() {
                   Empresa Concedente
                 </label>
                 <select
-                  value={empresa}
-                  onChange={(e) => setEmpresa(e.target.value)}
+                  value={empresaSelect}
+                  onChange={(e) => setEmpresaSelect(e.target.value)}
                   className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all cursor-pointer"
                 >
-                  {empresas.map((emp) => (
-                    <option key={emp.id} value={emp.razaoSocial}>
-                      {emp.razaoSocial}
-                    </option>
-                  ))}
+                  <optgroup label="Empresas Parceiras do Grupo">
+                    {companiesList.map((empNome) => (
+                      <option key={empNome} value={empNome}>
+                        {empNome}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <option value="__CUSTOM__">
+                    + Informar Outra Empresa Concedente (Digitação Livre)
+                  </option>
                 </select>
+
+                {empresaSelect === '__CUSTOM__' && (
+                  <div className="mt-2.5">
+                    <input
+                      type="text"
+                      required
+                      value={customEmpresa}
+                      onChange={(e) => setCustomEmpresa(e.target.value)}
+                      placeholder="Digite a Razão Social da Empresa Concedente *"
+                      className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white placeholder:text-slate-500 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="sm:col-span-2">
@@ -374,7 +462,6 @@ export default function CadastroPage() {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
@@ -394,7 +481,6 @@ export default function CadastroPage() {
           </form>
         )}
 
-        {/* TAB 2: TURMA */}
         {activeTab === 'TURMA' && (
           <form onSubmit={handleTurmaSubmit} className="space-y-4 text-xs">
             <div>

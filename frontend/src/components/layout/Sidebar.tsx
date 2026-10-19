@@ -275,7 +275,7 @@ export default function Sidebar() {
                   ? student.instituicao || (student.tipoVinculo === 'APRENDIZ' ? 'Jovem Aprendiz' : 'Estagiário')
                   : currentRole === 'COORDENADOR'
                   ? activeInstitution
-                  : 'Escopo Global (Multi-Instituição)'
+                  : 'Super Administrador (Global)'
               }
             >
               {currentRole === 'ESTUDANTE'
@@ -284,7 +284,7 @@ export default function Sidebar() {
                   : 'Estagiário'
                 : currentRole === 'COORDENADOR'
                 ? activeInstitution
-                : 'Escopo Global (Multi-Instituição)'}
+                : 'Super Administrador (Global)'}
             </span>
           </div>
         </Link>

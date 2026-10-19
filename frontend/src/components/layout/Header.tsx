@@ -13,7 +13,6 @@ import {
   Menu,
   LogOut,
   Building2,
-  Shield,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,8 +22,6 @@ export default function Header() {
     student,
     activeInstitution,
     setActiveInstitution,
-    superAdminInstitutionFilter,
-    setSuperAdminInstitutionFilter,
     availableInstitutions,
     toastMessage,
     setToastMessage,
@@ -93,37 +90,7 @@ export default function Header() {
             </div>
           )}
 
-          {/* Scope Selector for Super Admin */}
-          {currentRole === 'SUPERADMIN' && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-purple-200 dark:border-purple-800/80 bg-purple-50/70 dark:bg-purple-950/40 text-xs shadow-2xs">
-              <Shield className="w-3.5 h-3.5 text-purple-700 dark:text-purple-400 shrink-0" />
-              <span className="font-semibold text-purple-800 dark:text-purple-300 hidden md:inline">
-                Escopo:
-              </span>
-              <select
-                value={superAdminInstitutionFilter}
-                onChange={(e) => setSuperAdminInstitutionFilter(e.target.value)}
-                className="bg-transparent font-bold text-purple-900 dark:text-purple-200 text-xs focus:outline-none cursor-pointer max-w-[200px] sm:max-w-none truncate"
-                title="Filtrar visão por instituição ou manter visão global"
-              >
-                <option
-                  value="ALL"
-                  className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
-                >
-                  Todas as Instituições (Global)
-                </option>
-                {availableInstitutions.map((inst) => (
-                  <option
-                    key={inst}
-                    value={inst}
-                    className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
-                  >
-                    {inst}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+
 
           {/* Student Institution Indicator */}
           {currentRole === 'ESTUDANTE' && student.instituicao && (

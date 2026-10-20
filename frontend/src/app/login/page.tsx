@@ -3,9 +3,9 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useApp } from '@/context/AppContext';
+import { useApp, mapAlunoResponseToStudent } from '@/context/AppContext';
 import { UserRole } from '@/lib/types';
-import { authApi, setAuthToken, setTenantId, ApiError } from '@/lib/api';
+import { authApi, alunosApi, documentosApi, setAuthToken, setTenantId, ApiError } from '@/lib/api';
 import confetti from 'canvas-confetti';
 import {
   Lock,
@@ -22,7 +22,7 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setCurrentRole, setToastMessage, systemUsers, studentsList, selectStudent } = useApp();
+  const { setCurrentRole, setToastMessage, systemUsers, setStudentDirect } = useApp();
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -30,7 +30,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  // Dynamic Password Strength Meter
   const calculatePasswordStrength = (pass: string) => {
     if (!pass) return 0;
     let score = 0;
@@ -72,6 +71,11 @@ export default function LoginPage() {
         role = 'ESTUDANTE';
       }
 
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('docflow_current_user', JSON.stringify(data.user));
+        localStorage.setItem('docflow_user_role', role);
+      }
+
       setCurrentRole(role);
 
       try {
@@ -91,11 +95,19 @@ export default function LoginPage() {
       });
 
       if (role === 'ESTUDANTE') {
-        const matched = studentsList.find(
-          (s) => s.email.toLowerCase() === emailClean.toLowerCase()
-        );
-        if (matched) {
-          selectStudent(matched.id);
+        try {
+          const [alunos, docs] = await Promise.all([
+            alunosApi.list().catch(() => []),
+            documentosApi.listAll().catch(() => []),
+          ]);
+          const matched = alunos.find(
+            (a) => a.email.toLowerCase() === emailClean.toLowerCase()
+          );
+          if (matched) {
+            const mapped = mapAlunoResponseToStudent(matched, docs);
+            setStudentDirect(mapped);
+          }
+        } catch {
         }
         router.push('/estudante');
       } else if (role === 'COORDENADOR') {

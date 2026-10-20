@@ -91,6 +91,9 @@ export interface AlunoResponse {
   email: string;
   matricula: string;
   status: string;
+  turma_id?: string | null;
+  instituicao_id?: string | null;
+  empresa_id?: string | null;
   avatar_path?: string | null;
   ativo: boolean;
 }

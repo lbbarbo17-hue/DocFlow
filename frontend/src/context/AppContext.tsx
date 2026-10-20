@@ -22,6 +22,126 @@ import {
   INITIAL_SYSTEM_USERS,
 } from '@/lib/mockData';
 import { computeSHA256, generateStorageUUID } from '@/lib/utils';
+import {
+  alunosApi,
+  documentosApi,
+  AlunoResponse,
+  DocumentoResponse,
+} from '@/lib/api';
+
+export function createDefaultStudentDocuments(alunoId: string, cpf: string): DocumentItem[] {
+  return [
+    {
+      id: `doc-rg-${alunoId}`,
+      tipo: 'RG',
+      nomeExibicao: 'Carteira de Identidade (RG)',
+      descricao: 'Frente e verso nítidos com foto visível e órgão expedidor legível.',
+      obrigatorio: true,
+      status: 'PENDENTE',
+      conteudoSensivelSimulado: {
+        cpfNumero: cpf,
+      },
+    },
+    {
+      id: `doc-cpf-${alunoId}`,
+      tipo: 'CPF',
+      nomeExibicao: 'Comprovante de Inscrição no CPF',
+      descricao: 'Comprovante oficial da Receita Federal com QR Code ou cartão com CPF regular.',
+      obrigatorio: true,
+      status: 'PENDENTE',
+      conteudoSensivelSimulado: {
+        cpfNumero: cpf,
+      },
+    },
+    {
+      id: `doc-res-${alunoId}`,
+      tipo: 'COMPROVANTE_RESIDENCIA',
+      nomeExibicao: 'Comprovante de Residência Atualizado',
+      descricao: 'Conta de consumo (água, luz, gás ou internet) emitida nos últimos 90 dias.',
+      obrigatorio: true,
+      status: 'PENDENTE',
+    },
+    {
+      id: `doc-mat-${alunoId}`,
+      tipo: 'COMPROVANTE_MATRICULA',
+      nomeExibicao: 'Comprovante de Matrícula / Frequência Escolar',
+      descricao: 'Declaração semestral oficial da instituição de ensino com período letivo atual.',
+      obrigatorio: true,
+      recorrente: true,
+      status: 'PENDENTE',
+    },
+    {
+      id: `doc-tce-${alunoId}`,
+      tipo: 'CONTRATO_TCE',
+      nomeExibicao: 'Contrato de Aprendizagem Profissional (CTPS / Registro)',
+      descricao: 'Documento assinado com vigência e dados da empresa e instituição concedente.',
+      obrigatorio: true,
+      status: 'PENDENTE',
+    },
+  ];
+}
+
+export function mapAlunoResponseToStudent(
+  aluno: AlunoResponse,
+  backendDocs: DocumentoResponse[] = []
+): Student {
+  const defaultDocs = createDefaultStudentDocuments(aluno.id, aluno.cpf);
+  const alunoDocs = backendDocs.filter((d) => d.aluno_id === aluno.id);
+
+  const mergedDocs = defaultDocs.map((doc) => {
+    const matched = alunoDocs.find(
+      (ad) =>
+        ad.tipo === doc.tipo ||
+        (ad.tipo === 'TERMO_COMPROMISSO_ESTAGIO' && doc.tipo === 'CONTRATO_TCE')
+    );
+    if (matched) {
+      const st: StatusDocumento =
+        matched.status === 'APROVADO'
+          ? 'APROVADO'
+          : matched.status === 'RECUSADO'
+          ? 'RECUSADO'
+          : 'EM_ANALISE';
+      return {
+        ...doc,
+        status: st,
+        fileHashSha256: matched.file_hash,
+        storageUuid: matched.storage_path,
+        dataEnvio: matched.created_at,
+        tamanhoBytes: matched.tamanho_bytes,
+        mimeType: matched.mime_type,
+      };
+    }
+    return doc;
+  });
+
+  const essentialDocs = mergedDocs.filter((d) => d.obrigatorio);
+  const approvedCount = essentialDocs.filter((d) => d.status === 'APROVADO').length;
+  const inReviewCount = essentialDocs.filter((d) => d.status === 'EM_ANALISE').length;
+  const percentual =
+    essentialDocs.length > 0
+      ? Math.round(((approvedCount + inReviewCount) / essentialDocs.length) * 100)
+      : 0;
+
+  return {
+    id: aluno.id,
+    nome: aluno.nome,
+    cpf: aluno.cpf,
+    email: aluno.email,
+    matricula: aluno.matricula,
+    tipoVinculo: 'APRENDIZ',
+    dataAdmissao: new Date().toISOString().split('T')[0],
+    turmaId: aluno.turma_id || 'turma-ds-01',
+    turmaNome: 'DS-2026.1 — Técnico em Desenvolvimento de Sistemas',
+    curso: 'Técnico em Desenvolvimento de Sistemas',
+    empresa: 'TechCorp Soluções Digitais S.A.',
+    instituicao: 'ETEC Politécnica de São Paulo',
+    percentualConformidade: percentual,
+    nivelRisco: percentual === 100 ? 'BAIXO' : percentual >= 60 ? 'MEDIO' : 'CRITICO',
+    statusGeral: percentual === 100 ? 'REGULAR' : 'PENDENTE',
+    documentos: mergedDocs,
+    avatarUrl: aluno.avatar_path || undefined,
+  };
+}
 
 interface AppContextType {
   currentRole: UserRole;
@@ -91,6 +211,7 @@ interface AppContextType {
     instituicao?: string;
   }) => Student;
   selectStudent: (studentId: string) => void;
+  setStudentDirect: (s: Student) => void;
   setSystemUsers: React.Dispatch<React.SetStateAction<SystemUser[]>>;
   logout: () => void;
 }
@@ -122,10 +243,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem('docflow_tenant_id');
       localStorage.removeItem('docflow_current_user');
       localStorage.removeItem('docflow_user_role');
+      localStorage.removeItem('docflow_current_student_id');
+      localStorage.removeItem('docflow_student_data');
     }
     setCurrentRoleState('ESTUDANTE');
   };
-  const [student, setStudent] = useState<Student>(CURRENT_STUDENT);
+  const [student, setStudent] = useState<Student>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('docflow_student_data');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.nome) return parsed;
+        } catch {
+        }
+      }
+    }
+    return CURRENT_STUDENT;
+  });
   const [rawStudentsList, setRawStudentsList] = useState<Student[]>(INITIAL_STUDENTS);
   const [rawTurmas, setRawTurmas] = useState<Turma[]>(INITIAL_TURMAS);
   const [activeInstitution, setActiveInstitution] = useState<string>('ETEC Politécnica de São Paulo');
@@ -145,7 +280,80 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     type: 'success' | 'error' | 'info';
   } | null>(null);
 
-  // Available institutions discovered across students, turmas and system users
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function syncBackendData() {
+      try {
+        const [alunosData, docsData] = await Promise.all([
+          alunosApi.list().catch(() => []),
+          documentosApi.listAll().catch(() => []),
+        ]);
+
+        if (isCancelled) return;
+
+        if (alunosData && alunosData.length > 0) {
+          const mappedStudents = alunosData.map((a) =>
+            mapAlunoResponseToStudent(a, docsData)
+          );
+
+          setRawStudentsList((prev) => {
+            const combined = [...mappedStudents];
+            prev.forEach((p) => {
+              if (!combined.some((c) => c.id === p.id || c.email === p.email)) {
+                combined.push(p);
+              }
+            });
+            return combined;
+          });
+
+          if (typeof window !== 'undefined') {
+            const savedUserStr = localStorage.getItem('docflow_current_user');
+            const savedStudentId = localStorage.getItem('docflow_current_student_id');
+            const role = localStorage.getItem('docflow_user_role') as UserRole | null;
+
+            let targetStudent: Student | undefined;
+
+            if (savedUserStr) {
+              try {
+                const parsedUser = JSON.parse(savedUserStr);
+                if (parsedUser?.email) {
+                  targetStudent = mappedStudents.find(
+                    (s) => s.email.toLowerCase() === parsedUser.email.toLowerCase()
+                  );
+                }
+              } catch {
+              }
+            }
+
+            if (!targetStudent && savedStudentId) {
+              targetStudent = mappedStudents.find((s) => s.id === savedStudentId);
+            }
+
+            if (!targetStudent && (role === 'ESTUDANTE' || !role)) {
+              targetStudent = mappedStudents.find(
+                (s) => s.email.includes('beatriz') || s.email.includes('aluno')
+              ) || mappedStudents[0];
+            }
+
+            if (targetStudent) {
+              setStudent(targetStudent);
+              localStorage.setItem('docflow_current_student_id', targetStudent.id);
+              localStorage.setItem('docflow_student_data', JSON.stringify(targetStudent));
+            }
+          }
+        }
+      } catch {
+      }
+    }
+
+    syncBackendData();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentRole]);
+
   const availableInstitutions = useMemo(() => {
     const set = new Set<string>();
     rawStudentsList.forEach((s) => s.instituicao && set.add(s.instituicao));
@@ -158,7 +366,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return Array.from(set).sort();
   }, [rawStudentsList, rawTurmas, systemUsers]);
 
-  // Current coordinator identity derived from active institution
   const currentCoordinatorUser = useMemo(() => {
     const found = systemUsers.find(
       (u) => u.role === 'COORDENADOR' && u.instituicao === activeInstitution
@@ -177,7 +384,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   }, [systemUsers, activeInstitution]);
 
-  // Filtered lists based on tenant role and active institution
   const allStudentsList = rawStudentsList;
   const allTurmas = rawTurmas;
 
@@ -188,7 +394,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       return rawStudentsList.filter((s) => s.instituicao === superAdminInstitutionFilter);
     }
-    // Coordinator: isolated strictly to their active institution
     return rawStudentsList.filter((s) => s.instituicao === activeInstitution);
   }, [rawStudentsList, currentRole, superAdminInstitutionFilter, activeInstitution]);
 
@@ -199,11 +404,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       return rawTurmas.filter((t) => t.instituicao === superAdminInstitutionFilter);
     }
-    // Coordinator: isolated strictly to their active institution
     return rawTurmas.filter((t) => t.instituicao === activeInstitution);
   }, [rawTurmas, currentRole, superAdminInstitutionFilter, activeInstitution]);
 
-  // Responsive sidebar initialization
   useEffect(() => {
     if (typeof window !== 'undefined') {
       if (window.innerWidth < 1024) {
@@ -220,7 +423,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setIsSidebarOpen(false);
   };
 
-  // Initialize theme from localStorage / system preference
   useEffect(() => {
     try {
       const saved = localStorage.getItem('docflow_theme') as 'light' | 'dark' | null;
@@ -236,7 +438,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         document.documentElement.classList.add('dark');
       }
     } catch {
-      // Ignore if localStorage unavailable
     }
   }, []);
 
@@ -250,7 +451,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         document.documentElement.classList.remove('dark');
       }
     } catch {
-      // Ignore
     }
   };
 
@@ -258,7 +458,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
-  // Auto clear toast after 4s
   useEffect(() => {
     if (toastMessage) {
       const timer = setTimeout(() => setToastMessage(null), 4000);
@@ -276,7 +475,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const uploadStudentDocument = async (docId: string, file: File): Promise<boolean> => {
-    // 1. Check size (< 10MB)
     if (file.size > 10 * 1024 * 1024) {
       setToastMessage({
         title: 'Bloqueio de Segurança (Payload Limit)',
@@ -298,12 +496,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return false;
     }
 
-    // 2. Compute SHA256 & UUID
     const sha256 = await computeSHA256(file);
     const ext = file.name.split('.').pop() || 'pdf';
     const storageUuid = generateStorageUUID(ext);
 
-    // 3. Update active student & list
     const updateDocs = (docs: DocumentItem[]): DocumentItem[] => {
       return docs.map((d) => {
         if (d.id === docId) {
@@ -353,7 +549,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s))
     );
 
-    // 4. Audit Log
     addAuditEntry({
       userId: student.id,
       userNome: student.nome,
@@ -381,7 +576,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     newDocData: Omit<DocumentItem, 'id'>,
     file: File
   ): Promise<boolean> => {
-    // 1. Check size (< 10MB)
     if (file.size > 10 * 1024 * 1024) {
       setToastMessage({
         title: 'Bloqueio de Segurança (Payload Limit)',
@@ -502,7 +696,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       })
     );
 
-    // Add audit log
     const targetStudent = rawStudentsList.find((s) => s.id === studentId);
     const targetDoc = targetStudent?.documentos.find((d) => d.id === docId);
 
@@ -766,12 +959,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const target = rawStudentsList.find((s) => s.id === studentId);
     if (target) {
       setStudent(target);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('docflow_current_student_id', target.id);
+        localStorage.setItem('docflow_student_data', JSON.stringify(target));
+      }
       setToastMessage({
         title: `Perfil Selecionado: ${target.nome}`,
         desc: `Visualizando como ${target.tipoVinculo === 'APRENDIZ' ? 'Jovem Aprendiz' : 'Estagiário'} (${target.instituicao || 'Instituição'}).`,
         type: 'info',
       });
     }
+  };
+
+  const setStudentDirect = (s: Student) => {
+    setStudent(s);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('docflow_current_student_id', s.id);
+      localStorage.setItem('docflow_student_data', JSON.stringify(s));
+    }
+    setRawStudentsList((prev) => {
+      const exists = prev.find((p) => p.id === s.id);
+      if (exists) return prev.map((p) => (p.id === s.id ? s : p));
+      return [s, ...prev];
+    });
   };
 
   const currentUserProfile: UserProfileData = useMemo(() => {
@@ -795,7 +1005,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         cargo: currentCoordinatorUser.cargo,
       };
     }
-    // SUPERADMIN
     const adminUser = systemUsers.find((u) => u.role === 'SUPERADMIN') || systemUsers[0];
     return {
       nome: adminUser?.nome || 'Super Administrador DocFlow',
@@ -853,7 +1062,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         )
       );
     } else {
-      // SUPERADMIN
       setSystemUsers((prev) =>
         prev.map((u) =>
           u.role === 'SUPERADMIN'
@@ -971,6 +1179,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addNewEmpresa,
         addNewStudent,
         selectStudent,
+        setStudentDirect,
         logout,
       }}
     >

@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { TipoVinculo } from '@/lib/types';
-import { alunosApi } from '@/lib/api';
+import { alunosApi, contratosApi } from '@/lib/api';
 import { scrollToTop } from '@/lib/utils';
 import PageBanner from '@/components/layout/PageBanner';
 import {
@@ -140,13 +140,25 @@ export default function CadastroPage() {
     const cleanEmail = email.trim() || `${nome.toLowerCase().replace(/\s+/g, '.')}@aluno.com.br`;
 
     try {
-      await alunosApi.create({
+      const novoAluno = await alunosApi.create({
         nome: nome.trim(),
         cpf: cpf.trim(),
         email: cleanEmail,
         matricula: matricula.trim(),
         status: 'ATIVO',
       });
+      if (novoAluno && novoAluno.id) {
+        const prefixo = tipoVinculo === 'APRENDIZ' ? 'APREND' : 'TCE';
+        contratosApi
+          .create({
+            aluno_id: novoAluno.id,
+            numero_contrato: `${prefixo}-2026-${matricula.trim()}`,
+            data_inicio: dataAdmissao || new Date().toISOString().split('T')[0],
+            data_fim: '2026-12-15',
+            valor_bolsa: 1650.0,
+          })
+          .catch(() => {});
+      }
     } catch {
     }
 

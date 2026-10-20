@@ -25,8 +25,10 @@ import { computeSHA256, generateStorageUUID } from '@/lib/utils';
 import {
   alunosApi,
   documentosApi,
+  contratosApi,
   AlunoResponse,
   DocumentoResponse,
+  ContratoResponse,
 } from '@/lib/api';
 
 export function createDefaultStudentDocuments(alunoId: string, cpf: string): DocumentItem[] {
@@ -83,8 +85,20 @@ export function createDefaultStudentDocuments(alunoId: string, cpf: string): Doc
 
 export function mapAlunoResponseToStudent(
   aluno: AlunoResponse,
-  backendDocs: DocumentoResponse[] = []
+  backendDocs: DocumentoResponse[] = [],
+  contratos: ContratoResponse[] = []
 ): Student {
+  const alunoContrato = contratos.find((c) => c.aluno_id === aluno.id && c.ativo);
+  const contratoAtivoObj = alunoContrato
+    ? {
+        id: alunoContrato.id,
+        numeroContrato: alunoContrato.numero_contrato,
+        dataInicio: alunoContrato.data_inicio,
+        dataFim: alunoContrato.data_fim,
+        valorBolsa: alunoContrato.valor_bolsa,
+        ativo: alunoContrato.ativo,
+      }
+    : undefined;
   const defaultDocs = createDefaultStudentDocuments(aluno.id, aluno.cpf);
   const alunoDocs = backendDocs.filter((d) => d.aluno_id === aluno.id);
 
@@ -128,6 +142,21 @@ export function mapAlunoResponseToStudent(
       ? Math.round(((approvedCount + inReviewCount) / essentialDocs.length) * 100)
       : 0;
 
+  const docsWithContractInfo = mergedDocs.map((d) => {
+    if (d.tipo === 'CONTRATO_TCE') {
+      return {
+        ...d,
+        validadeAte: alunoContrato?.data_fim || d.validadeAte,
+        conteudoSensivelSimulado: {
+          ...d.conteudoSensivelSimulado,
+          valorBolsa: alunoContrato?.valor_bolsa ? `R$ ${alunoContrato.valor_bolsa}` : undefined,
+          empresaConcedente: 'TechCorp Soluções Digitais S.A.',
+        },
+      };
+    }
+    return d;
+  });
+
   return {
     id: aluno.id,
     nome: aluno.nome,
@@ -144,7 +173,8 @@ export function mapAlunoResponseToStudent(
     percentualConformidade: percentual,
     nivelRisco: percentual === 100 ? 'BAIXO' : percentual >= 60 ? 'MEDIO' : 'CRITICO',
     statusGeral: percentual === 100 ? 'REGULAR' : 'PENDENTE',
-    documentos: mergedDocs,
+    documentos: docsWithContractInfo,
+    contratoAtivo: contratoAtivoObj,
     avatarUrl: aluno.avatar_path || undefined,
   };
 }
@@ -291,16 +321,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     async function syncBackendData() {
       try {
-        const [alunosData, docsData] = await Promise.all([
+        const [alunosData, docsData, contratosData] = await Promise.all([
           alunosApi.list().catch(() => []),
           documentosApi.listAll().catch(() => []),
+          contratosApi.list().catch(() => []),
         ]);
 
         if (isCancelled) return;
 
         if (alunosData && alunosData.length > 0) {
           const mappedStudents = alunosData.map((a) =>
-            mapAlunoResponseToStudent(a, docsData)
+            mapAlunoResponseToStudent(a, docsData, contratosData)
           );
 
           setRawStudentsList((prev) => {

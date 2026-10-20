@@ -111,6 +111,20 @@ export default function StudentHeader() {
                   </span>
                 </div>
               </div>
+
+              {student.contratoAtivo && (
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-xs shadow-2xs">
+                  <div className="w-5 h-5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider">Contrato:</span>
+                    <span className="font-bold font-mono text-slate-800 dark:text-slate-200">
+                      {student.contratoAtivo.numeroContrato}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

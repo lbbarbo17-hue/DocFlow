@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useApp, mapAlunoResponseToStudent } from '@/context/AppContext';
 import { UserRole } from '@/lib/types';
-import { authApi, alunosApi, documentosApi, setAuthToken, setTenantId, ApiError } from '@/lib/api';
+import { authApi, alunosApi, documentosApi, contratosApi, setAuthToken, setTenantId, ApiError } from '@/lib/api';
 import confetti from 'canvas-confetti';
 import {
   Lock,
@@ -96,15 +96,16 @@ export default function LoginPage() {
 
       if (role === 'ESTUDANTE') {
         try {
-          const [alunos, docs] = await Promise.all([
+          const [alunos, docs, contratos] = await Promise.all([
             alunosApi.list().catch(() => []),
             documentosApi.listAll().catch(() => []),
+            contratosApi.list().catch(() => []),
           ]);
           const matched = alunos.find(
             (a) => a.email.toLowerCase() === emailClean.toLowerCase()
           );
           if (matched) {
-            const mapped = mapAlunoResponseToStudent(matched, docs);
+            const mapped = mapAlunoResponseToStudent(matched, docs, contratos);
             setStudentDirect(mapped);
           }
         } catch {

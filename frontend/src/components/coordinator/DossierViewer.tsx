@@ -131,9 +131,16 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                 {riskBadge.label}
               </span>
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-300 font-semibold mt-0.5">
-              {student.empresa}
-            </p>
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              <p className="text-xs text-slate-600 dark:text-slate-300 font-semibold">
+                {student.empresa}
+              </p>
+              {student.contratoAtivo && (
+                <span className="font-mono bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-cyan-300 border border-sky-300 dark:border-sky-800 px-2 py-0.5 rounded text-[10px] font-bold">
+                  {student.contratoAtivo.numeroContrato}
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-2 self-start sm:self-auto">
@@ -302,6 +309,31 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                   <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">CPF</span>
                   <p className="font-mono font-bold text-slate-950 dark:text-white">{student.cpf}</p>
                 </div>
+
+                {student.contratoAtivo && (
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Nº do Contrato</span>
+                    <p className="font-mono font-bold text-slate-950 dark:text-white">{student.contratoAtivo.numeroContrato}</p>
+                  </div>
+                )}
+
+                {student.contratoAtivo && (
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Vigência Contratual</span>
+                    <p className="font-semibold text-slate-950 dark:text-white">
+                      {student.contratoAtivo.dataInicio} até {student.contratoAtivo.dataFim}
+                    </p>
+                  </div>
+                )}
+
+                {student.contratoAtivo?.valorBolsa && (
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Bolsa-Auxílio</span>
+                    <p className="font-bold text-emerald-700 dark:text-emerald-400">
+                      R$ {student.contratoAtivo.valorBolsa}
+                    </p>
+                  </div>
+                )}
 
                 {selectedDoc.conteudoSensivelSimulado?.rgNumero && (
                   <div>

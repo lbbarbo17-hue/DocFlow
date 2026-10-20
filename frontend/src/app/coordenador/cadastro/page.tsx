@@ -14,6 +14,8 @@ import {
   Building2,
   Check,
   ShieldCheck,
+  CalendarDays,
+  DollarSign,
 } from 'lucide-react';
 
 const formatCPF = (val: string) => {
@@ -50,12 +52,13 @@ export default function CadastroPage() {
     availableInstitutions,
     turmas,
     empresas,
+    allStudentsList,
     addNewStudent,
     addNewTurma,
     setToastMessage,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'ALUNO' | 'TURMA'>('ALUNO');
+  const [activeTab, setActiveTab] = useState<'ALUNO' | 'TURMA' | 'CONTRATO'>('ALUNO');
 
   const companiesList = useMemo(() => {
     const set = new Set<string>(DEFAULT_EMPRESAS_GRUPO);
@@ -99,6 +102,53 @@ export default function CadastroPage() {
   const [nomeCursoTurma, setNomeCursoTurma] = useState('');
   const [periodoTurma, setPeriodoTurma] = useState('2026.2 - Manhã');
   const [isSubmittingTurma, setIsSubmittingTurma] = useState(false);
+
+  const [contratoAlunoId, setContratoAlunoId] = useState<string>('');
+  const [contratoNumero, setContratoNumero] = useState<string>('');
+  const [contratoInicio, setContratoInicio] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [contratoFim, setContratoFim] = useState<string>('2026-12-15');
+  const [contratoBolsa, setContratoBolsa] = useState<string>('1650');
+  const [isSubmittingContrato, setIsSubmittingContrato] = useState(false);
+
+  const handleContratoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!contratoAlunoId || !contratoNumero.trim() || !contratoInicio || !contratoFim) {
+      setToastMessage({
+        title: 'Campos obrigatórios',
+        desc: 'Selecione o estudante e preencha todos os campos do contrato.',
+        type: 'error',
+      });
+      return;
+    }
+    setIsSubmittingContrato(true);
+    try {
+      const bolsaNum = parseFloat(contratoBolsa.replace(',', '.'));
+      await contratosApi.create({
+        aluno_id: contratoAlunoId,
+        numero_contrato: contratoNumero.trim(),
+        data_inicio: contratoInicio,
+        data_fim: contratoFim,
+        valor_bolsa: isNaN(bolsaNum) ? undefined : bolsaNum,
+      });
+      setToastMessage({
+        title: 'Contrato registrado',
+        desc: contratoNumero.trim(),
+        type: 'success',
+      });
+      setContratoNumero('');
+      setContratoAlunoId('');
+      setContratoInicio(new Date().toISOString().split('T')[0]);
+      setContratoFim('2026-12-15');
+      setContratoBolsa('1650');
+    } catch {
+      setToastMessage({
+        title: 'Erro ao registrar contrato',
+        desc: 'Verifique os dados e tente novamente.',
+        type: 'error',
+      });
+    }
+    setIsSubmittingContrato(false);
+  };
 
   const handleTurmaChange = (newTurmaId: string) => {
     setTurmaSelect(newTurmaId);
@@ -488,6 +538,109 @@ export default function CadastroPage() {
                 className="px-7 py-3 text-xs font-extrabold text-white bg-gradient-to-r from-[#0284c7] to-[#00b4d8] hover:from-sky-600 hover:to-sky-500 rounded-2xl shadow-lg shadow-[#0284c7]/25 hover:shadow-xl transition-all cursor-pointer disabled:opacity-50"
               >
                 {isSubmittingAluno ? 'Cadastrando...' : 'Cadastrar Estudante'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {activeTab === 'CONTRATO' && (
+          <form onSubmit={handleContratoSubmit} className="space-y-5 text-xs">
+            <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 flex items-start gap-2.5">
+              <CalendarDays className="w-4 h-4 text-sky-600 dark:text-sky-400 mt-0.5 shrink-0" />
+              <p className="text-sky-900 dark:text-sky-300 font-medium">
+                Registre ou vincule um contrato / TCE a um estudante já cadastrado. O contrato ficará visível no dossiê e no portal do estudante.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2">
+                <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
+                  Estudante
+                </label>
+                <select
+                  required
+                  value={contratoAlunoId}
+                  onChange={(e) => setContratoAlunoId(e.target.value)}
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all cursor-pointer"
+                >
+                  <option value="">Selecione o estudante...</option>
+                  {allStudentsList.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.nome} — {s.matricula}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
+                  Número do Contrato / TCE
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={contratoNumero}
+                  onChange={(e) => setContratoNumero(e.target.value)}
+                  placeholder="Ex: TCE-2026-042 ou APREND-2026-0199"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
+                  Data de Início
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={contratoInicio}
+                  onChange={(e) => setContratoInicio(e.target.value)}
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
+                  Data de Término
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={contratoFim}
+                  onChange={(e) => setContratoFim(e.target.value)}
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
+                  <span className="flex items-center gap-1.5"><DollarSign className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />Bolsa-Auxílio (R$)</span>
+                </label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={contratoBolsa}
+                  onChange={(e) => setContratoBolsa(e.target.value)}
+                  placeholder="Ex: 1650.00"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 shadow-2xs rounded-xl px-3.5 py-2.5 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => router.push('/coordenador/dossies')}
+                className="px-5 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmittingContrato}
+                className="px-7 py-3 text-xs font-extrabold text-white bg-gradient-to-r from-[#065373] to-[#0284c7] hover:from-[#05435c] hover:to-sky-600 rounded-2xl shadow-lg shadow-[#065373]/25 hover:shadow-xl transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isSubmittingContrato ? 'Registrando...' : 'Registrar Contrato / TCE'}
               </button>
             </div>
           </form>

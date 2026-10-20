@@ -313,3 +313,43 @@ export const alunosApi = {
     return apiRequest<{ avatar_url: string }>(`/alunos/${alunoId}/avatar-url`);
   },
 };
+export interface ContratoResponse {
+  id: string;
+  tenant_id: string;
+  aluno_id: string;
+  empresa_id?: string | null;
+  instituicao_id?: string | null;
+  numero_contrato: string;
+  data_inicio: string;
+  data_fim: string;
+  valor_bolsa?: string | number | null;
+  ativo: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export const contratosApi = {
+  list: async (skip = 0, limit = 100): Promise<ContratoResponse[]> => {
+    return apiRequest<ContratoResponse[]>(`/contratos?skip=${skip}&limit=${limit}`);
+  },
+  listByAluno: async (alunoId: string): Promise<ContratoResponse[]> => {
+    return apiRequest<ContratoResponse[]>(`/contratos/aluno/${alunoId}`);
+  },
+  create: async (payload: {
+    aluno_id: string;
+    numero_contrato: string;
+    data_inicio: string;
+    data_fim: string;
+    valor_bolsa?: number;
+    empresa_id?: string;
+    instituicao_id?: string;
+  }): Promise<ContratoResponse> => {
+    return apiRequest<ContratoResponse>('/contratos', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+  getById: async (contratoId: string): Promise<ContratoResponse> => {
+    return apiRequest<ContratoResponse>(`/contratos/${contratoId}`);
+  },
+};

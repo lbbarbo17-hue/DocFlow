@@ -34,17 +34,14 @@ export default function Sidebar() {
     logout,
   } = useApp();
 
-  // Pending docs for student
   const pendingStudentDocs = student.documentos.filter(
     (d) => d.status === 'PENDENTE' || d.status === 'RECUSADO'
   ).length;
 
-  // Critical risk count for coordinator
   const criticalStudents = studentsList.filter(
     (s) => s.nivelRisco === 'CRITICO'
   ).length;
 
-  // Strict isolated navigation items per role
   const getNavItemsForRole = () => {
     if (currentRole === 'ESTUDANTE') {
       return [
@@ -95,7 +92,6 @@ export default function Sidebar() {
       ];
     }
 
-    // SUPERADMIN
     return [
       {
         label: 'Controle Global',
@@ -123,7 +119,7 @@ export default function Sidebar() {
   const navItems = getNavItemsForRole();
 
   const userInitials = (currentUserProfile.nome || 'DocFlow')
-    .replace(/^(Profª\.|Prof\.|Dr\.|Dra\.)\s*/, '')
+    .replace(new RegExp('^(Profª\\.|Prof\\.|Dr\\.|Dra\\.)\\s*'), '')
     .split(' ')
     .filter(Boolean)
     .slice(0, 2)
@@ -133,7 +129,6 @@ export default function Sidebar() {
 
   return (
     <aside className="w-64 bg-[#065373] text-white flex flex-col shrink-0 border-r border-[#043c53] shadow-xl z-30 min-h-screen">
-      {/* Brand Header with official Logo */}
       <div className="p-4 flex items-center justify-between gap-2 border-b border-[#226a8b]/60">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 relative rounded-xl overflow-hidden bg-white flex items-center justify-center p-1 shadow-md shrink-0">
@@ -153,7 +148,6 @@ export default function Sidebar() {
           </div>
         </div>
 
-        {/* Hide / Collapse Sidebar Button */}
         <button
           type="button"
           onClick={closeSidebar}
@@ -165,7 +159,6 @@ export default function Sidebar() {
         </button>
       </div>
 
-      {/* Navigation Links */}
       <div className="flex-1 py-5 px-3 space-y-1.5 overflow-y-auto">
         <div className="px-3 pb-2 text-[10px] font-bold text-[#77afd3] uppercase tracking-wider truncate">
           Menu de Navegação
@@ -224,9 +217,7 @@ export default function Sidebar() {
         })}
       </div>
 
-      {/* Footer Profile & Logout Button */}
       <div className="p-3.5 border-t border-[#226a8b]/60 bg-[#043c53]/50 space-y-3">
-        {/* User Card with Profile Picture Circle - Navigates to /perfil page */}
         <Link
           href="/perfil"
           onClick={() => {
@@ -244,7 +235,6 @@ export default function Sidebar() {
           title="Clique para gerenciar seu perfil, alterar dados, senha e foto"
           aria-label="Abrir página de configurações de perfil"
         >
-          {/* Foto de Perfil (Avatar Circle) */}
           <div className="relative shrink-0">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#226a8b] via-[#3f81a3] to-[#77afd3] text-white flex items-center justify-center font-black text-xs shadow-md border-2 border-white/20 overflow-hidden group-hover:border-white transition-all">
               {currentUserProfile.avatarUrl ? (
@@ -257,14 +247,12 @@ export default function Sidebar() {
                 userInitials
               )}
             </div>
-            {/* Online status indicator */}
             <div
               className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#043c53] shadow-xs"
               title="Online"
             />
           </div>
 
-          {/* User info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-1">
               <span

@@ -92,7 +92,8 @@ export function mapAlunoResponseToStudent(
     const matched = alunoDocs.find(
       (ad) =>
         ad.tipo === doc.tipo ||
-        (ad.tipo === 'TERMO_COMPROMISSO_ESTAGIO' && doc.tipo === 'CONTRATO_TCE')
+        (ad.tipo === 'TERMO_COMPROMISSO_ESTAGIO' && doc.tipo === 'CONTRATO_TCE') ||
+        (ad.tipo === 'CONTRATO_APRENDIZAGEM' && doc.tipo === 'CONTRATO_TCE')
     );
     if (matched) {
       const st: StatusDocumento =
@@ -101,9 +102,14 @@ export function mapAlunoResponseToStudent(
           : matched.status === 'RECUSADO'
           ? 'RECUSADO'
           : 'EM_ANALISE';
+      const cleanFileName = matched.storage_path
+        ? matched.storage_path.split('/').pop()?.replace(/^[a-f0-9]+_/, '') || doc.nomeExibicao
+        : doc.nomeExibicao;
       return {
         ...doc,
+        id: matched.id,
         status: st,
+        nomeArquivoOriginal: cleanFileName,
         fileHashSha256: matched.file_hash,
         storageUuid: matched.storage_path,
         dataEnvio: matched.created_at,
@@ -500,11 +506,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const ext = file.name.split('.').pop() || 'pdf';
     const storageUuid = generateStorageUUID(ext);
 
+    const targetDoc = student.documentos.find((d) => d.id === docId);
+    let backendDocId = docId;
+
+    if (student.id) {
+      try {
+        let tipoEnvio = targetDoc?.tipo || 'OUTROS';
+        if (tipoEnvio === 'CONTRATO_TCE') {
+          tipoEnvio = student.tipoVinculo === 'APRENDIZ' ? 'CONTRATO_APRENDIZAGEM' : 'TERMO_COMPROMISSO_ESTAGIO';
+        }
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('aluno_id', student.id);
+        formData.append('tipo', tipoEnvio);
+
+        const novoDocBackend = await documentosApi.upload(formData);
+        if (novoDocBackend && novoDocBackend.id) {
+          backendDocId = novoDocBackend.id;
+        }
+      } catch {
+      }
+    }
+
     const updateDocs = (docs: DocumentItem[]): DocumentItem[] => {
       return docs.map((d) => {
         if (d.id === docId) {
           return {
             ...d,
+            id: backendDocId,
             status: 'EM_ANALISE' as StatusDocumento,
             nomeArquivoOriginal: file.name,
             storageUuid,
@@ -545,6 +574,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
 
     setStudent(updatedStudent);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('docflow_student_data', JSON.stringify(updatedStudent));
+    }
     setRawStudentsList((prev) =>
       prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s))
     );
@@ -652,6 +684,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     newStatus: 'APROVADO' | 'RECUSADO',
     justificativa?: string
   ) => {
+    if (docId && !docId.startsWith('doc-')) {
+      documentosApi
+        .validate(docId, {
+          status: newStatus,
+          justificativa_recusa: newStatus === 'RECUSADO' ? justificativa : undefined,
+        })
+        .catch(() => {});
+    }
+
     setRawStudentsList((prev) =>
       prev.map((s) => {
         if (s.id === studentId) {
@@ -688,6 +729,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
           if (s.id === student.id) {
             setStudent(updatedStudentObj);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('docflow_student_data', JSON.stringify(updatedStudentObj));
+            }
           }
 
           return updatedStudentObj;

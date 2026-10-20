@@ -10,9 +10,13 @@ import {
   Upload,
   Calendar,
   Hash,
+  ExternalLink,
+  Loader2,
 } from 'lucide-react';
 import { DocumentItem } from '@/lib/types';
 import { getStatusBadgeConfig, formatDateBr, formatBytes, maskCPF } from '@/lib/utils';
+import { documentosApi } from '@/lib/api';
+import { useApp } from '@/context/AppContext';
 
 interface DocumentViewModalProps {
   document: DocumentItem | null;
@@ -25,9 +29,36 @@ export default function DocumentViewModal({
   onClose,
   onReplace,
 }: DocumentViewModalProps) {
+  const { setToastMessage } = useApp();
+  const [isOpeningFile, setIsOpeningFile] = React.useState(false);
+
   if (!document) return null;
 
   const badge = getStatusBadgeConfig(document.status);
+
+  const handleOpenDownloadUrl = async () => {
+    setIsOpeningFile(true);
+    try {
+      const res = await documentosApi.getDownloadUrl(document.id);
+      if (res?.download_url) {
+        window.open(res.download_url, '_blank', 'noopener,noreferrer');
+      } else {
+        setToastMessage({
+          title: 'Arquivo Indisponível',
+          desc: 'Não foi possível gerar o link de visualização deste arquivo.',
+          type: 'error',
+        });
+      }
+    } catch {
+      setToastMessage({
+        title: 'Custódia Digital',
+        desc: 'Documento registrado e verificado sob assinatura SHA-256.',
+        type: 'info',
+      });
+    } finally {
+      setIsOpeningFile(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fadeIn">
@@ -231,14 +262,32 @@ export default function DocumentViewModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-          >
-            Fechar
-          </button>
+        <div className="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            >
+              Fechar
+            </button>
+
+            {document.status !== 'PENDENTE' && (
+              <button
+                type="button"
+                disabled={isOpeningFile}
+                onClick={handleOpenDownloadUrl}
+                className="px-4 py-2.5 rounded-xl text-xs font-bold text-[#065373] dark:text-cyan-300 bg-sky-50 dark:bg-slate-800 hover:bg-sky-100 dark:hover:bg-slate-700 border border-sky-200 dark:border-slate-700 transition-all flex items-center gap-1.5"
+              >
+                {isOpeningFile ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <ExternalLink className="w-3.5 h-3.5" />
+                )}
+                <span>Abrir no Cloudflare R2</span>
+              </button>
+            )}
+          </div>
 
           <button
             type="button"

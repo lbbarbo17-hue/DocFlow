@@ -68,6 +68,7 @@ export interface Student {
   nome: string;
   cpf: string;
   email: string;
+  senha?: string;
   telefone?: string;
   matricula: string;
   tipoVinculo: TipoVinculo;
@@ -124,6 +125,7 @@ export interface SystemUser {
   id: string;
   nome: string;
   email: string;
+  senha?: string;
   role: UserRole;
   cargo: string;
   status: 'ATIVO' | 'INATIVO';

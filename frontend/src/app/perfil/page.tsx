@@ -38,7 +38,6 @@ export default function PerfilPage() {
 
   const [activeTab, setActiveTab] = useState<'dados' | 'seguranca'>('dados');
 
-  // Form states - Dados Pessoais
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [telefone, setTelefone] = useState('');
@@ -46,7 +45,6 @@ export default function PerfilPage() {
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>('');
   const [cargo, setCargo] = useState('');
 
-  // Form states - Segurança
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -59,7 +57,6 @@ export default function PerfilPage() {
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Sync initial state
   useEffect(() => {
     setNome(currentUserProfile.nome || '');
     setEmail(currentUserProfile.email || '');
@@ -69,7 +66,6 @@ export default function PerfilPage() {
     setCargo(currentUserProfile.cargo || '');
   }, [currentUserProfile]);
 
-  // Mask helpers
   const formatPhone = (val: string) => {
     const raw = val.replace(/\D/g, '').slice(0, 11);
     if (raw.length <= 10) {
@@ -86,7 +82,6 @@ export default function PerfilPage() {
       .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
   };
 
-  // Avatar upload handler
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -116,7 +111,6 @@ export default function PerfilPage() {
     }
   };
 
-  // Initials generator
   const initials = (nome || 'DocFlow')
     .replace(/^(Profª\.|Prof\.|Dr\.|Dra\.)\s*/, '')
     .split(' ')
@@ -126,7 +120,6 @@ export default function PerfilPage() {
     .join('')
     .toUpperCase();
 
-  // Save profile changes
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nome.trim()) {
@@ -148,7 +141,6 @@ export default function PerfilPage() {
     }, 400);
   };
 
-  // Save password changes
   const handleSavePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError('');

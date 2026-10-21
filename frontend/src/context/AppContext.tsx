@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
 import {
   UserRole,
   TipoVinculo,
@@ -229,6 +229,7 @@ interface AppContextType {
   addNewSystemUser: (data: {
     nome: string;
     email: string;
+    senha?: string;
     cargo: string;
     role: UserRole;
     instituicao: string;
@@ -238,6 +239,7 @@ interface AppContextType {
     nome: string;
     cpf: string;
     email: string;
+    senha?: string;
     matricula: string;
     tipoVinculo: TipoVinculo;
     dataAdmissao?: string;
@@ -250,6 +252,7 @@ interface AppContextType {
   setStudentDirect: (s: Student) => void;
   setSystemUsers: React.Dispatch<React.SetStateAction<SystemUser[]>>;
   logout: () => void;
+  loginUser: (email: string) => { role: UserRole; route: string; user?: SystemUser | Student };
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -301,6 +304,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [rawTurmas, setRawTurmas] = useState<Turma[]>(INITIAL_TURMAS);
   const [activeInstitution, setActiveInstitution] = useState<string>('ETEC Politécnica de São Paulo');
   const [superAdminInstitutionFilter, setSuperAdminInstitutionFilter] = useState<string>('ALL');
+  const [activeCoordinatorUserId, setActiveCoordinatorUserId] = useState<string | null>(null);
   const [empresas, setEmpresas] = useState<Empresa[]>(INITIAL_EMPRESAS);
   const [systemUsers, setSystemUsers] = useState<SystemUser[]>(INITIAL_SYSTEM_USERS);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
@@ -403,7 +407,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return Array.from(set).sort();
   }, [rawStudentsList, rawTurmas, systemUsers]);
 
+
   const currentCoordinatorUser = useMemo(() => {
+    if (activeCoordinatorUserId) {
+      const byId = systemUsers.find((u) => u.id === activeCoordinatorUserId);
+      if (byId) return byId;
+    }
     const found = systemUsers.find(
       (u) => u.role === 'COORDENADOR' && u.instituicao === activeInstitution
     );
@@ -419,7 +428,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ultimoAcesso: 'Hoje às 15:00',
       }
     );
-  }, [systemUsers, activeInstitution]);
+  }, [systemUsers, activeInstitution, activeCoordinatorUserId]);
 
   const allStudentsList = rawStudentsList;
   const allTurmas = rawTurmas;
@@ -495,6 +504,110 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
+  const isHydratedRef = useRef(false);
+
+  useEffect(() => {
+    try {
+      const savedUsers = localStorage.getItem('docflow_system_users');
+      if (savedUsers) {
+        const parsed = JSON.parse(savedUsers);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSystemUsers(parsed);
+        }
+      }
+      const savedStudents = localStorage.getItem('docflow_students');
+      if (savedStudents) {
+        const parsed = JSON.parse(savedStudents);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setRawStudentsList(parsed);
+        }
+      }
+      const savedTurmas = localStorage.getItem('docflow_turmas');
+      if (savedTurmas) {
+        const parsed = JSON.parse(savedTurmas);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setRawTurmas(parsed);
+        }
+      }
+      const savedEmpresas = localStorage.getItem('docflow_empresas');
+      if (savedEmpresas) {
+        const parsed = JSON.parse(savedEmpresas);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setEmpresas(parsed);
+        }
+      }
+      const savedRole = localStorage.getItem('docflow_current_role') as UserRole | null;
+      if (savedRole && ['SUPERADMIN', 'COORDENADOR', 'ESTUDANTE'].includes(savedRole)) {
+        setCurrentRole(savedRole);
+      }
+      const savedCoordId = localStorage.getItem('docflow_active_coord_id');
+      if (savedCoordId) {
+        setActiveCoordinatorUserId(savedCoordId);
+      }
+      const savedInst = localStorage.getItem('docflow_active_institution');
+      if (savedInst) {
+        setActiveInstitution(savedInst);
+      }
+    } catch {
+    } finally {
+      isHydratedRef.current = true;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    try {
+      localStorage.setItem('docflow_system_users', JSON.stringify(systemUsers));
+    } catch {}
+  }, [systemUsers]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    try {
+      localStorage.setItem('docflow_students', JSON.stringify(rawStudentsList));
+    } catch {}
+  }, [rawStudentsList]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    try {
+      localStorage.setItem('docflow_turmas', JSON.stringify(rawTurmas));
+    } catch {}
+  }, [rawTurmas]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    try {
+      localStorage.setItem('docflow_empresas', JSON.stringify(empresas));
+    } catch {}
+  }, [empresas]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    try {
+      localStorage.setItem('docflow_current_role', currentRole);
+    } catch {}
+  }, [currentRole]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    try {
+      if (activeCoordinatorUserId) {
+        localStorage.setItem('docflow_active_coord_id', activeCoordinatorUserId);
+      } else {
+        localStorage.removeItem('docflow_active_coord_id');
+      }
+    } catch {}
+  }, [activeCoordinatorUserId]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    try {
+      if (activeInstitution) {
+        localStorage.setItem('docflow_active_institution', activeInstitution);
+      }
+    } catch {}
+  }, [activeInstitution]);
   useEffect(() => {
     if (toastMessage) {
       const timer = setTimeout(() => setToastMessage(null), 4000);
@@ -830,6 +943,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addNewSystemUser = (data: {
     nome: string;
     email: string;
+    senha?: string;
     cargo: string;
     role: UserRole;
     instituicao: string;
@@ -840,6 +954,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       id: newUserId,
       nome: data.nome,
       email: data.email,
+      senha: data.senha,
       role: data.role,
       cargo: data.cargo,
       instituicao: data.instituicao,
@@ -890,6 +1005,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     nome: string;
     cpf: string;
     email: string;
+    senha?: string;
     matricula: string;
     tipoVinculo: TipoVinculo;
     dataAdmissao?: string;
@@ -910,6 +1026,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       nome: data.nome,
       cpf: data.cpf,
       email: data.email,
+      senha: data.senha,
       matricula: data.matricula,
       tipoVinculo: data.tipoVinculo,
       dataAdmissao: data.dataAdmissao || new Date().toISOString().split('T')[0],
@@ -1206,6 +1323,147 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return true;
   };
 
+  const loginUser = (
+    email: string
+  ): { role: UserRole; route: string; user?: SystemUser | Student } => {
+    const emailClean = email.trim().toLowerCase();
+
+    const allUsers: SystemUser[] = [...systemUsers];
+    try {
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('docflow_system_users');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            parsed.forEach((u: SystemUser) => {
+              if (
+                !allUsers.some(
+                  (existing) =>
+                    existing.id === u.id || existing.email.toLowerCase() === u.email.toLowerCase()
+                )
+              ) {
+                allUsers.push(u);
+              }
+            });
+          }
+        }
+      }
+    } catch {}
+
+    const foundSystemUser = allUsers.find(
+      (u) => u.email.trim().toLowerCase() === emailClean
+    );
+
+    if (foundSystemUser) {
+      setCurrentRole(foundSystemUser.role);
+      try {
+        localStorage.setItem('docflow_current_role', foundSystemUser.role);
+      } catch {}
+
+      if (foundSystemUser.role === 'COORDENADOR') {
+        setActiveCoordinatorUserId(foundSystemUser.id);
+        try {
+          localStorage.setItem('docflow_active_coord_id', foundSystemUser.id);
+        } catch {}
+
+        if (foundSystemUser.instituicao) {
+          setActiveInstitution(foundSystemUser.instituicao);
+          try {
+            localStorage.setItem('docflow_active_institution', foundSystemUser.instituicao);
+          } catch {}
+        }
+        return {
+          role: 'COORDENADOR',
+          route: '/coordenador',
+          user: foundSystemUser,
+        };
+      } else {
+        return {
+          role: 'SUPERADMIN',
+          route: '/admin',
+          user: foundSystemUser,
+        };
+      }
+    }
+
+    const allStudents: Student[] = [...rawStudentsList];
+    try {
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('docflow_students');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            parsed.forEach((s: Student) => {
+              if (
+                !allStudents.some(
+                  (existing) =>
+                    existing.id === s.id || existing.email.toLowerCase() === s.email.toLowerCase()
+                )
+              ) {
+                allStudents.push(s);
+              }
+            });
+          }
+        }
+      }
+    } catch {}
+
+    const foundStudent = allStudents.find(
+      (s) => s.email.trim().toLowerCase() === emailClean
+    );
+
+    if (foundStudent) {
+      setCurrentRole('ESTUDANTE');
+      setStudent(foundStudent);
+      try {
+        localStorage.setItem('docflow_current_role', 'ESTUDANTE');
+      } catch {}
+      if (foundStudent.instituicao) {
+        setActiveInstitution(foundStudent.instituicao);
+        try {
+          localStorage.setItem('docflow_active_institution', foundStudent.instituicao);
+        } catch {}
+      }
+      return {
+        role: 'ESTUDANTE',
+        route: '/estudante',
+        user: foundStudent,
+      };
+    }
+
+    if (
+      emailClean.includes('aluno') ||
+      emailClean.includes('estudante') ||
+      emailClean.includes('aprendiz') ||
+      emailClean.includes('estag')
+    ) {
+      setCurrentRole('ESTUDANTE');
+      try {
+        localStorage.setItem('docflow_current_role', 'ESTUDANTE');
+      } catch {}
+      return { role: 'ESTUDANTE', route: '/estudante' };
+    }
+
+    if (
+      emailClean.includes('admin') ||
+      emailClean.includes('super') ||
+      emailClean.includes('root') ||
+      emailClean.includes('diretor')
+    ) {
+      setCurrentRole('SUPERADMIN');
+      try {
+        localStorage.setItem('docflow_current_role', 'SUPERADMIN');
+      } catch {}
+      return { role: 'SUPERADMIN', route: '/admin' };
+    }
+
+    setCurrentRole('COORDENADOR');
+    try {
+      localStorage.setItem('docflow_current_role', 'COORDENADOR');
+    } catch {}
+    return { role: 'COORDENADOR', route: '/coordenador' };
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -1256,6 +1514,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         selectStudent,
         setStudentDirect,
         logout,
+        loginUser,
       }}
     >
       {children}

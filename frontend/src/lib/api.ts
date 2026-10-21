@@ -69,18 +69,22 @@ export interface TurmaResponse {
   tenant_id: string;
   nome: string;
   codigo: string;
-  ano_letivo: number;
+  semestre_referencia?: string;
+  ano_letivo?: number;
   instituicao_id?: string | null;
   ativo: boolean;
 }
 
 export interface ConformidadeResponse {
   turma_id: string;
-  nome_turma: string;
+  codigo?: string;
+  nome?: string;
+  nome_turma?: string;
   total_alunos: number;
   alunos_regulares: number;
   alunos_em_risco: number;
-  taxa_conformidade_percentual: number;
+  percentual_conformidade?: number;
+  taxa_conformidade_percentual?: number;
 }
 
 export interface AlunoResponse {
@@ -276,6 +280,17 @@ export const turmasApi = {
   },
   getConformidade: async (turmaId: string): Promise<ConformidadeResponse> => {
     return apiRequest<ConformidadeResponse>(`/turmas/${turmaId}/conformidade`);
+  },
+  create: async (payload: {
+    codigo: string;
+    nome: string;
+    semestre_referencia?: string;
+    instituicao_id?: string;
+  }): Promise<TurmaResponse> => {
+    return apiRequest<TurmaResponse>('/turmas', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   },
 };
 

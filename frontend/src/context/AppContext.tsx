@@ -28,6 +28,7 @@ import {
   documentosApi,
   contratosApi,
   auditoriaApi,
+  turmasApi,
   AlunoResponse,
   DocumentoResponse,
   ContratoResponse,
@@ -353,11 +354,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     async function syncBackendData() {
       try {
-        const [alunosData, docsData, contratosData, auditData] = await Promise.all([
+        const [alunosData, docsData, contratosData, auditData, turmasData] = await Promise.all([
           alunosApi.list().catch(() => []),
           documentosApi.listAll().catch(() => []),
           contratosApi.list().catch(() => []),
           auditoriaApi.list().catch(() => []),
+          turmasApi.list().catch(() => []),
         ]);
 
         if (isCancelled) return;
@@ -368,6 +370,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             const combined = [...mappedLogs];
             prev.forEach((p) => {
               if (!combined.some((c) => c.id === p.id)) {
+                combined.push(p);
+              }
+            });
+            return combined;
+          });
+        }
+
+        if (turmasData && turmasData.length > 0) {
+          const mappedTurmas: Turma[] = turmasData.map((t) => {
+            const turmasAlunos = (alunosData || []).filter((a) => a.turma_id === t.id);
+            const total = turmasAlunos.length;
+            const emRisco = turmasAlunos.filter((a) => a.status === 'EM_RISCO' || a.status === 'PENDENTE').length;
+            const regulares = total - emRisco;
+            const conformidade = total > 0 ? Math.round((regulares / total) * 100) : 100;
+            return {
+              id: t.id,
+              codigo: t.codigo,
+              nomeCurso: t.nome,
+              periodo: t.semestre_referencia || '2026.1',
+              totalAlunos: total,
+              conformidadeMedia: conformidade,
+              alunosEmRisco: emRisco,
+              alunosRegulares: regulares,
+              instituicao: 'ETEC Politécnica de São Paulo',
+            };
+          });
+
+          setRawTurmas((prev) => {
+            const combined = [...mappedTurmas];
+            prev.forEach((p) => {
+              if (!combined.some((c) => c.id === p.id || c.codigo === p.codigo)) {
                 combined.push(p);
               }
             });
@@ -1046,6 +1079,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addNewTurma = (turma: Turma) => {
+    turmasApi
+      .create({
+        codigo: turma.codigo,
+        nome: turma.nomeCurso,
+        semestre_referencia: turma.periodo,
+      })
+      .catch(() => {});
+
     const turmaWithInstitution: Turma = {
       ...turma,
       instituicao:

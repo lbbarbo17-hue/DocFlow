@@ -856,7 +856,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const sha256 = await computeSHA256(file);
     const ext = file.name.split('.').pop() || 'pdf';
     const storageUuid = generateStorageUUID(ext);
-    const newDocId = `doc-${Date.now()}`;
+    let newDocId = `doc-${Date.now()}`;
+
+    if (student.id) {
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('aluno_id', student.id);
+        formData.append('tipo', newDocData.tipo || 'OUTROS');
+        const novoDocBackend = await documentosApi.upload(formData);
+        if (novoDocBackend && novoDocBackend.id) {
+          newDocId = novoDocBackend.id;
+        }
+      } catch {}
+    }
 
     const createdDoc: DocumentItem = {
       ...newDocData,

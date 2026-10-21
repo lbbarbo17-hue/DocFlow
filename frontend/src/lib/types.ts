@@ -33,10 +33,10 @@ export interface DocumentItem {
   descricao: string;
   obrigatorio: boolean;
   status: StatusDocumento;
-  condicional?: string; // ex: 'Necessário para menores de 18 anos', 'Necessário para +18 anos'
+  condicional?: string;
   categoria?: 'OBRIGATORIO' | 'IDENTIFICACAO_APOIO' | 'COMPLEMENTAR';
-  recorrente?: boolean; // Para documentos periódicos (ex: Matrícula semestral)
-  protecaoLgpd?: boolean; // Indicador de dados sensíveis e anonimização
+  recorrente?: boolean;
+  protecaoLgpd?: boolean;
   observacaoValidade?: string;
   nomeArquivoOriginal?: string;
   storageUuid?: string;
@@ -44,7 +44,7 @@ export interface DocumentItem {
   mimeType?: string;
   fileHashSha256?: string;
   dataEnvio?: string;
-  validadeAte?: string; // ex: 2026-12-31 para Matrícula Semestral
+  validadeAte?: string;
   diasParaVencer?: number;
   justificativaRecusa?: string;
   aprovadoPor?: string;
@@ -84,9 +84,17 @@ export interface Student {
   instituicao?: string;
   avatarUrl?: string;
   documentos: DocumentItem[];
-  percentualConformidade: number; // 0 - 100
+  percentualConformidade: number;
   nivelRisco: NivelRisco;
   statusGeral: 'REGULAR' | 'PENDENTE' | 'ALERTA_CRITICO';
+  contratoAtivo?: {
+    id: string;
+    numeroContrato: string;
+    dataInicio: string;
+    dataFim: string;
+    valorBolsa?: string | number | null;
+    ativo: boolean;
+  };
 }
 
 export interface Turma {

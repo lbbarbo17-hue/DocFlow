@@ -65,3 +65,11 @@ class R2StorageService:
     def list_buckets(self) -> list:
         response = self.s3_client.list_buckets()
         return [b["Name"] for b in response.get("Buckets", [])]
+
+    def check_connection(self, bucket_name: Optional[str] = None) -> bool:
+        bucket = bucket_name or self.default_bucket
+        try:
+            self.s3_client.head_bucket(Bucket=bucket)
+            return True
+        except Exception:
+            return False

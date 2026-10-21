@@ -128,7 +128,7 @@ export default function StudentHealthCard() {
               ? 'bg-[#eac652]/20 text-[#8a6e14] dark:text-[#eac652]'
               : 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
           }`}>
-            {isGood ? 'Regular' : isWarning ? 'Atenção' : 'Ação Necessária'}
+            {student.contratoAtivo?.numeroContrato ? `${student.contratoAtivo.numeroContrato} • Vigente` : isGood ? 'Regular' : isWarning ? 'Atenção' : 'Ação Necessária'}
           </span>
         </div>
       </div>

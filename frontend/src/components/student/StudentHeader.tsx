@@ -19,13 +19,10 @@ export default function StudentHeader() {
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden transition-colors duration-200">
-      {/* Decorative subtle background gradient */}
       <div className="absolute top-0 right-0 w-80 h-full bg-gradient-to-l from-[#065373]/5 dark:from-cyan-500/10 to-transparent pointer-events-none" />
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 relative z-10">
-        {/* Left Side: Avatar, Greeting & Metadata */}
         <div className="flex items-start sm:items-center gap-4">
-          {/* Avatar with role icon */}
           <div className="relative shrink-0">
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#065373] to-[#226a8b] text-white flex items-center justify-center shadow-md border-2 border-white dark:border-slate-800">
               {isAprendiz ? (
@@ -44,14 +41,12 @@ export default function StudentHeader() {
             </div>
           </div>
 
-          {/* Student name & details */}
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2.5">
               <h2 className="text-xl sm:text-2xl font-black text-[#065373] dark:text-cyan-300 tracking-tight">
                 Olá, {firstName}! 👋
               </h2>
 
-              {/* Vínculo badge */}
               <span
                 className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-2xl bg-sky-50 dark:bg-[#122634] border border-sky-200 dark:border-[#1c3547] text-xs font-semibold text-[#065373] dark:text-cyan-300"
               >
@@ -79,9 +74,7 @@ export default function StudentHeader() {
               </span>
             </div>
 
-            {/* Contract & Course Badges */}
             <div className="flex flex-wrap items-center gap-2.5 mt-3">
-              {/* Instituição & Curso */}
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-xs shadow-2xs">
                 <div className="w-5 h-5 rounded-lg bg-[#065373]/10 dark:bg-cyan-400/10 flex items-center justify-center text-[#065373] dark:text-cyan-300 shrink-0">
                   <BookOpen className="w-3.5 h-3.5" />
@@ -99,7 +92,6 @@ export default function StudentHeader() {
                 </div>
               </div>
 
-              {/* Empresa Concedente */}
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-xs shadow-2xs">
                 <div className="w-5 h-5 rounded-lg bg-[#065373]/10 dark:bg-cyan-400/10 flex items-center justify-center text-[#065373] dark:text-cyan-300 shrink-0">
                   <Building2 className="w-3.5 h-3.5" />
@@ -111,11 +103,24 @@ export default function StudentHeader() {
                   </span>
                 </div>
               </div>
+
+              {student.contratoAtivo && (
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-xs shadow-2xs">
+                  <div className="w-5 h-5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider">Contrato:</span>
+                    <span className="font-bold font-mono text-slate-800 dark:text-slate-200">
+                      {student.contratoAtivo.numeroContrato}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Right Side: Quick Profile Switcher (Simulação e Demonstração) */}
         <div className="shrink-0 flex items-center justify-between sm:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider hidden sm:inline">

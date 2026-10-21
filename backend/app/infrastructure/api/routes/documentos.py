@@ -7,6 +7,7 @@ from app.domain.schemas.documento import DocumentoRead, DocumentoValidate
 from app.application.services.file_validator import compute_file_hash_and_size
 from app.application.services.storage_service import R2StorageService
 from app.infrastructure.database.models.documento import Documento
+from app.infrastructure.database.audit import create_audit_entry
 from app.infrastructure.repositories.documento_repository import SQLAlchemyDocumentoRepository
 from app.infrastructure.repositories.aluno_repository import SQLAlchemyAlunoRepository
 from app.infrastructure.api.dependencies import (
@@ -74,6 +75,24 @@ async def upload_documento(
     )
 
     documento_salvo = await doc_repo.create(novo_documento)
+    try:
+        await create_audit_entry(
+            session=doc_repo.session,
+            action="DOCUMENT_UPLOAD",
+            resource_type="Documento",
+            resource_id=documento_salvo.id,
+            tenant_id=tenant_id,
+            detalhes={
+                "tipo": str(tipo),
+                "filename": safe_filename,
+                "file_hash": sha256_hash,
+                "aluno_nome": aluno.nome
+            }
+        )
+        await doc_repo.session.commit()
+    except Exception:
+        pass
+
     return documento_salvo
 
 @router.get("/aluno/{aluno_id}", response_model=List[DocumentoRead], status_code=status.HTTP_200_OK)
@@ -139,6 +158,25 @@ async def validate_documento(
     doc.validado_por_user_id = payload.validado_por_user_id
 
     doc_atualizado = await doc_repo.update(doc)
+
+    try:
+        audit_action = "DOCUMENT_APPROVAL" if payload.status == StatusDocumento.APROVADO else "DOCUMENT_REJECTION"
+        await create_audit_entry(
+            session=doc_repo.session,
+            action=audit_action,
+            resource_type="Documento",
+            resource_id=doc.id,
+            tenant_id=tenant_id,
+            detalhes={
+                "status": str(payload.status),
+                "justificativa": payload.justificativa_recusa,
+                "file_hash": doc.file_hash
+            }
+        )
+        await doc_repo.session.commit()
+    except Exception:
+        pass
+
     return doc_atualizado
 
 @router.get("", response_model=List[DocumentoRead], status_code=status.HTTP_200_OK)

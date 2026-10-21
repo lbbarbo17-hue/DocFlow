@@ -8,6 +8,7 @@ import {
   Turma,
   Empresa,
   AuditLog,
+  AuditAction,
   DocumentItem,
   StatusDocumento,
   SystemUser,
@@ -26,10 +27,37 @@ import {
   alunosApi,
   documentosApi,
   contratosApi,
+  auditoriaApi,
   AlunoResponse,
   DocumentoResponse,
   ContratoResponse,
+  AuditLogBackendResponse,
 } from '@/lib/api';
+
+export function mapBackendAuditLogToItem(b: AuditLogBackendResponse): AuditLog {
+  const detalhesObj = ((b.detalhes as Record<string, unknown>) || {});
+  const detalhesStr = typeof detalhesObj.detalhes === 'string'
+    ? detalhesObj.detalhes
+    : typeof detalhesObj.justificativa === 'string'
+    ? detalhesObj.justificativa
+    : b.action;
+
+  return {
+    id: b.id,
+    timestampUtc: b.timestamp_utc,
+    userId: b.user_id || 'usr-system',
+    userNome: (detalhesObj.userNome as string) || (detalhesObj.aluno_nome as string) || 'Operador DocFlow',
+    userRole: (detalhesObj.userRole as UserRole) || 'SUPERADMIN',
+    action: b.action as AuditAction,
+    resourceId: b.resource_id || b.id,
+    resourceTipo: (detalhesObj.resourceTipo as string) || b.resource_type,
+    ipAddress: b.ip_address || '127.0.0.1',
+    status: (detalhesObj.status as 'SUCCESS' | 'FAILURE' | 'BLOCKED') || 'SUCCESS',
+    detalhes: detalhesStr,
+    sha256Hash: (detalhesObj.file_hash as string) || (detalhesObj.sha256Hash as string) || 'N/A',
+    storageUuid: (detalhesObj.storageUuid as string) || undefined,
+  };
+}
 
 export function createDefaultStudentDocuments(alunoId: string, cpf: string): DocumentItem[] {
   return [
@@ -325,13 +353,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     async function syncBackendData() {
       try {
-        const [alunosData, docsData, contratosData] = await Promise.all([
+        const [alunosData, docsData, contratosData, auditData] = await Promise.all([
           alunosApi.list().catch(() => []),
           documentosApi.listAll().catch(() => []),
           contratosApi.list().catch(() => []),
+          auditoriaApi.list().catch(() => []),
         ]);
 
         if (isCancelled) return;
+
+        if (auditData && auditData.length > 0) {
+          const mappedLogs = auditData.map(mapBackendAuditLogToItem);
+          setAuditLogs((prev) => {
+            const combined = [...mappedLogs];
+            prev.forEach((p) => {
+              if (!combined.some((c) => c.id === p.id)) {
+                combined.push(p);
+              }
+            });
+            return combined;
+          });
+        }
 
         if (alunosData && alunosData.length > 0) {
           const mappedStudents = alunosData.map((a) =>
@@ -622,6 +664,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       timestampUtc: new Date().toISOString(),
     };
     setAuditLogs((prev) => [newLog, ...prev]);
+
+    auditoriaApi
+      .create({
+        action: entry.action,
+        resource_type: entry.resourceTipo,
+        ip_address: entry.ipAddress,
+        detalhes: {
+          userNome: entry.userNome,
+          userRole: entry.userRole,
+          status: entry.status,
+          detalhes: entry.detalhes,
+          sha256Hash: entry.sha256Hash,
+          storageUuid: entry.storageUuid,
+          resourceTipo: entry.resourceTipo,
+        },
+      })
+      .catch(() => {});
   };
 
   const uploadStudentDocument = async (docId: string, file: File): Promise<boolean> => {

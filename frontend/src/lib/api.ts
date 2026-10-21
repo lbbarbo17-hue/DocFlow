@@ -353,3 +353,33 @@ export const contratosApi = {
     return apiRequest<ContratoResponse>(`/contratos/${contratoId}`);
   },
 };
+export interface AuditLogBackendResponse {
+  id: string;
+  tenant_id: string;
+  user_id?: string | null;
+  action: string;
+  resource_id?: string | null;
+  resource_type: string;
+  ip_address?: string | null;
+  detalhes?: Record<string, unknown> | null;
+  timestamp_utc: string;
+}
+
+export const auditoriaApi = {
+  list: async (skip = 0, limit = 100): Promise<AuditLogBackendResponse[]> => {
+    return apiRequest<AuditLogBackendResponse[]>(`/auditoria?skip=${skip}&limit=${limit}`);
+  },
+  create: async (payload: {
+    action: string;
+    resource_type: string;
+    resource_id?: string;
+    user_id?: string;
+    ip_address?: string;
+    detalhes?: Record<string, unknown>;
+  }): Promise<AuditLogBackendResponse> => {
+    return apiRequest<AuditLogBackendResponse>('/auditoria', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+};

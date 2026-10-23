@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
@@ -19,7 +19,11 @@ import {
 } from 'lucide-react';
 
 export default function EsqueceuSenhaPage() {
-  const { setToastMessage } = useApp();
+  const { setToastMessage, logout } = useApp();
+
+  useEffect(() => {
+    logout();
+  }, []);
 
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');

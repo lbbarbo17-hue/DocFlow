@@ -356,7 +356,8 @@ export default function CadastrarCoordenadorPage() {
                   </div>
                 </div>
 
-                <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                {/* Seção 2: Cargo & Instituição */}
+                <div className="space-y-4">
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
                     2. Atribuição & Vínculo
                   </span>

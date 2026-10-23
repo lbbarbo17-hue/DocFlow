@@ -212,6 +212,12 @@ export const authApi = {
   getAvatarUrl: async (): Promise<{ avatar_url: string }> => {
     return apiRequest<{ avatar_url: string }>('/auth/me/avatar-url');
   },
+  forgotPassword: async (email: string): Promise<{ message: string }> => {
+    return apiRequest<{ message: string }>('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
 };
 
 export const documentosApi = {

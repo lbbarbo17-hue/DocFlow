@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { UserRole } from '@/lib/types';
@@ -42,25 +43,6 @@ export default function LoginPage() {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [generalError, setGeneralError] = useState('');
-
-  const calculatePasswordStrength = (pass: string) => {
-    if (!pass) return 0;
-    let score = 0;
-    if (pass.length >= 6) score += 1;
-    if (/[A-Z]/.test(pass)) score += 1;
-    if (/[0-9]/.test(pass)) score += 1;
-    if (/[^A-Za-z0-9]/.test(pass)) score += 1;
-    return score;
-  };
-
-  const passStrength = calculatePasswordStrength(password);
-  const strengthLabels = [
-    { label: 'Muito Curta', color: 'bg-slate-700 text-slate-400', emoji: '😴' },
-    { label: 'Fraca', color: 'bg-rose-500 text-rose-300', emoji: '⚠️' },
-    { label: 'Média', color: 'bg-amber-500 text-amber-300', emoji: '🤔' },
-    { label: 'Forte', color: 'bg-sky-500 text-sky-300', emoji: '🔥' },
-    { label: 'Suprema & Segura', color: 'bg-emerald-400 text-emerald-300', emoji: '🛡️' },
-  ];
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -374,20 +356,12 @@ export default function LoginPage() {
                     <KeyRound className="w-3.5 h-3.5 text-cyan-400" />
                     <span>Senha</span>
                   </label>
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setToastMessage({
-                        title: 'Link de Recuperação Enviado',
-                        desc: `Instruções enviadas para ${identifier}.`,
-                        type: 'info',
-                      });
-                    }}
+                  <Link
+                    href="/esqueceu-senha"
                     className="text-[11px] text-cyan-300 hover:text-cyan-200 transition-colors"
                   >
                     Esqueceu a senha?
-                  </a>
+                  </Link>
                 </div>
 
                 <div className="relative">
@@ -420,38 +394,6 @@ export default function LoginPage() {
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                     <span>{passwordError}</span>
                   </p>
-                )}
-
-                {password.length > 0 && (
-                  <div className="pt-1.5 space-y-1">
-                    <div className="flex items-center justify-between text-[10px] font-mono">
-                      <span className="text-slate-400">Força da Senha:</span>
-                      <span className="font-bold flex items-center gap-1">
-                        <span>{strengthLabels[passStrength].emoji}</span>
-                        <span className={strengthLabels[passStrength].color.split(' ')[1]}>
-                          {strengthLabels[passStrength].label}
-                        </span>
-                      </span>
-                    </div>
-                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden flex gap-0.5">
-                      {[1, 2, 3, 4].map((step) => (
-                        <div
-                          key={step}
-                          className={`h-full flex-1 transition-all duration-300 ${
-                            passStrength >= step
-                              ? passStrength === 1
-                                ? 'bg-rose-500'
-                                : passStrength === 2
-                                ? 'bg-amber-500'
-                                : passStrength === 3
-                                ? 'bg-sky-400'
-                                : 'bg-emerald-400'
-                              : 'bg-slate-800'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
                 )}
               </div>
 

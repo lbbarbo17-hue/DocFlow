@@ -23,7 +23,7 @@ export function clearAuthSession(): void {
 
 export function getTenantId(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('docflow_tenant_id');
+  return localStorage.getItem('docflow_tenant_id') || '6a7eb67b-bddc-4ad1-8898-0106ff268ed5';
 }
 
 export function setTenantId(tenantId: string): void {
@@ -91,6 +91,9 @@ export interface AlunoResponse {
   email: string;
   matricula: string;
   status: string;
+  turma_id?: string | null;
+  instituicao_id?: string | null;
+  empresa_id?: string | null;
   avatar_path?: string | null;
   ativo: boolean;
 }
@@ -191,6 +194,9 @@ export const authApi = {
   getMe: async (): Promise<AuthUserResponse> => {
     return apiRequest<AuthUserResponse>('/auth/me');
   },
+  listUsers: async (): Promise<AuthUserResponse[]> => {
+    return apiRequest<AuthUserResponse[]>('/auth/users');
+  },
   uploadAvatar: async (file: File): Promise<AuthUserResponse> => {
     const formData = new FormData();
     formData.append('file', file);
@@ -205,6 +211,9 @@ export const authApi = {
 };
 
 export const documentosApi = {
+  listAll: async (skip = 0, limit = 100): Promise<DocumentoResponse[]> => {
+    return apiRequest<DocumentoResponse[]>(`/documentos?skip=${skip}&limit=${limit}`);
+  },
   listByAluno: async (alunoId: string): Promise<DocumentoResponse[]> => {
     return apiRequest<DocumentoResponse[]>(`/documentos/aluno/${alunoId}`);
   },
@@ -216,6 +225,11 @@ export const documentosApi = {
   },
   getDownloadUrl: async (docId: string): Promise<{ download_url: string }> => {
     return apiRequest<{ download_url: string }>(`/documentos/${docId}/download-url`);
+  },
+  delete: async (docId: string): Promise<{ message: string }> => {
+    return apiRequest<{ message: string }>(`/documentos/${docId}`, {
+      method: 'DELETE',
+    });
   },
   validate: async (
     docId: string,
@@ -229,6 +243,30 @@ export const documentosApi = {
       method: 'POST',
       body: JSON.stringify(payload),
     });
+  },
+};
+
+export interface HealthConnectionsResponse {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  database: {
+    connected: boolean;
+    latency_ms: number;
+    provider: string;
+  };
+  auth: {
+    connected: boolean;
+    provider: string;
+  };
+  storage: {
+    connected: boolean;
+    bucket: string;
+    provider: string;
+  };
+}
+
+export const healthApi = {
+  checkConnections: async (): Promise<HealthConnectionsResponse> => {
+    return apiRequest<HealthConnectionsResponse>('/health/connections');
   },
 };
 
@@ -248,6 +286,21 @@ export const alunosApi = {
   getById: async (alunoId: string): Promise<AlunoResponse> => {
     return apiRequest<AlunoResponse>(`/alunos/${alunoId}`);
   },
+  create: async (payload: {
+    nome: string;
+    cpf: string;
+    email: string;
+    matricula: string;
+    status?: string;
+    turma_id?: string;
+    instituicao_id?: string;
+    empresa_id?: string;
+  }): Promise<AlunoResponse> => {
+    return apiRequest<AlunoResponse>('/alunos', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
   uploadAvatar: async (alunoId: string, file: File): Promise<AlunoResponse> => {
     const formData = new FormData();
     formData.append('file', file);
@@ -258,5 +311,45 @@ export const alunosApi = {
   },
   getAvatarUrl: async (alunoId: string): Promise<{ avatar_url: string }> => {
     return apiRequest<{ avatar_url: string }>(`/alunos/${alunoId}/avatar-url`);
+  },
+};
+export interface ContratoResponse {
+  id: string;
+  tenant_id: string;
+  aluno_id: string;
+  empresa_id?: string | null;
+  instituicao_id?: string | null;
+  numero_contrato: string;
+  data_inicio: string;
+  data_fim: string;
+  valor_bolsa?: string | number | null;
+  ativo: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export const contratosApi = {
+  list: async (skip = 0, limit = 100): Promise<ContratoResponse[]> => {
+    return apiRequest<ContratoResponse[]>(`/contratos?skip=${skip}&limit=${limit}`);
+  },
+  listByAluno: async (alunoId: string): Promise<ContratoResponse[]> => {
+    return apiRequest<ContratoResponse[]>(`/contratos/aluno/${alunoId}`);
+  },
+  create: async (payload: {
+    aluno_id: string;
+    numero_contrato: string;
+    data_inicio: string;
+    data_fim: string;
+    valor_bolsa?: number;
+    empresa_id?: string;
+    instituicao_id?: string;
+  }): Promise<ContratoResponse> => {
+    return apiRequest<ContratoResponse>('/contratos', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+  getById: async (contratoId: string): Promise<ContratoResponse> => {
+    return apiRequest<ContratoResponse>(`/contratos/${contratoId}`);
   },
 };

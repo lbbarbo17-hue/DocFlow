@@ -14,7 +14,30 @@ SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 class SupabaseAuthService:
     @staticmethod
     async def signup(email: str, password: str) -> Optional[uuid.UUID]:
-        if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        if not SUPABASE_URL:
+            return None
+
+        if SUPABASE_SERVICE_ROLE_KEY:
+            admin_url = f"{SUPABASE_URL}/auth/v1/admin/users"
+            admin_headers = {
+                "apikey": SUPABASE_SERVICE_ROLE_KEY,
+                "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+                "Content-Type": "application/json"
+            }
+            admin_payload = {
+                "email": email,
+                "password": password,
+                "email_confirm": True
+            }
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                res = await client.post(admin_url, json=admin_payload, headers=admin_headers)
+                if res.status_code in [200, 201]:
+                    data = res.json()
+                    user_id_str = data.get("id") or (data.get("user") or {}).get("id")
+                    if user_id_str:
+                        return uuid.UUID(user_id_str)
+
+        if not SUPABASE_ANON_KEY:
             return None
 
         url = f"{SUPABASE_URL}/auth/v1/signup"

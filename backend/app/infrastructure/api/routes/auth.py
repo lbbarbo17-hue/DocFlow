@@ -1,9 +1,15 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 from app.domain.schemas.usuario import UsuarioCreate, UsuarioRead, LoginRequest, TokenResponse
 from app.infrastructure.database.models.usuario import Usuario
 from app.infrastructure.repositories.usuario_repository import SQLAlchemyUsuarioRepository
 from app.application.services.auth_service import SupabaseAuthService
-from app.infrastructure.api.dependencies import get_usuario_repository, get_current_user, get_storage_service
+from app.infrastructure.api.dependencies import (
+    get_usuario_repository,
+    get_current_user,
+    get_storage_service,
+    get_current_tenant_id
+)
 from app.application.services.file_validator import compute_file_hash_and_size
 from app.application.services.storage_service import R2StorageService
 
@@ -66,6 +72,16 @@ async def get_me(
             detail="Token de autenticacao invalido ou ausente."
         )
     return current_user
+
+@router.get("/users", response_model=List[UsuarioRead], status_code=status.HTTP_200_OK)
+async def list_users(
+    skip: int = 0,
+    limit: int = 100,
+    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    user_repo: SQLAlchemyUsuarioRepository = Depends(get_usuario_repository)
+):
+    return await user_repo.list_all(tenant_id=tenant_id, skip=skip, limit=limit)
+
 
 @router.post("/me/avatar", response_model=UsuarioRead, status_code=status.HTTP_200_OK)
 async def upload_my_avatar(

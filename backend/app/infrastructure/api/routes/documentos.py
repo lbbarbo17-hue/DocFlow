@@ -140,3 +140,30 @@ async def validate_documento(
 
     doc_atualizado = await doc_repo.update(doc)
     return doc_atualizado
+
+@router.get("", response_model=List[DocumentoRead], status_code=status.HTTP_200_OK)
+async def list_all_documentos(
+    skip: int = 0,
+    limit: int = 100,
+    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    doc_repo: SQLAlchemyDocumentoRepository = Depends(get_documento_repository)
+):
+    return await doc_repo.list_all(tenant_id=tenant_id, skip=skip, limit=limit)
+
+@router.delete("/{documento_id}", status_code=status.HTTP_200_OK)
+async def delete_documento(
+    documento_id: uuid.UUID,
+    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    doc_repo: SQLAlchemyDocumentoRepository = Depends(get_documento_repository),
+    storage_service: R2StorageService = Depends(get_storage_service)
+):
+    doc = await doc_repo.get_by_id(entity_id=documento_id, tenant_id=tenant_id)
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Documento nao encontrado."
+        )
+
+    storage_service.delete_file(file_path=doc.storage_path)
+    await doc_repo.delete(entity_id=documento_id, tenant_id=tenant_id)
+    return {"message": "Documento e arquivo no R2 excluidos com sucesso."}

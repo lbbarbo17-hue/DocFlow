@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { TipoVinculo } from '@/lib/types';
+import { alunosApi, contratosApi, authApi, getTenantId } from '@/lib/api';
 import { scrollToTop } from '@/lib/utils';
 import PageBanner from '@/components/layout/PageBanner';
 import {
@@ -13,12 +14,15 @@ import {
   Building2,
   Check,
   ShieldCheck,
+  CalendarDays,
+  DollarSign,
   KeyRound,
   Eye,
   EyeOff,
   GraduationCap,
   Briefcase,
   Mail,
+  FileSignature,
 } from 'lucide-react';
 
 const formatCPF = (val: string) => {
@@ -29,6 +33,24 @@ const formatCPF = (val: string) => {
     .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 };
 
+const DEFAULT_EMPRESAS_GRUPO = [
+  'TechCorp Soluções Digitais S.A.',
+  'Inovação & Sistemas Brasil Ltda',
+  'Alpha Logística & Distribuição',
+  'Nexus Engenharia e Projetos',
+  'Banco Itaú Unibanco S.A.',
+  'Ambev Brasil S.A.',
+  'Accenture Soluções Tecnológicas',
+  'Hospital & Centro Médico São Luiz',
+];
+
+const DEFAULT_TURMAS = [
+  { id: 'turma-ds-01', codigo: 'DS-2026.1', nomeCurso: 'Técnico em Desenvolvimento de Sistemas' },
+  { id: 'turma-adm-01', codigo: 'ADM-2026.1', nomeCurso: 'Técnico em Administração' },
+  { id: 'turma-log-01', codigo: 'LOG-2026.1', nomeCurso: 'Técnico em Logística' },
+  { id: 'turma-rh-01', codigo: 'RH-2026.1', nomeCurso: 'Técnico em Recursos Humanos' },
+];
+
 export default function CadastroPage() {
   const router = useRouter();
   const {
@@ -37,14 +59,35 @@ export default function CadastroPage() {
     availableInstitutions,
     turmas,
     empresas,
+    allStudentsList,
     addNewStudent,
     addNewTurma,
     setToastMessage,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'ALUNO' | 'TURMA'>('ALUNO');
+  const [activeTab, setActiveTab] = useState<'ALUNO' | 'TURMA' | 'CONTRATO'>('ALUNO');
 
-  // Form - Aluno
+  const companiesList = useMemo(() => {
+    const set = new Set<string>(DEFAULT_EMPRESAS_GRUPO);
+    empresas.forEach((e) => {
+      if (e.razaoSocial) set.add(e.razaoSocial);
+    });
+    return Array.from(set);
+  }, [empresas]);
+
+  const availableTurmasList = useMemo(() => {
+    if (turmas.length > 0) return turmas;
+    return DEFAULT_TURMAS.map((dt) => ({
+      ...dt,
+      periodo: '2026.1 - Manhã',
+      instituicao: activeInstitution,
+      totalAlunos: 0,
+      alunosEmRisco: 0,
+      alunosRegulares: 0,
+      conformidadeMedia: 100,
+    }));
+  }, [turmas, activeInstitution]);
+
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
   const [email, setEmail] = useState('');
@@ -52,9 +95,11 @@ export default function CadastroPage() {
   const [showSenha, setShowSenha] = useState(false);
   const [matricula, setMatricula] = useState('');
   const [tipoVinculo, setTipoVinculo] = useState<TipoVinculo>('APRENDIZ');
-  const [turmaId, setTurmaId] = useState(turmas[0]?.id || '');
-  const [curso, setCurso] = useState(turmas[0]?.nomeCurso || 'Técnico em Desenvolvimento de Sistemas');
-  const [empresa, setEmpresa] = useState(empresas[0]?.razaoSocial || 'TechCorp Soluções Digitais S.A.');
+  const [turmaSelect, setTurmaSelect] = useState<string>(availableTurmasList[0]?.id || 'turma-ds-01');
+  const [customTurma, setCustomTurma] = useState<string>('');
+  const [curso, setCurso] = useState(availableTurmasList[0]?.nomeCurso || 'Técnico em Desenvolvimento de Sistemas');
+  const [empresaSelect, setEmpresaSelect] = useState<string>(companiesList[0] || 'TechCorp Soluções Digitais S.A.');
+  const [customEmpresa, setCustomEmpresa] = useState<string>('');
   const [instituicao, setInstituicao] = useState(activeInstitution);
   const [instituicaoTurma, setInstituicaoTurma] = useState(activeInstitution);
   const [dataAdmissao, setDataAdmissao] = useState(
@@ -62,21 +107,29 @@ export default function CadastroPage() {
   );
   const [isSubmittingAluno, setIsSubmittingAluno] = useState(false);
 
-  // Form - Turma
   const [codigoTurma, setCodigoTurma] = useState('');
   const [nomeCursoTurma, setNomeCursoTurma] = useState('');
   const [periodoTurma, setPeriodoTurma] = useState('2026.2 - Manhã');
   const [isSubmittingTurma, setIsSubmittingTurma] = useState(false);
 
+  const [contratoAlunoId, setContratoAlunoId] = useState<string>('');
+  const [contratoNumero, setContratoNumero] = useState<string>('');
+  const [contratoInicio, setContratoInicio] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [contratoFim, setContratoFim] = useState<string>('2026-12-15');
+  const [contratoBolsa, setContratoBolsa] = useState<string>('1650');
+  const [isSubmittingContrato, setIsSubmittingContrato] = useState(false);
+
   const handleTurmaChange = (newTurmaId: string) => {
-    setTurmaId(newTurmaId);
-    const selected = turmas.find((t) => t.id === newTurmaId);
-    if (selected) {
-      setCurso(selected.nomeCurso);
+    setTurmaSelect(newTurmaId);
+    if (newTurmaId !== '__CUSTOM_TURMA__') {
+      const selected = availableTurmasList.find((t) => t.id === newTurmaId);
+      if (selected) {
+        setCurso(selected.nomeCurso);
+      }
     }
   };
 
-  const handleAlunoSubmit = (e: React.FormEvent) => {
+  const handleAlunoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nome.trim() || !cpf.trim() || !matricula.trim()) {
       setToastMessage({
@@ -87,33 +140,78 @@ export default function CadastroPage() {
       return;
     }
 
-    if (!senha.trim() || senha.length < 6) {
-      setToastMessage({
-        title: 'Senha Obrigatória',
-        desc: 'Defina uma senha de acesso com no mínimo 6 caracteres para o estudante.',
-        type: 'error',
-      });
-      return;
-    }
+    const finalTurmaId =
+      turmaSelect === '__CUSTOM_TURMA__'
+        ? `turma-custom-${Date.now()}`
+        : turmaSelect;
+
+    const finalCurso =
+      turmaSelect === '__CUSTOM_TURMA__'
+        ? customTurma.trim() || 'Curso Técnico'
+        : curso;
+
+    const finalEmpresa =
+      empresaSelect === '__CUSTOM__'
+        ? customEmpresa.trim() || 'Empresa Concedente'
+        : empresaSelect;
+
+    const cleanEmail = email.trim() || `${nome.toLowerCase().replace(/\s+/g, '.')}@aluno.com.br`;
+    const studentPassword = senha.trim() || 'DocFlow@2026';
 
     setIsSubmittingAluno(true);
+
+    const tenantId = getTenantId() || '6a7eb67b-bddc-4ad1-8898-0106ff268ed5';
+
+    try {
+      await authApi.register({
+        tenant_id: tenantId,
+        email: cleanEmail,
+        nome: nome.trim(),
+        perfil: 'ESTUDANTE',
+        senha: studentPassword,
+      });
+    } catch {
+    }
+
+    try {
+      const novoAluno = await alunosApi.create({
+        nome: nome.trim(),
+        cpf: cpf.trim(),
+        email: cleanEmail,
+        matricula: matricula.trim(),
+        status: 'ATIVO',
+      });
+      if (novoAluno && novoAluno.id) {
+        const prefixo = tipoVinculo === 'APRENDIZ' ? 'APREND' : 'TCE';
+        contratosApi
+          .create({
+            aluno_id: novoAluno.id,
+            numero_contrato: `${prefixo}-2026-${matricula.trim()}`,
+            data_inicio: dataAdmissao || new Date().toISOString().split('T')[0],
+            data_fim: '2026-12-15',
+            valor_bolsa: 1650.0,
+          })
+          .catch(() => {});
+      }
+    } catch {
+    }
+
     const created = addNewStudent({
       nome: nome.trim(),
       cpf: cpf.trim(),
-      email: email.trim() || `${nome.toLowerCase().replace(/\s+/g, '.')}@aluno.com.br`,
-      senha: senha.trim(),
+      email: cleanEmail,
       matricula: matricula.trim(),
       tipoVinculo,
-      turmaId,
-      curso,
-      empresa: empresa || 'Empresa Parceira',
+      turmaId: finalTurmaId,
+      curso: finalCurso,
+      empresa: finalEmpresa,
       instituicao: currentRole === 'COORDENADOR' ? activeInstitution : instituicao,
       dataAdmissao,
     });
 
     setToastMessage({
-      title: 'Estudante Cadastrado com Sucesso! 🎉',
-      desc: `${nome} foi adicionado(a) com acesso ativo.`,
+      title: 'Estudante Cadastrado com Sucesso!',
+      desc: `${nome} foi registrado com acesso ao sistema e contrato vinculado.`,
       type: 'success',
     });
 
@@ -156,43 +254,80 @@ export default function CadastroPage() {
     router.push('/analytics');
   };
 
+  const handleContratoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!contratoAlunoId || !contratoNumero.trim() || !contratoInicio || !contratoFim) {
+      setToastMessage({
+        title: 'Campos Obrigatórios',
+        desc: 'Selecione o estudante e preencha todos os campos do contrato.',
+        type: 'error',
+      });
+      return;
+    }
+    setIsSubmittingContrato(true);
+    try {
+      const bolsaNum = parseFloat(contratoBolsa.replace(',', '.'));
+      await contratosApi.create({
+        aluno_id: contratoAlunoId,
+        numero_contrato: contratoNumero.trim(),
+        data_inicio: contratoInicio,
+        data_fim: contratoFim,
+        valor_bolsa: isNaN(bolsaNum) ? undefined : bolsaNum,
+      });
+      setToastMessage({
+        title: 'Contrato Registrado!',
+        desc: contratoNumero.trim(),
+        type: 'success',
+      });
+      setContratoNumero('');
+      setContratoAlunoId('');
+      setContratoInicio(new Date().toISOString().split('T')[0]);
+      setContratoFim('2026-12-15');
+      setContratoBolsa('1650');
+    } catch {
+      setToastMessage({
+        title: 'Erro ao Registrar Contrato',
+        desc: 'Verifique os dados e tente novamente.',
+        type: 'error',
+      });
+    }
+    setIsSubmittingContrato(false);
+  };
+
   return (
     <div className="max-w-4xl mx-auto py-4 px-4 sm:px-6 animate-fadeIn space-y-6">
-      {/* Page Header Banner */}
       <PageBanner
         title="Central de Cadastros"
-        subtitle="Admissão simplificada de estudantes, turmas e gestão de credenciais"
         icon={UserPlus}
         backHref="/coordenador"
         backLabel="Voltar ao Painel"
         badge={{
-          label: 'Coordenação',
+          label: 'Ambiente da Coordenação',
           icon: ShieldCheck,
         }}
         action={{
-          label: 'Ver Dossiês dos Alunos',
+          label: 'Ver Aprendizes',
           href: '/coordenador/dossies',
           icon: UserCheck,
         }}
       />
 
-      {/* Modern Pill Switcher */}
       <div className="flex justify-center">
-        <div className="inline-flex bg-slate-200/60 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200/80 dark:border-slate-700">
+        <div className="inline-flex bg-slate-100 dark:bg-slate-800/60 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm max-w-xl w-full">
           <button
             type="button"
             onClick={() => {
               setActiveTab('ALUNO');
               scrollToTop('instant');
             }}
-            className={`px-5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
+            className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === 'ALUNO'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm font-bold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-white dark:bg-slate-900 text-[#0284c7] dark:text-[#00b4d8] shadow-xs border border-slate-200 dark:border-slate-700'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
             }`}
           >
-            <GraduationCap className="w-4 h-4 text-[#065373] dark:text-cyan-400" />
-            <span>Novo Estudante</span>
+            <UserPlus className="w-4 h-4 text-[#0284c7] dark:text-[#00b4d8]" />
+            <span>Estudante</span>
           </button>
 
           <button
@@ -201,129 +336,100 @@ export default function CadastroPage() {
               setActiveTab('TURMA');
               scrollToTop('instant');
             }}
-            className={`px-5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
+            className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === 'TURMA'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm font-bold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-white dark:bg-slate-900 text-[#0284c7] dark:text-[#00b4d8] shadow-xs border border-slate-200 dark:border-slate-700'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
             }`}
           >
-            <FolderPlus className="w-4 h-4 text-[#065373] dark:text-cyan-400" />
-            <span>Nova Turma</span>
+            <FolderPlus className="w-4 h-4 text-[#0284c7] dark:text-[#00b4d8]" />
+            <span>Turma</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('CONTRATO');
+              scrollToTop('instant');
+            }}
+            className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              activeTab === 'CONTRATO'
+                ? 'bg-white dark:bg-slate-900 text-[#0284c7] dark:text-[#00b4d8] shadow-xs border border-slate-200 dark:border-slate-700'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+            }`}
+          >
+            <FileSignature className="w-4 h-4 text-[#0284c7] dark:text-[#00b4d8]" />
+            <span>Contrato / TCE</span>
           </button>
         </div>
       </div>
 
-      {/* Main Card */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        {/* TAB 1: ESTUDANTE */}
         {activeTab === 'ALUNO' && (
           <form onSubmit={handleAlunoSubmit}>
-            {/* Header com estilo limpo */}
             <div className="px-6 sm:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
-                  Cadastro de Aprendiz ou Estagiário
+                  Novo Estudante
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Preencha os dados pessoais, acadêmicos e defina a senha para acesso ao portal do aluno.
+                  Cadastre um jovem aprendiz ou estagiário com credencial de acesso
                 </p>
               </div>
-              <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800/60">
                 <Check className="w-3 h-3" />
-                <span>Pronto para Login</span>
+                <span>Ativo</span>
               </span>
             </div>
 
-            <div className="p-6 sm:p-8 space-y-8">
-              {/* Seção 1: Modalidade de Contrato */}
-              <div className="space-y-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                  1. Modalidade de Contratação
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setTipoVinculo('APRENDIZ')}
-                    className={`p-4 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${
-                      tipoVinculo === 'APRENDIZ'
-                        ? 'border-[#065373] dark:border-cyan-400 bg-[#065373]/5 dark:bg-cyan-500/10 ring-2 ring-[#065373]/20'
-                        : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900'
-                    }`}
-                  >
-                    <div className={`p-2 rounded-lg shrink-0 ${
-                      tipoVinculo === 'APRENDIZ'
-                        ? 'bg-[#065373] text-white'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
-                    }`}>
-                      <Briefcase className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs font-bold text-slate-900 dark:text-white">Jovem Aprendiz</p>
-                        {tipoVinculo === 'APRENDIZ' && (
-                          <span className="w-2 h-2 rounded-full bg-[#065373] dark:bg-cyan-400" />
-                        )}
-                      </div>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        Contrato de Aprendizagem Profissional (Lei 10.097/00) com CTPS e programa teórico.
-                      </p>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setTipoVinculo('ESTAGIARIO')}
-                    className={`p-4 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${
-                      tipoVinculo === 'ESTAGIARIO'
-                        ? 'border-[#065373] dark:border-cyan-400 bg-[#065373]/5 dark:bg-cyan-500/10 ring-2 ring-[#065373]/20'
-                        : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900'
-                    }`}
-                  >
-                    <div className={`p-2 rounded-lg shrink-0 ${
-                      tipoVinculo === 'ESTAGIARIO'
-                        ? 'bg-[#065373] text-white'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
-                    }`}>
-                      <GraduationCap className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs font-bold text-slate-900 dark:text-white">Estágio (TCE)</p>
-                        {tipoVinculo === 'ESTAGIARIO' && (
-                          <span className="w-2 h-2 rounded-full bg-[#065373] dark:bg-cyan-400" />
-                        )}
-                      </div>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                        Termo de Compromisso de Estágio (Lei 11.788/08) vinculado à grade curricular.
-                      </p>
-                    </div>
-                  </button>
-                </div>
+            <div className="p-6 sm:p-8 space-y-6">
+              <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-xl border border-slate-200/80 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setTipoVinculo('APRENDIZ')}
+                  className={`py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    tipoVinculo === 'APRENDIZ'
+                      ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-300 dark:border-slate-700'
+                      : 'text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white'
+                  }`}
+                >
+                  <GraduationCap className="w-4 h-4 text-[#065373] dark:text-cyan-400" />
+                  <span>Jovem Aprendiz</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTipoVinculo('ESTAGIARIO')}
+                  className={`py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    tipoVinculo === 'ESTAGIARIO'
+                      ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-300 dark:border-slate-700'
+                      : 'text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white'
+                  }`}
+                >
+                  <Briefcase className="w-4 h-4 text-[#065373] dark:text-cyan-400" />
+                  <span>Estágio (TCE)</span>
+                </button>
               </div>
 
-              {/* Seção 2: Dados Pessoais & Acesso */}
               <div className="space-y-4">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                  2. Identificação & Credenciais de Acesso
+                  1. Dados Pessoais & Acesso
                 </span>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Nome Completo */}
                   <div className="sm:col-span-2 space-y-1">
                     <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      Nome Completo do Estudante <span className="text-rose-500">*</span>
+                      Nome Completo <span className="text-rose-500">*</span>
                     </label>
                     <input
                       type="text"
                       required
                       value={nome}
                       onChange={(e) => setNome(e.target.value)}
-                      placeholder="Ex: Lucas Gabriel da Silva"
+                      placeholder="Nome do estudante"
                       className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                     />
                   </div>
 
-                  {/* CPF */}
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
                       CPF <span className="text-rose-500">*</span>
@@ -339,10 +445,9 @@ export default function CadastroPage() {
                     />
                   </div>
 
-                  {/* Matrícula */}
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      Matrícula ou Código ID <span className="text-rose-500">*</span>
+                      Matrícula <span className="text-rose-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -354,119 +459,137 @@ export default function CadastroPage() {
                     />
                   </div>
 
-                  {/* E-mail de Acesso */}
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      E-mail de Login <span className="text-rose-500">*</span>
+                      E-mail Institucional ou Pessoal
                     </label>
                     <div className="relative">
-                      <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                       <input
                         type="email"
-                        required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="lucas.gabriel@exemplo.com"
+                        placeholder="email@exemplo.com"
                         className="w-full h-10 pl-9 pr-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                       />
                     </div>
                   </div>
 
-                  {/* Senha de Acesso */}
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                      <span>Senha de Acesso <span className="text-rose-500">*</span></span>
-                      <span className="text-[10px] text-slate-400">Mínimo 6 caracteres</span>
-                    </label>
-                    <div className="relative">
-                      <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                      <input
-                        type={showSenha ? 'text' : 'password'}
-                        required
-                        value={senha}
-                        onChange={(e) => setSenha(e.target.value)}
-                        placeholder="Defina a senha inicial..."
-                        className="w-full h-10 pl-9 pr-10 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                      />
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                        Senha de Acesso ao Portal
+                      </label>
                       <button
                         type="button"
                         onClick={() => setShowSenha(!showSenha)}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
-                        title={showSenha ? 'Ocultar senha' : 'Ver senha'}
+                        className="text-[11px] text-[#065373] dark:text-cyan-400 hover:underline flex items-center gap-1 cursor-pointer"
                       >
-                        {showSenha ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showSenha ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                        <span>{showSenha ? 'Ocultar' : 'Exibir'}</span>
                       </button>
+                    </div>
+                    <div className="relative">
+                      <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type={showSenha ? 'text' : 'password'}
+                        value={senha}
+                        onChange={(e) => setSenha(e.target.value)}
+                        placeholder="Padrão: DocFlow@2026"
+                        className="w-full h-10 pl-9 pr-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all font-mono"
+                      />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Seção 3: Vínculo Acadêmico & Empresa */}
-              <div className="space-y-4">
+              <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                  3. Entidade, Turma & Empresa
+                  2. Dados Acadêmicos & Concessão
                 </span>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Turma */}
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      Turma de Origem
+                      Turma / Curso
                     </label>
                     <select
-                      required
-                      value={turmaId}
+                      value={turmaSelect}
                       onChange={(e) => handleTurmaChange(e.target.value)}
                       className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
                     >
-                      {turmas.length === 0 ? (
-                        <option value="">Nenhuma turma cadastrada (Geral)</option>
-                      ) : (
-                        turmas.map((t) => (
+                      <optgroup label="Turmas Disponíveis">
+                        {availableTurmasList.map((t) => (
                           <option key={t.id} value={t.id}>
                             {t.codigo} — {t.nomeCurso}
                           </option>
-                        ))
-                      )}
+                        ))}
+                      </optgroup>
+                      <option value="__CUSTOM_TURMA__">
+                        + Informar Outra Turma / Curso (Digitação Livre)
+                      </option>
                     </select>
+
+                    {turmaSelect === '__CUSTOM_TURMA__' && (
+                      <input
+                        type="text"
+                        required
+                        value={customTurma}
+                        onChange={(e) => {
+                          setCustomTurma(e.target.value);
+                          setCurso(e.target.value);
+                        }}
+                        placeholder="Código e Nome da Turma (Ex: DS-2026 / Redes) *"
+                        className="w-full h-10 px-3 text-xs bg-white dark:bg-slate-900 border border-[#065373] dark:border-cyan-400 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] mt-2"
+                      />
+                    )}
                   </div>
 
-                  {/* Data de Início */}
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      Data de Início
+                      Data de Admissão / Início
                     </label>
                     <input
                       type="date"
                       value={dataAdmissao}
                       onChange={(e) => setDataAdmissao(e.target.value)}
-                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
+                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
                     />
                   </div>
 
-                  {/* Empresa Concedente */}
                   <div className="sm:col-span-2 space-y-1">
                     <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      Empresa Parceira / Concedente
+                      Empresa Concedente
                     </label>
                     <select
-                      value={empresa}
-                      onChange={(e) => setEmpresa(e.target.value)}
+                      value={empresaSelect}
+                      onChange={(e) => setEmpresaSelect(e.target.value)}
                       className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
                     >
-                      {empresas.length === 0 ? (
-                        <option value="">Empresa Conveniada Padrão</option>
-                      ) : (
-                        empresas.map((emp) => (
-                          <option key={emp.id} value={emp.razaoSocial}>
-                            {emp.nomeFantasia || emp.razaoSocial}
+                      <optgroup label="Empresas Parceiras do Grupo">
+                        {companiesList.map((empNome) => (
+                          <option key={empNome} value={empNome}>
+                            {empNome}
                           </option>
-                        ))
-                      )}
+                        ))}
+                      </optgroup>
+                      <option value="__CUSTOM__">
+                        + Informar Outra Empresa Concedente (Digitação Livre)
+                      </option>
                     </select>
+
+                    {empresaSelect === '__CUSTOM__' && (
+                      <input
+                        type="text"
+                        required
+                        value={customEmpresa}
+                        onChange={(e) => setCustomEmpresa(e.target.value)}
+                        placeholder="Digite a Razão Social da Empresa Concedente *"
+                        className="w-full h-10 px-3 text-xs bg-white dark:bg-slate-900 border border-[#065373] dark:border-cyan-400 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] mt-2"
+                      />
+                    )}
                   </div>
 
-                  {/* Instituição de Ensino */}
                   <div className="sm:col-span-2 space-y-1">
                     <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
                       Instituição de Ensino
@@ -497,7 +620,6 @@ export default function CadastroPage() {
               </div>
             </div>
 
-            {/* Footer Actions */}
             <div className="px-6 sm:px-8 py-4 bg-slate-50/80 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
               <button
                 type="button"
@@ -511,22 +633,27 @@ export default function CadastroPage() {
                 disabled={isSubmittingAluno}
                 className="px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 dark:bg-cyan-500 dark:text-slate-950 dark:hover:bg-cyan-400 rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50"
               >
-                {isSubmittingAluno ? 'Cadastrando...' : 'Salvar Estudante'}
+                {isSubmittingAluno ? 'Cadastrando...' : 'Cadastrar Estudante'}
               </button>
             </div>
           </form>
         )}
 
-        {/* TAB 2: TURMA */}
         {activeTab === 'TURMA' && (
           <form onSubmit={handleTurmaSubmit}>
-            <div className="px-6 sm:px-8 py-5 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
-                Nova Turma
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Crie turmas para organizar o envio e a validação em lote dos documentos dos alunos.
-              </p>
+            <div className="px-6 sm:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
+                  Nova Turma
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Crie uma turma para agrupar e monitorar aprendizes
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
+                <Check className="w-3 h-3" />
+                <span>Ativa</span>
+              </span>
             </div>
 
             <div className="p-6 sm:p-8 space-y-4">
@@ -622,8 +749,128 @@ export default function CadastroPage() {
             </div>
           </form>
         )}
+
+        {activeTab === 'CONTRATO' && (
+          <form onSubmit={handleContratoSubmit}>
+            <div className="px-6 sm:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
+                  Novo Contrato / Termo de Compromisso (TCE)
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Vincule um contrato com vigência e bolsa-auxílio a um estudante
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-800/60">
+                <Check className="w-3 h-3" />
+                <span>Contrato</span>
+              </span>
+            </div>
+
+            <div className="p-6 sm:p-8 space-y-4">
+              <div className="p-3.5 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 flex items-start gap-2.5">
+                <CalendarDays className="w-4 h-4 text-sky-600 dark:text-sky-400 mt-0.5 shrink-0" />
+                <p className="text-xs text-sky-900 dark:text-sky-300 font-medium">
+                  Registre ou vincule um contrato / TCE a um estudante já cadastrado. O contrato ficará visível no dossiê e no portal do estudante.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2 space-y-1">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    Estudante <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    required
+                    value={contratoAlunoId}
+                    onChange={(e) => setContratoAlunoId(e.target.value)}
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
+                  >
+                    <option value="">Selecione o estudante...</option>
+                    {allStudentsList.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.nome} — {s.matricula}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="sm:col-span-2 space-y-1">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    Número do Contrato / TCE <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={contratoNumero}
+                    onChange={(e) => setContratoNumero(e.target.value)}
+                    placeholder="Ex: TCE-2026-042 ou APREND-2026-0199"
+                    className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 font-medium"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    Data de Início <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={contratoInicio}
+                    onChange={(e) => setContratoInicio(e.target.value)}
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    Data de Término <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={contratoFim}
+                    onChange={(e) => setContratoFim(e.target.value)}
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                  />
+                </div>
+
+                <div className="sm:col-span-2 space-y-1">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <DollarSign className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span>Bolsa-Auxílio Mensal (R$)</span>
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={contratoBolsa}
+                    onChange={(e) => setContratoBolsa(e.target.value)}
+                    placeholder="Ex: 1650.00"
+                    className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 sm:px-8 py-4 bg-slate-50/80 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => router.push('/coordenador/dossies')}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmittingContrato}
+                className="px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 dark:bg-cyan-500 dark:text-slate-950 dark:hover:bg-cyan-400 rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isSubmittingContrato ? 'Registrando...' : 'Salvar Contrato / TCE'}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );
 }
-

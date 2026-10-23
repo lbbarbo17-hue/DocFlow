@@ -29,10 +29,12 @@ import {
   contratosApi,
   auditoriaApi,
   turmasApi,
+  authApi,
   AlunoResponse,
   DocumentoResponse,
   ContratoResponse,
   AuditLogBackendResponse,
+  AuthUserResponse,
 } from '@/lib/api';
 
 export function mapBackendAuditLogToItem(b: AuditLogBackendResponse): AuditLog {
@@ -280,6 +282,7 @@ interface AppContextType {
   selectStudent: (studentId: string) => void;
   setStudentDirect: (s: Student) => void;
   setSystemUsers: React.Dispatch<React.SetStateAction<SystemUser[]>>;
+  setActiveCoordinatorUserId: (id: string | null) => void;
   logout: () => void;
   loginUser: (email: string) => { role: UserRole; route: string; user?: SystemUser | Student };
 }
@@ -354,15 +357,58 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     async function syncBackendData() {
       try {
-        const [alunosData, docsData, contratosData, auditData, turmasData] = await Promise.all([
+        const [alunosData, docsData, contratosData, auditData, turmasData, usersData] = await Promise.all([
           alunosApi.list().catch(() => []),
           documentosApi.listAll().catch(() => []),
           contratosApi.list().catch(() => []),
           auditoriaApi.list().catch(() => []),
           turmasApi.list().catch(() => []),
+          authApi.listUsers().catch(() => []),
         ]);
 
         if (isCancelled) return;
+
+        if (usersData && usersData.length > 0) {
+          const mappedUsers: SystemUser[] = usersData.map((u: AuthUserResponse) => ({
+            id: u.id,
+            nome: u.nome,
+            email: u.email,
+            role: (u.perfil === 'ADMIN' ? 'SUPERADMIN' : u.perfil === 'COORDENADOR' || u.perfil === 'RH' ? 'COORDENADOR' : 'ESTUDANTE') as UserRole,
+            cargo: u.perfil === 'ADMIN' || u.perfil === 'SUPERADMIN' ? 'Super Administrador' : u.perfil === 'COORDENADOR' ? 'Coordenador Pedagógico' : 'Analista de RH',
+            status: u.ativo ? 'ATIVO' : 'INATIVO',
+            ultimoAcesso: 'Recente',
+            instituicao: 'ETEC Politécnica de São Paulo',
+          }));
+          setSystemUsers((prev) => {
+            const combined = [...mappedUsers];
+            prev.forEach((p) => {
+              if (!combined.some((c) => c.id === p.id || c.email.toLowerCase() === p.email.toLowerCase())) {
+                combined.push(p);
+              }
+            });
+            return combined;
+          });
+
+          if (typeof window !== 'undefined') {
+            const savedUserStr = localStorage.getItem('docflow_current_user');
+            if (savedUserStr) {
+              try {
+                const parsedUser = JSON.parse(savedUserStr);
+                if (parsedUser?.email && (parsedUser?.perfil === 'COORDENADOR' || parsedUser?.perfil === 'RH')) {
+                  const matched = mappedUsers.find(
+                    (u) => u.email.toLowerCase() === parsedUser.email.toLowerCase()
+                  );
+                  if (matched) {
+                    setActiveCoordinatorUserId(matched.id);
+                    if (matched.instituicao) {
+                      setActiveInstitution(matched.instituicao);
+                    }
+                  }
+                }
+              } catch {}
+            }
+          }
+        }
 
         if (auditData && auditData.length > 0) {
           const mappedLogs = auditData.map(mapBackendAuditLogToItem);
@@ -1628,6 +1674,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setStudentDirect,
         logout,
         loginUser,
+        setActiveCoordinatorUserId,
       }}
     >
       {children}

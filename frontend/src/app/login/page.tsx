@@ -31,7 +31,7 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setCurrentRole, setToastMessage, setStudentDirect, loginUser } = useApp();
+  const { setCurrentRole, setToastMessage, setStudentDirect, loginUser, setSystemUsers, setActiveCoordinatorUserId, setActiveInstitution } = useApp();
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -87,6 +87,33 @@ export default function LoginPage() {
 
       setCurrentRole(role);
       const localSync = loginUser(emailClean);
+
+      if (role === 'COORDENADOR' && data.user?.id) {
+        const coordUser = {
+          id: data.user.id,
+          nome: data.user.nome,
+          email: data.user.email,
+          role: 'COORDENADOR' as UserRole,
+          cargo: 'Coordenador Pedagógico',
+          status: 'ATIVO' as const,
+          ultimoAcesso: 'Agora',
+          instituicao: 'ETEC Politécnica de São Paulo',
+        };
+        setSystemUsers((prev) => {
+          const exists = prev.some(
+            (u) => u.id === coordUser.id || u.email.toLowerCase() === coordUser.email.toLowerCase()
+          );
+          return exists
+            ? prev.map((u) => (u.id === coordUser.id ? { ...u, ...coordUser } : u))
+            : [...prev, coordUser];
+        });
+        setActiveCoordinatorUserId(data.user.id);
+        setActiveInstitution('ETEC Politécnica de São Paulo');
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('docflow_active_coord_id', data.user.id);
+          localStorage.setItem('docflow_active_institution', 'ETEC Politécnica de São Paulo');
+        }
+      }
 
       try {
         confetti({

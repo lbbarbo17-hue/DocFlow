@@ -27,6 +27,7 @@ import {
   Clock,
   KeyRound,
   Loader2,
+  AlertCircle,
 } from 'lucide-react';
 
 export default function LoginPage() {
@@ -38,6 +39,9 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [generalError, setGeneralError] = useState('');
 
   const calculatePasswordStrength = (pass: string) => {
     if (!pass) return 0;
@@ -60,9 +64,34 @@ export default function LoginPage() {
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setEmailError('');
+    setPasswordError('');
+    setGeneralError('');
 
     const emailClean = identifier.trim();
+    let hasError = false;
+
+    if (!emailClean) {
+      setEmailError('Informe seu e-mail cadastrado.');
+      hasError = true;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailClean)) {
+      setEmailError('Digite um formato de e-mail válido.');
+      hasError = true;
+    }
+
+    if (!password) {
+      setPasswordError('Informe sua senha de acesso.');
+      hasError = true;
+    } else if (password.length < 6) {
+      setPasswordError('A senha deve conter no mínimo 6 caracteres.');
+      hasError = true;
+    }
+
+    if (hasError) {
+      return;
+    }
+
+    setIsLoading(true);
 
     try {
       const data = await authApi.login(emailClean, password);
@@ -153,9 +182,13 @@ export default function LoginPage() {
       }
     } catch (err) {
       if (err instanceof ApiError && err.status !== 500 && err.status !== 502 && err.status !== 503) {
+        const errorMsg = err.message || 'E-mail ou senha incorretos.';
+        setGeneralError(errorMsg);
+        setEmailError('Verifique o e-mail digitado');
+        setPasswordError('Verifique a senha digitada');
         setToastMessage({
           title: 'Falha na Autenticação',
-          desc: err.message || 'Credenciais inválidas no DocFlow.',
+          desc: errorMsg,
           type: 'error',
         });
         setIsLoading(false);
@@ -163,6 +196,20 @@ export default function LoginPage() {
       }
 
       const loginResult = loginUser(emailClean);
+
+      if (!loginResult || !loginResult.user) {
+        const msg = 'E-mail ou senha não encontrados no sistema.';
+        setGeneralError(msg);
+        setEmailError('E-mail não localizado');
+        setPasswordError('Senha incorreta');
+        setToastMessage({
+          title: 'Falha na Autenticação',
+          desc: msg,
+          type: 'error',
+        });
+        setIsLoading(false);
+        return;
+      }
 
       try {
         confetti({
@@ -283,7 +330,14 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <form onSubmit={handleLoginSubmit} className="space-y-4">
+            <form noValidate onSubmit={handleLoginSubmit} className="space-y-4">
+              {generalError && (
+                <div className="p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs flex items-start gap-2.5">
+                  <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                  <span className="leading-relaxed">{generalError}</span>
+                </div>
+              )}
+
               <div className="space-y-1">
                 <label className="text-[11px] font-bold text-slate-300 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
@@ -293,12 +347,25 @@ export default function LoginPage() {
                 </label>
                 <input
                   type="email"
-                  required
                   value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
+                  onChange={(e) => {
+                    setIdentifier(e.target.value);
+                    if (emailError) setEmailError('');
+                    if (generalError) setGeneralError('');
+                  }}
                   placeholder="seu.email@exemplo.com"
-                  className="w-full bg-slate-950/90 border border-slate-700 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 transition-all font-sans outline-none"
+                  className={`w-full bg-slate-950/90 border ${
+                    emailError
+                      ? 'border-rose-500 focus:border-rose-400 focus:ring-rose-400/40'
+                      : 'border-slate-700 focus:border-cyan-400 focus:ring-cyan-400'
+                  } focus:ring-1 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 transition-all font-sans outline-none`}
                 />
+                {emailError && (
+                  <p className="text-[11px] text-rose-400 font-medium flex items-center gap-1.5 pt-0.5">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{emailError}</span>
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1">
@@ -326,11 +393,18 @@ export default function LoginPage() {
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    required
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (passwordError) setPasswordError('');
+                      if (generalError) setGeneralError('');
+                    }}
                     placeholder="••••••••••••"
-                    className="w-full bg-slate-950/90 border border-slate-700 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 transition-all font-mono outline-none pr-10"
+                    className={`w-full bg-slate-950/90 border ${
+                      passwordError
+                        ? 'border-rose-500 focus:border-rose-400 focus:ring-rose-400/40'
+                        : 'border-slate-700 focus:border-cyan-400 focus:ring-cyan-400'
+                    } focus:ring-1 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 transition-all font-mono outline-none pr-10`}
                   />
                   <button
                     type="button"
@@ -341,6 +415,12 @@ export default function LoginPage() {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                {passwordError && (
+                  <p className="text-[11px] text-rose-400 font-medium flex items-center gap-1.5 pt-0.5">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{passwordError}</span>
+                  </p>
+                )}
 
                 {password.length > 0 && (
                   <div className="pt-1.5 space-y-1">

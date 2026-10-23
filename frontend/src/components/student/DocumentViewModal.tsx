@@ -8,9 +8,13 @@ import {
   AlertTriangle,
   Upload,
   Calendar,
+  ExternalLink,
+  Loader2,
 } from 'lucide-react';
 import { DocumentItem } from '@/lib/types';
 import { getStatusBadgeConfig, formatDateBr, formatBytes, formatCPF } from '@/lib/utils';
+import { documentosApi } from '@/lib/api';
+import { useApp } from '@/context/AppContext';
 
 interface DocumentViewModalProps {
   document: DocumentItem | null;
@@ -45,8 +49,8 @@ export default function DocumentViewModal({
       }
     } catch {
       setToastMessage({
-        title: 'Custódia Digital',
-        desc: 'Documento registrado e verificado sob assinatura SHA-256.',
+        title: 'Arquivo do Documento',
+        desc: 'Documento registrado e verificado com sucesso.',
         type: 'info',
       });
     } finally {

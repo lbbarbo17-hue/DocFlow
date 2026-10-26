@@ -313,7 +313,7 @@ export default function PerfilPage() {
                 <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
                   <Building className="w-4 h-4 text-[#0284c7] shrink-0" />
                   <span className="truncate">
-                    {currentRole === 'COORDENADOR' ? activeInstitution : 'Escopo Global Multi-Instituição'}
+                    {currentRole === 'COORDENADOR' ? activeInstitution : 'Super Administrador (Global)'}
                   </span>
                 </div>
               </div>

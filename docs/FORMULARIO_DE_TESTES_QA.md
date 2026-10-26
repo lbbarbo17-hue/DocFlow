@@ -79,7 +79,7 @@ Este documento é o roteiro oficial de testes e formulário de validação para 
   3. Verificar filtros de listagem (Todos, Obrigatórios, Pendentes, Aprovados).
   4. Clicar em "Visualizar" em um documento aprovado.
 - **Resultado Esperado**:
-  - Modal de visualização exibe informações de custódia digital, hash SHA-256 e status.
+  - Modal de visualização exibe informações e detalhes do documento, dados cadastrais limpos e status (sem tarjas ou hash SHA-256 exposto).
 - **Status**: [ ] PASS &nbsp;&nbsp; [ ] FAIL &nbsp;&nbsp; [ ] BLCK
 - **Evidência / Observações**:
 

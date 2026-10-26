@@ -93,6 +93,25 @@ export default function CadastroPage() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [showSenha, setShowSenha] = useState(false);
+
+  const calculatePasswordStrength = (pass: string) => {
+    if (!pass) return 0;
+    let score = 0;
+    if (pass.length >= 6) score += 1;
+    if (/[A-Z]/.test(pass)) score += 1;
+    if (/[0-9]/.test(pass)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pass)) score += 1;
+    return score;
+  };
+
+  const passStrength = calculatePasswordStrength(senha);
+  const strengthLabels = [
+    { label: 'Muito Curta', color: 'bg-slate-700 text-slate-400', emoji: '😴' },
+    { label: 'Fraca', color: 'bg-rose-500 text-rose-500', emoji: '⚠️' },
+    { label: 'Média', color: 'bg-amber-500 text-amber-500', emoji: '🤔' },
+    { label: 'Forte', color: 'bg-sky-500 text-sky-500', emoji: '🔥' },
+    { label: 'Segura', color: 'bg-emerald-500 text-emerald-500', emoji: '🛡️' },
+  ];
   const [matricula, setMatricula] = useState('');
   const [tipoVinculo, setTipoVinculo] = useState<TipoVinculo>('APRENDIZ');
   const [turmaSelect, setTurmaSelect] = useState<string>(availableTurmasList[0]?.id || 'turma-ds-01');
@@ -499,6 +518,37 @@ export default function CadastroPage() {
                         className="w-full h-10 pl-9 pr-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all font-mono"
                       />
                     </div>
+                    {senha.length > 0 && (
+                      <div className="pt-1.5 space-y-1">
+                        <div className="flex items-center justify-between text-[10px] font-mono">
+                          <span className="text-slate-500 dark:text-slate-400">Força da Senha:</span>
+                          <span className="font-bold flex items-center gap-1">
+                            <span>{strengthLabels[passStrength].emoji}</span>
+                            <span className={strengthLabels[passStrength].color.split(' ')[1]}>
+                              {strengthLabels[passStrength].label}
+                            </span>
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden flex gap-0.5">
+                          {[1, 2, 3, 4].map((step) => (
+                            <div
+                              key={step}
+                              className={`h-full flex-1 transition-all duration-300 ${
+                                passStrength >= step
+                                  ? passStrength === 1
+                                    ? 'bg-rose-500'
+                                    : passStrength === 2
+                                    ? 'bg-amber-500'
+                                    : passStrength === 3
+                                    ? 'bg-sky-400'
+                                    : 'bg-emerald-400'
+                                  : 'bg-slate-200 dark:bg-slate-700'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

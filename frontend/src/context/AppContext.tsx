@@ -8,6 +8,7 @@ import {
   Turma,
   Empresa,
   AuditLog,
+  AuditAction,
   DocumentItem,
   StatusDocumento,
   SystemUser,
@@ -26,10 +27,40 @@ import {
   alunosApi,
   documentosApi,
   contratosApi,
+  auditoriaApi,
+  turmasApi,
+  authApi,
   AlunoResponse,
   DocumentoResponse,
   ContratoResponse,
+  AuditLogBackendResponse,
+  AuthUserResponse,
 } from '@/lib/api';
+
+export function mapBackendAuditLogToItem(b: AuditLogBackendResponse): AuditLog {
+  const detalhesObj = ((b.detalhes as Record<string, unknown>) || {});
+  const detalhesStr = typeof detalhesObj.detalhes === 'string'
+    ? detalhesObj.detalhes
+    : typeof detalhesObj.justificativa === 'string'
+    ? detalhesObj.justificativa
+    : b.action;
+
+  return {
+    id: b.id,
+    timestampUtc: b.timestamp_utc,
+    userId: b.user_id || 'usr-system',
+    userNome: (detalhesObj.userNome as string) || (detalhesObj.aluno_nome as string) || 'Operador DocFlow',
+    userRole: (detalhesObj.userRole as UserRole) || 'SUPERADMIN',
+    action: b.action as AuditAction,
+    resourceId: b.resource_id || b.id,
+    resourceTipo: (detalhesObj.resourceTipo as string) || b.resource_type,
+    ipAddress: b.ip_address || '127.0.0.1',
+    status: (detalhesObj.status as 'SUCCESS' | 'FAILURE' | 'BLOCKED') || 'SUCCESS',
+    detalhes: detalhesStr,
+    sha256Hash: (detalhesObj.file_hash as string) || (detalhesObj.sha256Hash as string) || 'N/A',
+    storageUuid: (detalhesObj.storageUuid as string) || undefined,
+  };
+}
 
 export function createDefaultStudentDocuments(alunoId: string, cpf: string): DocumentItem[] {
   return [
@@ -251,6 +282,7 @@ interface AppContextType {
   selectStudent: (studentId: string) => void;
   setStudentDirect: (s: Student) => void;
   setSystemUsers: React.Dispatch<React.SetStateAction<SystemUser[]>>;
+  setActiveCoordinatorUserId: (id: string | null) => void;
   logout: () => void;
   loginUser: (email: string) => { role: UserRole; route: string; user?: SystemUser | Student };
 }
@@ -325,13 +357,102 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     async function syncBackendData() {
       try {
-        const [alunosData, docsData, contratosData] = await Promise.all([
+        const [alunosData, docsData, contratosData, auditData, turmasData, usersData] = await Promise.all([
           alunosApi.list().catch(() => []),
           documentosApi.listAll().catch(() => []),
           contratosApi.list().catch(() => []),
+          auditoriaApi.list().catch(() => []),
+          turmasApi.list().catch(() => []),
+          authApi.listUsers().catch(() => []),
         ]);
 
         if (isCancelled) return;
+
+        if (usersData && usersData.length > 0) {
+          const mappedUsers: SystemUser[] = usersData.map((u: AuthUserResponse) => ({
+            id: u.id,
+            nome: u.nome,
+            email: u.email,
+            role: (u.perfil === 'ADMIN' ? 'SUPERADMIN' : u.perfil === 'COORDENADOR' || u.perfil === 'RH' ? 'COORDENADOR' : 'ESTUDANTE') as UserRole,
+            cargo: u.perfil === 'ADMIN' || u.perfil === 'SUPERADMIN' ? 'Super Administrador' : u.perfil === 'COORDENADOR' ? 'Coordenador Pedagógico' : 'Analista de RH',
+            status: u.ativo ? 'ATIVO' : 'INATIVO',
+            ultimoAcesso: 'Recente',
+            instituicao: 'ETEC Politécnica de São Paulo',
+          }));
+          setSystemUsers((prev) => {
+            const combined = [...mappedUsers];
+            prev.forEach((p) => {
+              if (!combined.some((c) => c.id === p.id || c.email.toLowerCase() === p.email.toLowerCase())) {
+                combined.push(p);
+              }
+            });
+            return combined;
+          });
+
+          if (typeof window !== 'undefined') {
+            const savedUserStr = localStorage.getItem('docflow_current_user');
+            if (savedUserStr) {
+              try {
+                const parsedUser = JSON.parse(savedUserStr);
+                if (parsedUser?.email && (parsedUser?.perfil === 'COORDENADOR' || parsedUser?.perfil === 'RH')) {
+                  const matched = mappedUsers.find(
+                    (u) => u.email.toLowerCase() === parsedUser.email.toLowerCase()
+                  );
+                  if (matched) {
+                    setActiveCoordinatorUserId(matched.id);
+                    if (matched.instituicao) {
+                      setActiveInstitution(matched.instituicao);
+                    }
+                  }
+                }
+              } catch {}
+            }
+          }
+        }
+
+        if (auditData && auditData.length > 0) {
+          const mappedLogs = auditData.map(mapBackendAuditLogToItem);
+          setAuditLogs((prev) => {
+            const combined = [...mappedLogs];
+            prev.forEach((p) => {
+              if (!combined.some((c) => c.id === p.id)) {
+                combined.push(p);
+              }
+            });
+            return combined;
+          });
+        }
+
+        if (turmasData && turmasData.length > 0) {
+          const mappedTurmas: Turma[] = turmasData.map((t) => {
+            const turmasAlunos = (alunosData || []).filter((a) => a.turma_id === t.id);
+            const total = turmasAlunos.length;
+            const emRisco = turmasAlunos.filter((a) => a.status === 'EM_RISCO' || a.status === 'PENDENTE').length;
+            const regulares = total - emRisco;
+            const conformidade = total > 0 ? Math.round((regulares / total) * 100) : 100;
+            return {
+              id: t.id,
+              codigo: t.codigo,
+              nomeCurso: t.nome,
+              periodo: t.semestre_referencia || '2026.1',
+              totalAlunos: total,
+              conformidadeMedia: conformidade,
+              alunosEmRisco: emRisco,
+              alunosRegulares: regulares,
+              instituicao: 'ETEC Politécnica de São Paulo',
+            };
+          });
+
+          setRawTurmas((prev) => {
+            const combined = [...mappedTurmas];
+            prev.forEach((p) => {
+              if (!combined.some((c) => c.id === p.id || c.codigo === p.codigo)) {
+                combined.push(p);
+              }
+            });
+            return combined;
+          });
+        }
 
         if (alunosData && alunosData.length > 0) {
           const mappedStudents = alunosData.map((a) =>
@@ -622,6 +743,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       timestampUtc: new Date().toISOString(),
     };
     setAuditLogs((prev) => [newLog, ...prev]);
+
+    auditoriaApi
+      .create({
+        action: entry.action,
+        resource_type: entry.resourceTipo,
+        ip_address: entry.ipAddress,
+        detalhes: {
+          userNome: entry.userNome,
+          userRole: entry.userRole,
+          status: entry.status,
+          detalhes: entry.detalhes,
+          sha256Hash: entry.sha256Hash,
+          storageUuid: entry.storageUuid,
+          resourceTipo: entry.resourceTipo,
+        },
+      })
+      .catch(() => {});
   };
 
   const uploadStudentDocument = async (docId: string, file: File): Promise<boolean> => {
@@ -764,7 +902,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const sha256 = await computeSHA256(file);
     const ext = file.name.split('.').pop() || 'pdf';
     const storageUuid = generateStorageUUID(ext);
-    const newDocId = `doc-${Date.now()}`;
+    let newDocId = `doc-${Date.now()}`;
+
+    if (student.id) {
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('aluno_id', student.id);
+        formData.append('tipo', newDocData.tipo || 'OUTROS');
+        const novoDocBackend = await documentosApi.upload(formData);
+        if (novoDocBackend && novoDocBackend.id) {
+          newDocId = novoDocBackend.id;
+        }
+      } catch {}
+    }
 
     const createdDoc: DocumentItem = {
       ...newDocData,
@@ -987,6 +1138,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addNewTurma = (turma: Turma) => {
+    turmasApi
+      .create({
+        codigo: turma.codigo,
+        nome: turma.nomeCurso,
+        semestre_referencia: turma.periodo,
+      })
+      .catch(() => {});
+
     const turmaWithInstitution: Turma = {
       ...turma,
       instituicao:
@@ -1515,6 +1674,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setStudentDirect,
         logout,
         loginUser,
+        setActiveCoordinatorUserId,
       }}
     >
       {children}

@@ -285,6 +285,8 @@ interface AppContextType {
   setActiveCoordinatorUserId: (id: string | null) => void;
   logout: () => void;
   loginUser: (email: string) => { role: UserRole; route: string; user?: SystemUser | Student };
+  updateStudent: (studentId: string, data: { nome?: string; email?: string; matricula?: string; empresa?: string; tipoVinculo?: TipoVinculo; dataAdmissao?: string; turmaId?: string; curso?: string }) => Promise<void>;
+  removeStudent: (studentId: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -1322,6 +1324,53 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateStudent = async (
+    studentId: string,
+    data: {
+      nome?: string;
+      email?: string;
+      matricula?: string;
+      empresa?: string;
+      tipoVinculo?: TipoVinculo;
+      dataAdmissao?: string;
+      turmaId?: string;
+      curso?: string;
+    }
+  ): Promise<void> => {
+    const apiPayload: { nome?: string; email?: string; matricula?: string } = {};
+    if (data.nome !== undefined) apiPayload.nome = data.nome;
+    if (data.email !== undefined) apiPayload.email = data.email;
+    if (data.matricula !== undefined) apiPayload.matricula = data.matricula;
+
+    try {
+      await alunosApi.update(studentId, apiPayload);
+    } catch {}
+
+    setRawStudentsList((prev) =>
+      prev.map((s) => {
+        if (s.id !== studentId) return s;
+        return {
+          ...s,
+          nome: data.nome ?? s.nome,
+          email: data.email ?? s.email,
+          matricula: data.matricula ?? s.matricula,
+          empresa: data.empresa ?? s.empresa,
+          tipoVinculo: data.tipoVinculo ?? s.tipoVinculo,
+          dataAdmissao: data.dataAdmissao ?? s.dataAdmissao,
+          turmaId: data.turmaId ?? s.turmaId,
+          curso: data.curso ?? s.curso,
+        };
+      })
+    );
+  };
+
+  const removeStudent = async (studentId: string): Promise<void> => {
+    try {
+      await alunosApi.delete(studentId);
+    } catch {}
+    setRawStudentsList((prev) => prev.filter((s) => s.id !== studentId));
+  };
+
   const setStudentDirect = (s: Student) => {
     setStudent(s);
     if (typeof window !== 'undefined') {
@@ -1675,6 +1724,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         logout,
         loginUser,
         setActiveCoordinatorUserId,
+        updateStudent,
+        removeStudent,
       }}
     >
       {children}

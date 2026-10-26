@@ -333,6 +333,25 @@ export const alunosApi = {
   getAvatarUrl: async (alunoId: string): Promise<{ avatar_url: string }> => {
     return apiRequest<{ avatar_url: string }>(`/alunos/${alunoId}/avatar-url`);
   },
+  update: async (
+    alunoId: string,
+    payload: {
+      nome?: string;
+      email?: string;
+      matricula?: string;
+      status?: string;
+    }
+  ): Promise<AlunoResponse> => {
+    return apiRequest<AlunoResponse>(`/alunos/${alunoId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  },
+  delete: async (alunoId: string): Promise<void> => {
+    await apiRequest<Record<string, never>>(`/alunos/${alunoId}`, {
+      method: 'DELETE',
+    });
+  },
 };
 export interface ContratoResponse {
   id: string;

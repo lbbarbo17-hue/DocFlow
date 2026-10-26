@@ -267,6 +267,7 @@ interface AppContextType {
     status?: 'ATIVO' | 'INATIVO';
   }) => SystemUser;
   addNewStudent: (data: {
+    id?: string;
     nome: string;
     cpf: string;
     email: string;
@@ -285,7 +286,7 @@ interface AppContextType {
   setActiveCoordinatorUserId: (id: string | null) => void;
   logout: () => void;
   loginUser: (email: string) => { role: UserRole; route: string; user?: SystemUser | Student };
-  updateStudent: (studentId: string, data: { nome?: string; email?: string; matricula?: string; empresa?: string; tipoVinculo?: TipoVinculo; dataAdmissao?: string; turmaId?: string; curso?: string }) => Promise<void>;
+  updateStudent: (studentId: string, data: { nome?: string; email?: string; matricula?: string; empresa?: string; dataAdmissao?: string; turmaId?: string; curso?: string }) => Promise<void>;
   removeStudent: (studentId: string) => Promise<void>;
 }
 
@@ -464,7 +465,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           setRawStudentsList((prev) => {
             const combined = [...mappedStudents];
             prev.forEach((p) => {
-              if (!combined.some((c) => c.id === p.id || c.email === p.email)) {
+              const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(p.id);
+              if (!isUuid && !combined.some((c) => c.id === p.id || c.email.toLowerCase() === p.email.toLowerCase())) {
                 combined.push(p);
               }
             });
@@ -1163,6 +1165,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addNewStudent = (data: {
+    id?: string;
     nome: string;
     cpf: string;
     email: string;
@@ -1181,7 +1184,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       selectedTurma?.instituicao ||
       (currentRole === 'COORDENADOR' ? activeInstitution : 'ETEC Politécnica de São Paulo');
 
-    const newStudentId = `std-${Date.now()}`;
+    const newStudentId = data.id || `std-${Date.now()}`;
     const newStudent: Student = {
       id: newStudentId,
       nome: data.nome,
@@ -1331,23 +1334,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       email?: string;
       matricula?: string;
       empresa?: string;
-      tipoVinculo?: TipoVinculo;
       dataAdmissao?: string;
       turmaId?: string;
       curso?: string;
     }
   ): Promise<void> => {
-    const apiPayload: { nome?: string; email?: string; matricula?: string } = {};
-    if (data.nome !== undefined) apiPayload.nome = data.nome;
-    if (data.email !== undefined) apiPayload.email = data.email;
-    if (data.matricula !== undefined) apiPayload.matricula = data.matricula;
-
-    try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(studentId);
+    if (isUuid) {
+      const apiPayload: { nome?: string; email?: string; matricula?: string } = {};
+      if (data.nome !== undefined) apiPayload.nome = data.nome;
+      if (data.email !== undefined) apiPayload.email = data.email;
+      if (data.matricula !== undefined) apiPayload.matricula = data.matricula;
       await alunosApi.update(studentId, apiPayload);
-    } catch {}
+    }
 
-    setRawStudentsList((prev) =>
-      prev.map((s) => {
+    setRawStudentsList((prev) => {
+      const updated = prev.map((s) => {
         if (s.id !== studentId) return s;
         return {
           ...s,
@@ -1355,20 +1357,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           email: data.email ?? s.email,
           matricula: data.matricula ?? s.matricula,
           empresa: data.empresa ?? s.empresa,
-          tipoVinculo: data.tipoVinculo ?? s.tipoVinculo,
           dataAdmissao: data.dataAdmissao ?? s.dataAdmissao,
           turmaId: data.turmaId ?? s.turmaId,
           curso: data.curso ?? s.curso,
         };
-      })
-    );
+      });
+      try {
+        localStorage.setItem('docflow_students', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
   };
 
   const removeStudent = async (studentId: string): Promise<void> => {
-    try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(studentId);
+    if (isUuid) {
       await alunosApi.delete(studentId);
-    } catch {}
-    setRawStudentsList((prev) => prev.filter((s) => s.id !== studentId));
+    }
+    setRawStudentsList((prev) => {
+      const updated = prev.filter((s) => s.id !== studentId);
+      try {
+        localStorage.setItem('docflow_students', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
   };
 
   const setStudentDirect = (s: Student) => {

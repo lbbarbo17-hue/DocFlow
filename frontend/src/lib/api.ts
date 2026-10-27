@@ -69,18 +69,22 @@ export interface TurmaResponse {
   tenant_id: string;
   nome: string;
   codigo: string;
-  ano_letivo: number;
+  semestre_referencia?: string;
+  ano_letivo?: number;
   instituicao_id?: string | null;
   ativo: boolean;
 }
 
 export interface ConformidadeResponse {
   turma_id: string;
-  nome_turma: string;
+  codigo?: string;
+  nome?: string;
+  nome_turma?: string;
   total_alunos: number;
   alunos_regulares: number;
   alunos_em_risco: number;
-  taxa_conformidade_percentual: number;
+  percentual_conformidade?: number;
+  taxa_conformidade_percentual?: number;
 }
 
 export interface AlunoResponse {
@@ -208,6 +212,12 @@ export const authApi = {
   getAvatarUrl: async (): Promise<{ avatar_url: string }> => {
     return apiRequest<{ avatar_url: string }>('/auth/me/avatar-url');
   },
+  forgotPassword: async (email: string): Promise<{ message: string }> => {
+    return apiRequest<{ message: string }>('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
 };
 
 export const documentosApi = {
@@ -277,6 +287,17 @@ export const turmasApi = {
   getConformidade: async (turmaId: string): Promise<ConformidadeResponse> => {
     return apiRequest<ConformidadeResponse>(`/turmas/${turmaId}/conformidade`);
   },
+  create: async (payload: {
+    codigo: string;
+    nome: string;
+    semestre_referencia?: string;
+    instituicao_id?: string;
+  }): Promise<TurmaResponse> => {
+    return apiRequest<TurmaResponse>('/turmas', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
 };
 
 export const alunosApi = {
@@ -311,6 +332,25 @@ export const alunosApi = {
   },
   getAvatarUrl: async (alunoId: string): Promise<{ avatar_url: string }> => {
     return apiRequest<{ avatar_url: string }>(`/alunos/${alunoId}/avatar-url`);
+  },
+  update: async (
+    alunoId: string,
+    payload: {
+      nome?: string;
+      email?: string;
+      matricula?: string;
+      status?: string;
+    }
+  ): Promise<AlunoResponse> => {
+    return apiRequest<AlunoResponse>(`/alunos/${alunoId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  },
+  delete: async (alunoId: string): Promise<void> => {
+    await apiRequest<Record<string, never>>(`/alunos/${alunoId}`, {
+      method: 'DELETE',
+    });
   },
 };
 export interface ContratoResponse {
@@ -351,5 +391,49 @@ export const contratosApi = {
   },
   getById: async (contratoId: string): Promise<ContratoResponse> => {
     return apiRequest<ContratoResponse>(`/contratos/${contratoId}`);
+  },
+  update: async (
+    contratoId: string,
+    payload: {
+      data_inicio?: string;
+      data_fim?: string;
+      valor_bolsa?: number;
+      numero_contrato?: string;
+    }
+  ): Promise<ContratoResponse> => {
+    return apiRequest<ContratoResponse>(`/contratos/${contratoId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  },
+};
+export interface AuditLogBackendResponse {
+  id: string;
+  tenant_id: string;
+  user_id?: string | null;
+  action: string;
+  resource_id?: string | null;
+  resource_type: string;
+  ip_address?: string | null;
+  detalhes?: Record<string, unknown> | null;
+  timestamp_utc: string;
+}
+
+export const auditoriaApi = {
+  list: async (skip = 0, limit = 100): Promise<AuditLogBackendResponse[]> => {
+    return apiRequest<AuditLogBackendResponse[]>(`/auditoria?skip=${skip}&limit=${limit}`);
+  },
+  create: async (payload: {
+    action: string;
+    resource_type: string;
+    resource_id?: string;
+    user_id?: string;
+    ip_address?: string;
+    detalhes?: Record<string, unknown>;
+  }): Promise<AuditLogBackendResponse> => {
+    return apiRequest<AuditLogBackendResponse>('/auditoria', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   },
 };

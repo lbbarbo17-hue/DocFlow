@@ -75,7 +75,7 @@ export default function StudentRegisterModal({
       turmaId,
       curso,
       empresa: empresa || 'Empresa Parceira',
-      instituicao,
+      instituicao: tipoVinculo === 'APRENDIZ' ? instituicao : undefined,
       dataAdmissao,
     });
 
@@ -250,18 +250,20 @@ export default function StudentRegisterModal({
               </select>
             </div>
 
-            <div className="sm:col-span-2">
-              <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1">
-                Instituição de Ensino
-              </label>
-              <input
-                type="text"
-                value={instituicao}
-                onChange={(e) => setInstituicao(e.target.value)}
-                placeholder="ETEC Politécnica de São Paulo"
-                className="w-full bg-slate-50/60 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 rounded-xl px-3.5 py-2 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all shadow-2xs"
-              />
-            </div>
+            {tipoVinculo === 'APRENDIZ' && (
+              <div className="sm:col-span-2">
+                <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1">
+                  Instituição de Ensino
+                </label>
+                <input
+                  type="text"
+                  value={instituicao}
+                  onChange={(e) => setInstituicao(e.target.value)}
+                  placeholder="ETEC Politécnica de São Paulo"
+                  className="w-full bg-slate-50/60 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 rounded-xl px-3.5 py-2 text-slate-950 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all shadow-2xs"
+                />
+              </div>
+            )}
           </div>
 
           {/* Footer Actions */}
@@ -286,3 +288,4 @@ export default function StudentRegisterModal({
     </div>
   );
 }
+

@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { DocFlowLogo } from '@/components/DocFlowLogo';
 import { useApp } from '@/context/AppContext';
 import { UserRole } from '@/lib/types';
 import {
@@ -234,23 +234,8 @@ export default function LoginPage() {
 
       <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center py-6 sm:py-0">
         <div className="order-2 lg:order-1 lg:col-span-6 space-y-4 sm:space-y-6 text-white text-center lg:text-left">
-          <div className="inline-flex items-center gap-3.5 px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
-            <div className="w-11 h-11 relative rounded-xl overflow-hidden bg-white flex items-center justify-center p-1 shadow-md">
-              <Image
-                src="/logo.png"
-                alt="DocFlow Logo"
-                width={40}
-                height={40}
-                className="object-contain"
-                priority
-              />
-            </div>
-            <div className="text-left">
-              <span className="font-extrabold text-lg tracking-tight text-white block leading-tight">
-                DocFlow
-              </span>
-              <span className="text-xs text-cyan-200">Guarda & Gestão de Documentos</span>
-            </div>
+          <div className="inline-flex items-center px-4 py-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
+            <DocFlowLogo inverted size="lg" showSubtitle />
           </div>
 
           <div className="space-y-3">

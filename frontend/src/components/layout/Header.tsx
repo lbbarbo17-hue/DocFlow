@@ -15,6 +15,7 @@ import {
   Building2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { DocFlowLogo } from '@/components/DocFlowLogo';
 
 export default function Header() {
   const router = useRouter();
@@ -47,6 +48,11 @@ export default function Header() {
           >
             <Menu className="w-4 h-4 text-[#065373] dark:text-cyan-300" />
           </button>
+
+          {/* Logo oficial DocFlow */}
+          <div className={`${isSidebarOpen ? 'flex lg:hidden' : 'flex'} items-center shrink-0`}>
+            <DocFlowLogo size="sm" />
+          </div>
 
           <div className="hidden sm:block h-6 w-[1px] bg-slate-200 dark:bg-slate-700" />
 

@@ -21,6 +21,9 @@ interface EditFormState {
   dataAdmissao: string;
   turmaId: string;
   curso: string;
+  contratoInicio: string;
+  contratoFim: string;
+  contratoValorBolsa: string;
 }
 
 export default function StudentMasterList({
@@ -52,6 +55,9 @@ export default function StudentMasterList({
     dataAdmissao: '',
     turmaId: '',
     curso: '',
+    contratoInicio: '',
+    contratoFim: '',
+    contratoValorBolsa: '',
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -148,6 +154,9 @@ export default function StudentMasterList({
       dataAdmissao: s.dataAdmissao || '',
       turmaId: s.turmaId,
       curso: s.curso,
+      contratoInicio: s.contratoAtivo?.dataInicio || s.dataAdmissao || new Date().toISOString().split('T')[0],
+      contratoFim: s.contratoAtivo?.dataFim || '2026-12-15',
+      contratoValorBolsa: s.contratoAtivo?.valorBolsa ? String(s.contratoAtivo.valorBolsa) : '1650.00',
     });
     setEditingStudentId(s.id);
   };
@@ -165,15 +174,19 @@ export default function StudentMasterList({
         email: editForm.email.trim(),
         matricula: editForm.matricula.trim(),
         empresa: editForm.empresa.trim(),
-        tipoVinculo: editForm.tipoVinculo,
         dataAdmissao: editForm.dataAdmissao,
         turmaId: editForm.turmaId,
         curso: editForm.curso,
+        contrato: {
+          dataInicio: editForm.contratoInicio,
+          dataFim: editForm.contratoFim,
+          valorBolsa: editForm.contratoValorBolsa,
+        },
       });
       setToastMessage({ title: 'Estudante atualizado', desc: `${editForm.nome} foi atualizado com sucesso.`, type: 'success' });
       setEditingStudentId(null);
     } catch {
-      setToastMessage({ title: 'Erro ao atualizar', desc: 'Não foi possível salvar as alterações.', type: 'error' });
+      setToastMessage({ title: 'Erro ao atualizar', desc: 'Não foi possível salvar as alterações no banco de dados.', type: 'error' });
     }
     setIsSaving(false);
   };
@@ -190,7 +203,7 @@ export default function StudentMasterList({
         setActiveStudentId(studentsList.find((s) => s.id !== deleteConfirmId)?.id || '');
       }
     } catch {
-      setToastMessage({ title: 'Erro ao excluir', desc: 'Não foi possível remover o estudante.', type: 'error' });
+      setToastMessage({ title: 'Erro ao excluir', desc: 'Não foi possível remover o estudante no banco de dados.', type: 'error' });
     }
     setIsDeleting(false);
   };
@@ -217,29 +230,11 @@ export default function StudentMasterList({
             </div>
 
             <div className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-xl border border-slate-200/80 dark:border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setEditForm((f) => ({ ...f, tipoVinculo: 'APRENDIZ' }))}
-                  className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                    editForm.tipoVinculo === 'APRENDIZ'
-                      ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-300 dark:border-slate-700'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                  }`}
-                >
-                  Jovem Aprendiz
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditForm((f) => ({ ...f, tipoVinculo: 'ESTAGIARIO' }))}
-                  className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                    editForm.tipoVinculo === 'ESTAGIARIO'
-                      ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-300 dark:border-slate-700'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                  }`}
-                >
-                  Estágio (TCE)
-                </button>
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Tipo de Vínculo:</span>
+                <span className="text-xs font-bold text-slate-900 dark:text-white px-2.5 py-1 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xs">
+                  {editForm.tipoVinculo === 'APRENDIZ' ? 'Jovem Aprendiz' : 'Estágio (TCE)'}
+                </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -311,6 +306,56 @@ export default function StudentMasterList({
                     onChange={(e) => setEditForm((f) => ({ ...f, dataAdmissao: e.target.value }))}
                     className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
                   />
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    Contrato & Remuneração
+                  </span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Vigência e reajuste salarial
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                      Início da Vigência
+                    </label>
+                    <input
+                      type="date"
+                      value={editForm.contratoInicio}
+                      onChange={(e) => setEditForm((f) => ({ ...f, contratoInicio: e.target.value }))}
+                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                      Término da Vigência
+                    </label>
+                    <input
+                      type="date"
+                      value={editForm.contratoFim}
+                      onChange={(e) => setEditForm((f) => ({ ...f, contratoFim: e.target.value }))}
+                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                      {editForm.tipoVinculo === 'APRENDIZ' ? 'Salário / Bolsa (R$)' : 'Bolsa-Auxílio (R$)'}
+                    </label>
+                    <input
+                      type="text"
+                      value={editForm.contratoValorBolsa}
+                      onChange={(e) => setEditForm((f) => ({ ...f, contratoValorBolsa: e.target.value }))}
+                      placeholder="1650.00"
+                      className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

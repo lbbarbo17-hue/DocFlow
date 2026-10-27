@@ -392,6 +392,20 @@ export const contratosApi = {
   getById: async (contratoId: string): Promise<ContratoResponse> => {
     return apiRequest<ContratoResponse>(`/contratos/${contratoId}`);
   },
+  update: async (
+    contratoId: string,
+    payload: {
+      data_inicio?: string;
+      data_fim?: string;
+      valor_bolsa?: number;
+      numero_contrato?: string;
+    }
+  ): Promise<ContratoResponse> => {
+    return apiRequest<ContratoResponse>(`/contratos/${contratoId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  },
 };
 export interface AuditLogBackendResponse {
   id: string;

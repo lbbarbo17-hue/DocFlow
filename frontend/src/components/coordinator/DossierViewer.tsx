@@ -95,6 +95,12 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
 
   const riskBadge = getRiskBadgeConfig(student.nivelRisco);
   const statusBadge = getStatusBadgeConfig(selectedDoc.status);
+  const isCtpsOrContract =
+    selectedDoc.tipo === 'CARTEIRA_TRABALHO' ||
+    selectedDoc.tipo === 'CONTRATO_TCE' ||
+    selectedDoc.nomeExibicao.toLowerCase().includes('ctps') ||
+    selectedDoc.nomeExibicao.toLowerCase().includes('registro') ||
+    selectedDoc.nomeExibicao.toLowerCase().includes('contrato');
 
   const handleBulkDownload = () => {
     addAuditEntry({
@@ -224,7 +230,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                   title={
                     selectedDoc.status === 'PENDENTE'
                       ? 'Documento ainda não enviado pelo aluno'
-                      : 'Abrir arquivo digital no Cloudflare R2'
+                      : 'Abrir arquivo digital'
                   }
                 >
                   {isOpeningFile ? (
@@ -232,7 +238,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                   ) : (
                     <ExternalLink className="w-3.5 h-3.5" />
                   )}
-                  <span>Visualizar Arquivo (R2)</span>
+                  <span>Visualizar Arquivo</span>
                 </button>
 
                 {selectedDoc.status === 'APROVADO' ? (
@@ -310,14 +316,14 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                   <p className="font-mono font-bold text-slate-950 dark:text-white">{student.cpf}</p>
                 </div>
 
-                {student.contratoAtivo && (
+                {isCtpsOrContract && student.contratoAtivo && (
                   <div>
                     <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Nº do Contrato</span>
                     <p className="font-mono font-bold text-slate-950 dark:text-white">{student.contratoAtivo.numeroContrato}</p>
                   </div>
                 )}
 
-                {student.contratoAtivo && (
+                {isCtpsOrContract && student.contratoAtivo && (
                   <div>
                     <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Vigência Contratual</span>
                     <p className="font-semibold text-slate-950 dark:text-white">
@@ -326,11 +332,15 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                   </div>
                 )}
 
-                {student.contratoAtivo?.valorBolsa && (
+                {isCtpsOrContract && student.contratoAtivo?.valorBolsa && (
                   <div>
-                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Bolsa-Auxílio</span>
+                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">
+                      {student.tipoVinculo === 'APRENDIZ' ? 'Salário / Bolsa' : 'Bolsa-Auxílio'}
+                    </span>
                     <p className="font-bold text-emerald-700 dark:text-emerald-400">
-                      R$ {student.contratoAtivo.valorBolsa}
+                      R$ {typeof student.contratoAtivo.valorBolsa === 'number'
+                        ? student.contratoAtivo.valorBolsa.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                        : student.contratoAtivo.valorBolsa}
                     </p>
                   </div>
                 )}
@@ -389,7 +399,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                         {selectedDoc.nomeArquivoOriginal || `${selectedDoc.nomeExibicao}.pdf`}
                       </p>
                       <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                        {selectedDoc.tamanhoBytes ? formatBytes(selectedDoc.tamanhoBytes) : 'Arquivo enviado'} • Custódia Cloudflare R2
+                        {selectedDoc.tamanhoBytes ? formatBytes(selectedDoc.tamanhoBytes) : 'Arquivo enviado'} • Custódia Digital Verificada
                       </p>
                     </div>
                   </div>
@@ -460,3 +470,4 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
     </div>
   );
 }
+

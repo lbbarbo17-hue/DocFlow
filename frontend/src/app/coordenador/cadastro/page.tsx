@@ -192,6 +192,7 @@ export default function CadastroPage() {
     } catch {
     }
 
+    let createdBackendId: string | undefined = undefined;
     try {
       const novoAluno = await alunosApi.create({
         nome: nome.trim(),
@@ -201,6 +202,7 @@ export default function CadastroPage() {
         status: 'ATIVO',
       });
       if (novoAluno && novoAluno.id) {
+        createdBackendId = novoAluno.id;
         const prefixo = tipoVinculo === 'APRENDIZ' ? 'APREND' : 'TCE';
         contratosApi
           .create({
@@ -216,6 +218,7 @@ export default function CadastroPage() {
     }
 
     const created = addNewStudent({
+      id: createdBackendId,
       nome: nome.trim(),
       cpf: cpf.trim(),
       email: cleanEmail,
@@ -224,7 +227,7 @@ export default function CadastroPage() {
       turmaId: finalTurmaId,
       curso: finalCurso,
       empresa: finalEmpresa,
-      instituicao: currentRole === 'COORDENADOR' ? activeInstitution : instituicao,
+      instituicao: tipoVinculo === 'APRENDIZ' ? (currentRole === 'COORDENADOR' ? activeInstitution : instituicao) : undefined,
       dataAdmissao,
     });
 
@@ -640,32 +643,34 @@ export default function CadastroPage() {
                     )}
                   </div>
 
-                  <div className="sm:col-span-2 space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      Instituição de Ensino
-                    </label>
-                    {currentRole === 'COORDENADOR' ? (
-                      <div className="h-10 px-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-between text-xs text-slate-700 dark:text-slate-300">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-slate-400" />
-                          <span className="font-medium">{activeInstitution}</span>
+                  {tipoVinculo === 'APRENDIZ' && (
+                    <div className="sm:col-span-2 space-y-1">
+                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                        Instituição de Ensino
+                      </label>
+                      {currentRole === 'COORDENADOR' ? (
+                        <div className="h-10 px-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-between text-xs text-slate-700 dark:text-slate-300">
+                          <div className="flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-slate-400" />
+                            <span className="font-medium">{activeInstitution}</span>
+                          </div>
+                          <span className="text-[10px] text-slate-400">Sua Instituição</span>
                         </div>
-                        <span className="text-[10px] text-slate-400">Sua Instituição</span>
-                      </div>
-                    ) : (
-                      <select
-                        value={instituicao}
-                        onChange={(e) => setInstituicao(e.target.value)}
-                        className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
-                      >
-                        {availableInstitutions.map((inst) => (
-                          <option key={inst} value={inst}>
-                            {inst}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-                  </div>
+                      ) : (
+                        <select
+                          value={instituicao}
+                          onChange={(e) => setInstituicao(e.target.value)}
+                          className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
+                        >
+                          {availableInstitutions.map((inst) => (
+                            <option key={inst} value={inst}>
+                              {inst}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

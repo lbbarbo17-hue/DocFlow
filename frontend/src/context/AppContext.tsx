@@ -286,7 +286,23 @@ interface AppContextType {
   setActiveCoordinatorUserId: (id: string | null) => void;
   logout: () => void;
   loginUser: (email: string) => { role: UserRole; route: string; user?: SystemUser | Student };
-  updateStudent: (studentId: string, data: { nome?: string; email?: string; matricula?: string; empresa?: string; dataAdmissao?: string; turmaId?: string; curso?: string }) => Promise<void>;
+  updateStudent: (
+    studentId: string,
+    data: {
+      nome?: string;
+      email?: string;
+      matricula?: string;
+      empresa?: string;
+      dataAdmissao?: string;
+      turmaId?: string;
+      curso?: string;
+      contrato?: {
+        dataInicio?: string;
+        dataFim?: string;
+        valorBolsa?: string | number;
+      };
+    }
+  ) => Promise<void>;
   removeStudent: (studentId: string) => Promise<void>;
 }
 
@@ -1337,6 +1353,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       dataAdmissao?: string;
       turmaId?: string;
       curso?: string;
+      contrato?: {
+        dataInicio?: string;
+        dataFim?: string;
+        valorBolsa?: string | number;
+      };
     }
   ): Promise<void> => {
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(studentId);
@@ -1346,6 +1367,48 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (data.email !== undefined) apiPayload.email = data.email;
       if (data.matricula !== undefined) apiPayload.matricula = data.matricula;
       await alunosApi.update(studentId, apiPayload);
+    }
+
+    const currentStudentObj = rawStudentsList.find((s) => s.id === studentId);
+    if (data.contrato && currentStudentObj) {
+      const contratoId = currentStudentObj.contratoAtivo?.id;
+      const isContratoUuid = contratoId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(contratoId);
+      const valorNum = data.contrato.valorBolsa !== undefined
+        ? (typeof data.contrato.valorBolsa === 'number'
+            ? data.contrato.valorBolsa
+            : parseFloat(String(data.contrato.valorBolsa).replace(',', '.')))
+        : undefined;
+
+      if (isContratoUuid) {
+        try {
+          await contratosApi.update(contratoId, {
+            data_inicio: data.contrato.dataInicio,
+            data_fim: data.contrato.dataFim,
+            valor_bolsa: isNaN(valorNum as number) ? undefined : valorNum,
+          });
+        } catch {}
+      } else if (isUuid) {
+        try {
+          const prefixo = currentStudentObj.tipoVinculo === 'APRENDIZ' ? 'APREND' : 'TCE';
+          const novoContrato = await contratosApi.create({
+            aluno_id: studentId,
+            numero_contrato: `${prefixo}-2026-${(data.matricula || currentStudentObj.matricula).trim()}`,
+            data_inicio: data.contrato.dataInicio || data.dataAdmissao || new Date().toISOString().split('T')[0],
+            data_fim: data.contrato.dataFim || '2026-12-15',
+            valor_bolsa: isNaN(valorNum as number) ? 1650 : valorNum,
+          });
+          if (novoContrato?.id) {
+            currentStudentObj.contratoAtivo = {
+              id: novoContrato.id,
+              numeroContrato: novoContrato.numero_contrato,
+              dataInicio: novoContrato.data_inicio,
+              dataFim: novoContrato.data_fim,
+              valorBolsa: novoContrato.valor_bolsa,
+              ativo: novoContrato.ativo,
+            };
+          }
+        } catch {}
+      }
     }
 
     setRawStudentsList((prev) => {
@@ -1360,6 +1423,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           dataAdmissao: data.dataAdmissao ?? s.dataAdmissao,
           turmaId: data.turmaId ?? s.turmaId,
           curso: data.curso ?? s.curso,
+          contratoAtivo: s.contratoAtivo ? {
+            ...s.contratoAtivo,
+            dataInicio: data.contrato?.dataInicio ?? s.contratoAtivo.dataInicio,
+            dataFim: data.contrato?.dataFim ?? s.contratoAtivo.dataFim,
+            valorBolsa: data.contrato?.valorBolsa !== undefined
+              ? (typeof data.contrato.valorBolsa === 'number'
+                  ? data.contrato.valorBolsa
+                  : parseFloat(String(data.contrato.valorBolsa).replace(',', '.')) || data.contrato.valorBolsa)
+              : s.contratoAtivo.valorBolsa,
+          } : (data.contrato ? {
+            id: `contrato-${Date.now()}`,
+            numeroContrato: `CTR-${Date.now()}`,
+            dataInicio: data.contrato.dataInicio || '',
+            dataFim: data.contrato.dataFim || '',
+            valorBolsa: data.contrato.valorBolsa || 0,
+            ativo: true,
+          } : undefined),
         };
       });
       try {

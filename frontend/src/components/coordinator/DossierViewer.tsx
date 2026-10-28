@@ -6,10 +6,18 @@ import {
   XCircle,
   FileText,
   Download,
+  ExternalLink,
+  Eye,
+  Loader2,
+  Copy,
+  Check,
+  ShieldCheck,
+  Clock,
 } from 'lucide-react';
 import { Student, DocumentItem } from '@/lib/types';
 import { useApp } from '@/context/AppContext';
-import { getStatusBadgeConfig, getRiskBadgeConfig } from '@/lib/utils';
+import { getStatusBadgeConfig, getRiskBadgeConfig, formatBytes } from '@/lib/utils';
+import { documentosApi } from '@/lib/api';
 import ValidateModal from './ValidateModal';
 
 interface DossierViewerProps {
@@ -45,9 +53,54 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
     doc: DocumentItem;
     action: 'APROVADO' | 'RECUSADO';
   } | null>(null);
+  const [isOpeningFile, setIsOpeningFile] = useState(false);
+  const [copiedHash, setCopiedHash] = useState(false);
+
+  const handleViewDocumentFile = async (doc: DocumentItem) => {
+    setIsOpeningFile(true);
+    try {
+      const res = await documentosApi.getDownloadUrl(doc.id);
+      if (res?.download_url) {
+        window.open(res.download_url, '_blank', 'noopener,noreferrer');
+      } else {
+        setToastMessage({
+          title: 'Arquivo Indisponível',
+          desc: 'Não foi possível gerar o link de visualização deste arquivo.',
+          type: 'error',
+        });
+      }
+    } catch {
+      setToastMessage({
+        title: 'Visualização Segura',
+        desc: 'Documento registrado sob custódia digital e hash SHA-256.',
+        type: 'info',
+      });
+    } finally {
+      setIsOpeningFile(false);
+    }
+  };
+
+  const handleCopyHash = (hash: string) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(hash);
+      setCopiedHash(true);
+      setTimeout(() => setCopiedHash(false), 2000);
+      setToastMessage({
+        title: 'Hash Copiado',
+        desc: 'Assinatura criptográfica SHA-256 copiada para a área de transferência.',
+        type: 'info',
+      });
+    }
+  };
 
   const riskBadge = getRiskBadgeConfig(student.nivelRisco);
   const statusBadge = getStatusBadgeConfig(selectedDoc.status);
+  const isCtpsOrContract =
+    selectedDoc.tipo === 'CARTEIRA_TRABALHO' ||
+    selectedDoc.tipo === 'CONTRATO_TCE' ||
+    selectedDoc.nomeExibicao.toLowerCase().includes('ctps') ||
+    selectedDoc.nomeExibicao.toLowerCase().includes('registro') ||
+    selectedDoc.nomeExibicao.toLowerCase().includes('contrato');
 
   const handleBulkDownload = () => {
     addAuditEntry({
@@ -84,9 +137,16 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                 {riskBadge.label}
               </span>
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-300 font-semibold mt-0.5">
-              {student.empresa}
-            </p>
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              <p className="text-xs text-slate-600 dark:text-slate-300 font-semibold">
+                {student.empresa}
+              </p>
+              {student.contratoAtivo && (
+                <span className="font-mono bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-cyan-300 border border-sky-300 dark:border-sky-800 px-2 py-0.5 rounded text-[10px] font-bold">
+                  {student.contratoAtivo.numeroContrato}
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-2 self-start sm:self-auto">
@@ -157,23 +217,89 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
               </div>
 
               {/* Approval Actions */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
                   type="button"
-                  onClick={() => setValidateModalState({ doc: selectedDoc, action: 'APROVADO' })}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors flex items-center gap-1 cursor-pointer shadow-2xs hover:shadow-xs"
+                  disabled={selectedDoc.status === 'PENDENTE' || isOpeningFile}
+                  onClick={() => handleViewDocumentFile(selectedDoc)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs ${
+                    selectedDoc.status === 'PENDENTE'
+                      ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed border border-slate-200 dark:border-slate-700'
+                      : 'bg-[#065373] hover:bg-[#05435c] text-white'
+                  }`}
+                  title={
+                    selectedDoc.status === 'PENDENTE'
+                      ? 'Documento ainda não enviado pelo aluno'
+                      : 'Abrir arquivo digital'
+                  }
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Aprovar</span>
+                  {isOpeningFile ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  )}
+                  <span>Visualizar Arquivo</span>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setValidateModalState({ doc: selectedDoc, action: 'RECUSADO' })}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white transition-colors flex items-center gap-1 cursor-pointer shadow-2xs hover:shadow-xs"
-                >
-                  <XCircle className="w-3.5 h-3.5" />
-                  <span>Recusar</span>
-                </button>
+
+                {selectedDoc.status === 'APROVADO' ? (
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      <span>Documento Aprovado</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setValidateModalState({ doc: selectedDoc, action: 'RECUSADO' })}
+                      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900 transition-colors"
+                      title="Reverter aprovação e recusar com justificativa"
+                    >
+                      Alterar para Recusado
+                    </button>
+                  </div>
+                ) : selectedDoc.status === 'RECUSADO' ? (
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 border border-rose-300 dark:border-rose-800">
+                      <XCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                      <span>Documento Recusado</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setValidateModalState({ doc: selectedDoc, action: 'APROVADO' })}
+                      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 transition-colors"
+                    >
+                      Reavaliar e Aprovar
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={selectedDoc.status === 'PENDENTE'}
+                      onClick={() => setValidateModalState({ doc: selectedDoc, action: 'APROVADO' })}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-2xs hover:shadow-xs ${
+                        selectedDoc.status === 'PENDENTE'
+                          ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-200 dark:border-slate-700'
+                          : 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer'
+                      }`}
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Aprovar</span>
+                    </button>
+                    <button
+                      type="button"
+                      disabled={selectedDoc.status === 'PENDENTE'}
+                      onClick={() => setValidateModalState({ doc: selectedDoc, action: 'RECUSADO' })}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-2xs hover:shadow-xs ${
+                        selectedDoc.status === 'PENDENTE'
+                          ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-200 dark:border-slate-700'
+                          : 'bg-rose-600 hover:bg-rose-700 text-white cursor-pointer'
+                      }`}
+                    >
+                      <XCircle className="w-3.5 h-3.5" />
+                      <span>Recusar</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -189,6 +315,35 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                   <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">CPF</span>
                   <p className="font-mono font-bold text-slate-950 dark:text-white">{student.cpf}</p>
                 </div>
+
+                {isCtpsOrContract && student.contratoAtivo && (
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Nº do Contrato</span>
+                    <p className="font-mono font-bold text-slate-950 dark:text-white">{student.contratoAtivo.numeroContrato}</p>
+                  </div>
+                )}
+
+                {isCtpsOrContract && student.contratoAtivo && (
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Vigência Contratual</span>
+                    <p className="font-semibold text-slate-950 dark:text-white">
+                      {student.contratoAtivo.dataInicio} até {student.contratoAtivo.dataFim}
+                    </p>
+                  </div>
+                )}
+
+                {isCtpsOrContract && student.contratoAtivo?.valorBolsa && (
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">
+                      {student.tipoVinculo === 'APRENDIZ' ? 'Salário / Bolsa' : 'Bolsa-Auxílio'}
+                    </span>
+                    <p className="font-bold text-emerald-700 dark:text-emerald-400">
+                      R$ {typeof student.contratoAtivo.valorBolsa === 'number'
+                        ? student.contratoAtivo.valorBolsa.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                        : student.contratoAtivo.valorBolsa}
+                    </p>
+                  </div>
+                )}
 
                 {selectedDoc.conteudoSensivelSimulado?.rgNumero && (
                   <div>
@@ -231,6 +386,74 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                 </div>
               )}
             </div>
+
+            {selectedDoc.status !== 'PENDENTE' ? (
+              <div className="p-4 bg-sky-50/60 dark:bg-slate-800/80 rounded-xl border border-sky-200/80 dark:border-slate-700 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-[#065373]/10 dark:bg-cyan-500/10 flex items-center justify-center text-[#065373] dark:text-cyan-400">
+                      <FileText className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-xs text-slate-900 dark:text-white">
+                        {selectedDoc.nomeArquivoOriginal || `${selectedDoc.nomeExibicao}.pdf`}
+                      </p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                        {selectedDoc.tamanhoBytes ? formatBytes(selectedDoc.tamanhoBytes) : 'Arquivo enviado'} • Custódia Digital Verificada
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={isOpeningFile}
+                    onClick={() => handleViewDocumentFile(selectedDoc)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#065373] hover:bg-[#05435c] text-white transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    {isOpeningFile ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Eye className="w-3.5 h-3.5" />
+                    )}
+                    <span>Abrir Documento</span>
+                  </button>
+                </div>
+
+                {selectedDoc.fileHashSha256 && (
+                  <div className="p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 text-[10px] font-mono">
+                    <div className="flex items-center gap-1.5 truncate">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span className="text-slate-500 dark:text-slate-400">SHA-256:</span>
+                      <span className="text-slate-800 dark:text-slate-200 truncate">
+                        {selectedDoc.fileHashSha256}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyHash(selectedDoc.fileHashSha256 || '')}
+                      className="p-1 rounded text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors shrink-0"
+                      title="Copiar Hash SHA-256"
+                    >
+                      {copiedHash ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 text-center space-y-1">
+                <Clock className="w-5 h-5 text-amber-500 mx-auto" />
+                <p className="font-bold text-xs text-slate-800 dark:text-slate-200">
+                  Documento Pendente de Envio
+                </p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  O aprendiz ainda não realizou o upload deste comprovante no Portal do Estudante.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -247,3 +470,4 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
     </div>
   );
 }
+

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
 import {
   UserRole,
   TipoVinculo,
@@ -8,6 +8,7 @@ import {
   Turma,
   Empresa,
   AuditLog,
+  AuditAction,
   DocumentItem,
   StatusDocumento,
   SystemUser,
@@ -22,6 +23,192 @@ import {
   INITIAL_SYSTEM_USERS,
 } from '@/lib/mockData';
 import { computeSHA256, generateStorageUUID } from '@/lib/utils';
+import {
+  alunosApi,
+  documentosApi,
+  contratosApi,
+  auditoriaApi,
+  turmasApi,
+  authApi,
+  AlunoResponse,
+  DocumentoResponse,
+  ContratoResponse,
+  AuditLogBackendResponse,
+  AuthUserResponse,
+} from '@/lib/api';
+
+export function mapBackendAuditLogToItem(b: AuditLogBackendResponse): AuditLog {
+  const detalhesObj = ((b.detalhes as Record<string, unknown>) || {});
+  const detalhesStr = typeof detalhesObj.detalhes === 'string'
+    ? detalhesObj.detalhes
+    : typeof detalhesObj.justificativa === 'string'
+    ? detalhesObj.justificativa
+    : b.action;
+
+  return {
+    id: b.id,
+    timestampUtc: b.timestamp_utc,
+    userId: b.user_id || 'usr-system',
+    userNome: (detalhesObj.userNome as string) || (detalhesObj.aluno_nome as string) || 'Operador DocFlow',
+    userRole: (detalhesObj.userRole as UserRole) || 'SUPERADMIN',
+    action: b.action as AuditAction,
+    resourceId: b.resource_id || b.id,
+    resourceTipo: (detalhesObj.resourceTipo as string) || b.resource_type,
+    ipAddress: b.ip_address || '127.0.0.1',
+    status: (detalhesObj.status as 'SUCCESS' | 'FAILURE' | 'BLOCKED') || 'SUCCESS',
+    detalhes: detalhesStr,
+    sha256Hash: (detalhesObj.file_hash as string) || (detalhesObj.sha256Hash as string) || 'N/A',
+    storageUuid: (detalhesObj.storageUuid as string) || undefined,
+  };
+}
+
+export function createDefaultStudentDocuments(alunoId: string, cpf: string): DocumentItem[] {
+  return [
+    {
+      id: `doc-rg-${alunoId}`,
+      tipo: 'RG',
+      nomeExibicao: 'Carteira de Identidade (RG)',
+      descricao: 'Frente e verso nítidos com foto visível e órgão expedidor legível.',
+      obrigatorio: true,
+      status: 'PENDENTE',
+      conteudoSensivelSimulado: {
+        cpfNumero: cpf,
+      },
+    },
+    {
+      id: `doc-cpf-${alunoId}`,
+      tipo: 'CPF',
+      nomeExibicao: 'Comprovante de Inscrição no CPF',
+      descricao: 'Comprovante oficial da Receita Federal com QR Code ou cartão com CPF regular.',
+      obrigatorio: true,
+      status: 'PENDENTE',
+      conteudoSensivelSimulado: {
+        cpfNumero: cpf,
+      },
+    },
+    {
+      id: `doc-res-${alunoId}`,
+      tipo: 'COMPROVANTE_RESIDENCIA',
+      nomeExibicao: 'Comprovante de Residência Atualizado',
+      descricao: 'Conta de consumo (água, luz, gás ou internet) emitida nos últimos 90 dias.',
+      obrigatorio: true,
+      status: 'PENDENTE',
+    },
+    {
+      id: `doc-mat-${alunoId}`,
+      tipo: 'COMPROVANTE_MATRICULA',
+      nomeExibicao: 'Comprovante de Matrícula / Frequência Escolar',
+      descricao: 'Declaração semestral oficial da instituição de ensino com período letivo atual.',
+      obrigatorio: true,
+      recorrente: true,
+      status: 'PENDENTE',
+    },
+    {
+      id: `doc-tce-${alunoId}`,
+      tipo: 'CONTRATO_TCE',
+      nomeExibicao: 'Contrato de Aprendizagem Profissional (CTPS / Registro)',
+      descricao: 'Documento assinado com vigência e dados da empresa e instituição concedente.',
+      obrigatorio: true,
+      status: 'PENDENTE',
+    },
+  ];
+}
+
+export function mapAlunoResponseToStudent(
+  aluno: AlunoResponse,
+  backendDocs: DocumentoResponse[] = [],
+  contratos: ContratoResponse[] = []
+): Student {
+  const alunoContrato = contratos.find((c) => c.aluno_id === aluno.id && c.ativo);
+  const contratoAtivoObj = alunoContrato
+    ? {
+        id: alunoContrato.id,
+        numeroContrato: alunoContrato.numero_contrato,
+        dataInicio: alunoContrato.data_inicio,
+        dataFim: alunoContrato.data_fim,
+        valorBolsa: alunoContrato.valor_bolsa,
+        ativo: alunoContrato.ativo,
+      }
+    : undefined;
+  const defaultDocs = createDefaultStudentDocuments(aluno.id, aluno.cpf);
+  const alunoDocs = backendDocs.filter((d) => d.aluno_id === aluno.id);
+
+  const mergedDocs = defaultDocs.map((doc) => {
+    const matched = alunoDocs.find(
+      (ad) =>
+        ad.tipo === doc.tipo ||
+        (ad.tipo === 'TERMO_COMPROMISSO_ESTAGIO' && doc.tipo === 'CONTRATO_TCE') ||
+        (ad.tipo === 'CONTRATO_APRENDIZAGEM' && doc.tipo === 'CONTRATO_TCE')
+    );
+    if (matched) {
+      const st: StatusDocumento =
+        matched.status === 'APROVADO'
+          ? 'APROVADO'
+          : matched.status === 'RECUSADO'
+          ? 'RECUSADO'
+          : 'EM_ANALISE';
+      const cleanFileName = matched.storage_path
+        ? matched.storage_path.split('/').pop()?.replace(/^[a-f0-9]+_/, '') || doc.nomeExibicao
+        : doc.nomeExibicao;
+      return {
+        ...doc,
+        id: matched.id,
+        status: st,
+        nomeArquivoOriginal: cleanFileName,
+        fileHashSha256: matched.file_hash,
+        storageUuid: matched.storage_path,
+        dataEnvio: matched.created_at,
+        tamanhoBytes: matched.tamanho_bytes,
+        mimeType: matched.mime_type,
+      };
+    }
+    return doc;
+  });
+
+  const essentialDocs = mergedDocs.filter((d) => d.obrigatorio);
+  const approvedCount = essentialDocs.filter((d) => d.status === 'APROVADO').length;
+  const inReviewCount = essentialDocs.filter((d) => d.status === 'EM_ANALISE').length;
+  const percentual =
+    essentialDocs.length > 0
+      ? Math.round(((approvedCount + inReviewCount) / essentialDocs.length) * 100)
+      : 0;
+
+  const docsWithContractInfo = mergedDocs.map((d) => {
+    if (d.tipo === 'CONTRATO_TCE') {
+      return {
+        ...d,
+        validadeAte: alunoContrato?.data_fim || d.validadeAte,
+        conteudoSensivelSimulado: {
+          ...d.conteudoSensivelSimulado,
+          valorBolsa: alunoContrato?.valor_bolsa ? `R$ ${alunoContrato.valor_bolsa}` : undefined,
+          empresaConcedente: 'TechCorp Soluções Digitais S.A.',
+        },
+      };
+    }
+    return d;
+  });
+
+  return {
+    id: aluno.id,
+    nome: aluno.nome,
+    cpf: aluno.cpf,
+    email: aluno.email,
+    matricula: aluno.matricula,
+    tipoVinculo: 'APRENDIZ',
+    dataAdmissao: new Date().toISOString().split('T')[0],
+    turmaId: aluno.turma_id || 'turma-ds-01',
+    turmaNome: 'DS-2026.1 — Técnico em Desenvolvimento de Sistemas',
+    curso: 'Técnico em Desenvolvimento de Sistemas',
+    empresa: 'TechCorp Soluções Digitais S.A.',
+    instituicao: 'ETEC Politécnica de São Paulo',
+    percentualConformidade: percentual,
+    nivelRisco: percentual === 100 ? 'BAIXO' : percentual >= 60 ? 'MEDIO' : 'CRITICO',
+    statusGeral: percentual === 100 ? 'REGULAR' : 'PENDENTE',
+    documentos: docsWithContractInfo,
+    contratoAtivo: contratoAtivoObj,
+    avatarUrl: aluno.avatar_path || undefined,
+  };
+}
 
 interface AppContextType {
   currentRole: UserRole;
@@ -73,15 +260,18 @@ interface AppContextType {
   addNewSystemUser: (data: {
     nome: string;
     email: string;
+    senha?: string;
     cargo: string;
     role: UserRole;
     instituicao: string;
     status?: 'ATIVO' | 'INATIVO';
   }) => SystemUser;
   addNewStudent: (data: {
+    id?: string;
     nome: string;
     cpf: string;
     email: string;
+    senha?: string;
     matricula: string;
     tipoVinculo: TipoVinculo;
     dataAdmissao?: string;
@@ -91,17 +281,81 @@ interface AppContextType {
     instituicao?: string;
   }) => Student;
   selectStudent: (studentId: string) => void;
+  setStudentDirect: (s: Student) => void;
+  setSystemUsers: React.Dispatch<React.SetStateAction<SystemUser[]>>;
+  setActiveCoordinatorUserId: (id: string | null) => void;
+  logout: () => void;
+  loginUser: (email: string) => { role: UserRole; route: string; user?: SystemUser | Student };
+  updateStudent: (
+    studentId: string,
+    data: {
+      nome?: string;
+      email?: string;
+      matricula?: string;
+      empresa?: string;
+      dataAdmissao?: string;
+      turmaId?: string;
+      curso?: string;
+      contrato?: {
+        dataInicio?: string;
+        dataFim?: string;
+        valorBolsa?: string | number;
+      };
+    }
+  ) => Promise<void>;
+  removeStudent: (studentId: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [currentRole, setCurrentRole] = useState<UserRole>('ESTUDANTE');
-  const [student, setStudent] = useState<Student>(CURRENT_STUDENT);
+  const [currentRole, setCurrentRoleState] = useState<UserRole>('SUPERADMIN');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedRole = localStorage.getItem('docflow_user_role') as UserRole | null;
+      if (savedRole && (savedRole === 'SUPERADMIN' || savedRole === 'COORDENADOR' || savedRole === 'ESTUDANTE')) {
+        setCurrentRoleState(savedRole);
+      }
+    }
+  }, []);
+
+  const setCurrentRole = (role: UserRole) => {
+    setCurrentRoleState(role);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('docflow_user_role', role);
+    }
+  };
+
+  const logout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('docflow_access_token');
+      localStorage.removeItem('docflow_tenant_id');
+      localStorage.removeItem('docflow_current_user');
+      localStorage.removeItem('docflow_user_role');
+      localStorage.removeItem('docflow_current_student_id');
+      localStorage.removeItem('docflow_student_data');
+    }
+    setCurrentRoleState('ESTUDANTE');
+  };
+  const [student, setStudent] = useState<Student>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('docflow_student_data');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.nome) return parsed;
+        } catch {
+        }
+      }
+    }
+    return CURRENT_STUDENT;
+  });
   const [rawStudentsList, setRawStudentsList] = useState<Student[]>(INITIAL_STUDENTS);
   const [rawTurmas, setRawTurmas] = useState<Turma[]>(INITIAL_TURMAS);
   const [activeInstitution, setActiveInstitution] = useState<string>('ETEC Politécnica de São Paulo');
   const [superAdminInstitutionFilter, setSuperAdminInstitutionFilter] = useState<string>('ALL');
+  const [activeCoordinatorUserId, setActiveCoordinatorUserId] = useState<string | null>(null);
   const [empresas, setEmpresas] = useState<Empresa[]>(INITIAL_EMPRESAS);
   const [systemUsers, setSystemUsers] = useState<SystemUser[]>(INITIAL_SYSTEM_USERS);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
@@ -117,7 +371,171 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     type: 'success' | 'error' | 'info';
   } | null>(null);
 
-  // Available institutions discovered across students, turmas and system users
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function syncBackendData() {
+      try {
+        const [alunosData, docsData, contratosData, auditData, turmasData, usersData] = await Promise.all([
+          alunosApi.list().catch(() => []),
+          documentosApi.listAll().catch(() => []),
+          contratosApi.list().catch(() => []),
+          auditoriaApi.list().catch(() => []),
+          turmasApi.list().catch(() => []),
+          authApi.listUsers().catch(() => []),
+        ]);
+
+        if (isCancelled) return;
+
+        if (usersData && usersData.length > 0) {
+          const mappedUsers: SystemUser[] = usersData.map((u: AuthUserResponse) => ({
+            id: u.id,
+            nome: u.nome,
+            email: u.email,
+            role: (u.perfil === 'ADMIN' ? 'SUPERADMIN' : u.perfil === 'COORDENADOR' || u.perfil === 'RH' ? 'COORDENADOR' : 'ESTUDANTE') as UserRole,
+            cargo: u.perfil === 'ADMIN' || u.perfil === 'SUPERADMIN' ? 'Super Administrador' : u.perfil === 'COORDENADOR' ? 'Coordenador Pedagógico' : 'Analista de RH',
+            status: u.ativo ? 'ATIVO' : 'INATIVO',
+            ultimoAcesso: 'Recente',
+            instituicao: 'ETEC Politécnica de São Paulo',
+          }));
+          setSystemUsers((prev) => {
+            const combined = [...mappedUsers];
+            prev.forEach((p) => {
+              if (!combined.some((c) => c.id === p.id || c.email.toLowerCase() === p.email.toLowerCase())) {
+                combined.push(p);
+              }
+            });
+            return combined;
+          });
+
+          if (typeof window !== 'undefined') {
+            const savedUserStr = localStorage.getItem('docflow_current_user');
+            if (savedUserStr) {
+              try {
+                const parsedUser = JSON.parse(savedUserStr);
+                if (parsedUser?.email && (parsedUser?.perfil === 'COORDENADOR' || parsedUser?.perfil === 'RH')) {
+                  const matched = mappedUsers.find(
+                    (u) => u.email.toLowerCase() === parsedUser.email.toLowerCase()
+                  );
+                  if (matched) {
+                    setActiveCoordinatorUserId(matched.id);
+                    if (matched.instituicao) {
+                      setActiveInstitution(matched.instituicao);
+                    }
+                  }
+                }
+              } catch {}
+            }
+          }
+        }
+
+        if (auditData && auditData.length > 0) {
+          const mappedLogs = auditData.map(mapBackendAuditLogToItem);
+          setAuditLogs((prev) => {
+            const combined = [...mappedLogs];
+            prev.forEach((p) => {
+              if (!combined.some((c) => c.id === p.id)) {
+                combined.push(p);
+              }
+            });
+            return combined;
+          });
+        }
+
+        if (turmasData && turmasData.length > 0) {
+          const mappedTurmas: Turma[] = turmasData.map((t) => {
+            const turmasAlunos = (alunosData || []).filter((a) => a.turma_id === t.id);
+            const total = turmasAlunos.length;
+            const emRisco = turmasAlunos.filter((a) => a.status === 'EM_RISCO' || a.status === 'PENDENTE').length;
+            const regulares = total - emRisco;
+            const conformidade = total > 0 ? Math.round((regulares / total) * 100) : 100;
+            return {
+              id: t.id,
+              codigo: t.codigo,
+              nomeCurso: t.nome,
+              periodo: t.semestre_referencia || '2026.1',
+              totalAlunos: total,
+              conformidadeMedia: conformidade,
+              alunosEmRisco: emRisco,
+              alunosRegulares: regulares,
+              instituicao: 'ETEC Politécnica de São Paulo',
+            };
+          });
+
+          setRawTurmas((prev) => {
+            const combined = [...mappedTurmas];
+            prev.forEach((p) => {
+              if (!combined.some((c) => c.id === p.id || c.codigo === p.codigo)) {
+                combined.push(p);
+              }
+            });
+            return combined;
+          });
+        }
+
+        if (alunosData && alunosData.length > 0) {
+          const mappedStudents = alunosData.map((a) =>
+            mapAlunoResponseToStudent(a, docsData, contratosData)
+          );
+
+          setRawStudentsList((prev) => {
+            const combined = [...mappedStudents];
+            prev.forEach((p) => {
+              const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(p.id);
+              if (!isUuid && !combined.some((c) => c.id === p.id || c.email.toLowerCase() === p.email.toLowerCase())) {
+                combined.push(p);
+              }
+            });
+            return combined;
+          });
+
+          if (typeof window !== 'undefined') {
+            const savedUserStr = localStorage.getItem('docflow_current_user');
+            const savedStudentId = localStorage.getItem('docflow_current_student_id');
+            const role = localStorage.getItem('docflow_user_role') as UserRole | null;
+
+            let targetStudent: Student | undefined;
+
+            if (savedUserStr) {
+              try {
+                const parsedUser = JSON.parse(savedUserStr);
+                if (parsedUser?.email) {
+                  targetStudent = mappedStudents.find(
+                    (s) => s.email.toLowerCase() === parsedUser.email.toLowerCase()
+                  );
+                }
+              } catch {
+              }
+            }
+
+            if (!targetStudent && savedStudentId) {
+              targetStudent = mappedStudents.find((s) => s.id === savedStudentId);
+            }
+
+            if (!targetStudent && (role === 'ESTUDANTE' || !role)) {
+              targetStudent = mappedStudents.find(
+                (s) => s.email.includes('beatriz') || s.email.includes('aluno')
+              ) || mappedStudents[0];
+            }
+
+            if (targetStudent) {
+              setStudent(targetStudent);
+              localStorage.setItem('docflow_current_student_id', targetStudent.id);
+              localStorage.setItem('docflow_student_data', JSON.stringify(targetStudent));
+            }
+          }
+        }
+      } catch {
+      }
+    }
+
+    syncBackendData();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentRole]);
+
   const availableInstitutions = useMemo(() => {
     const set = new Set<string>();
     rawStudentsList.forEach((s) => s.instituicao && set.add(s.instituicao));
@@ -130,8 +548,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return Array.from(set).sort();
   }, [rawStudentsList, rawTurmas, systemUsers]);
 
-  // Current coordinator identity derived from active institution
+
   const currentCoordinatorUser = useMemo(() => {
+    if (activeCoordinatorUserId) {
+      const byId = systemUsers.find((u) => u.id === activeCoordinatorUserId);
+      if (byId) return byId;
+    }
     const found = systemUsers.find(
       (u) => u.role === 'COORDENADOR' && u.instituicao === activeInstitution
     );
@@ -147,9 +569,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ultimoAcesso: 'Hoje às 15:00',
       }
     );
-  }, [systemUsers, activeInstitution]);
+  }, [systemUsers, activeInstitution, activeCoordinatorUserId]);
 
-  // Filtered lists based on tenant role and active institution
   const allStudentsList = rawStudentsList;
   const allTurmas = rawTurmas;
 
@@ -160,7 +581,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       return rawStudentsList.filter((s) => s.instituicao === superAdminInstitutionFilter);
     }
-    // Coordinator: isolated strictly to their active institution
     return rawStudentsList.filter((s) => s.instituicao === activeInstitution);
   }, [rawStudentsList, currentRole, superAdminInstitutionFilter, activeInstitution]);
 
@@ -171,11 +591,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       return rawTurmas.filter((t) => t.instituicao === superAdminInstitutionFilter);
     }
-    // Coordinator: isolated strictly to their active institution
     return rawTurmas.filter((t) => t.instituicao === activeInstitution);
   }, [rawTurmas, currentRole, superAdminInstitutionFilter, activeInstitution]);
 
-  // Responsive sidebar initialization
   useEffect(() => {
     if (typeof window !== 'undefined') {
       if (window.innerWidth < 1024) {
@@ -192,7 +610,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setIsSidebarOpen(false);
   };
 
-  // Initialize theme from localStorage / system preference
   useEffect(() => {
     try {
       const saved = localStorage.getItem('docflow_theme') as 'light' | 'dark' | null;
@@ -208,7 +625,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         document.documentElement.classList.add('dark');
       }
     } catch {
-      // Ignore if localStorage unavailable
     }
   }, []);
 
@@ -222,7 +638,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         document.documentElement.classList.remove('dark');
       }
     } catch {
-      // Ignore
     }
   };
 
@@ -230,7 +645,110 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
-  // Auto clear toast after 4s
+  const isHydratedRef = useRef(false);
+
+  useEffect(() => {
+    try {
+      const savedUsers = localStorage.getItem('docflow_system_users');
+      if (savedUsers) {
+        const parsed = JSON.parse(savedUsers);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSystemUsers(parsed);
+        }
+      }
+      const savedStudents = localStorage.getItem('docflow_students');
+      if (savedStudents) {
+        const parsed = JSON.parse(savedStudents);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setRawStudentsList(parsed);
+        }
+      }
+      const savedTurmas = localStorage.getItem('docflow_turmas');
+      if (savedTurmas) {
+        const parsed = JSON.parse(savedTurmas);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setRawTurmas(parsed);
+        }
+      }
+      const savedEmpresas = localStorage.getItem('docflow_empresas');
+      if (savedEmpresas) {
+        const parsed = JSON.parse(savedEmpresas);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setEmpresas(parsed);
+        }
+      }
+      const savedRole = localStorage.getItem('docflow_current_role') as UserRole | null;
+      if (savedRole && ['SUPERADMIN', 'COORDENADOR', 'ESTUDANTE'].includes(savedRole)) {
+        setCurrentRole(savedRole);
+      }
+      const savedCoordId = localStorage.getItem('docflow_active_coord_id');
+      if (savedCoordId) {
+        setActiveCoordinatorUserId(savedCoordId);
+      }
+      const savedInst = localStorage.getItem('docflow_active_institution');
+      if (savedInst) {
+        setActiveInstitution(savedInst);
+      }
+    } catch {
+    } finally {
+      isHydratedRef.current = true;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    try {
+      localStorage.setItem('docflow_system_users', JSON.stringify(systemUsers));
+    } catch {}
+  }, [systemUsers]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    try {
+      localStorage.setItem('docflow_students', JSON.stringify(rawStudentsList));
+    } catch {}
+  }, [rawStudentsList]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    try {
+      localStorage.setItem('docflow_turmas', JSON.stringify(rawTurmas));
+    } catch {}
+  }, [rawTurmas]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    try {
+      localStorage.setItem('docflow_empresas', JSON.stringify(empresas));
+    } catch {}
+  }, [empresas]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    try {
+      localStorage.setItem('docflow_current_role', currentRole);
+    } catch {}
+  }, [currentRole]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    try {
+      if (activeCoordinatorUserId) {
+        localStorage.setItem('docflow_active_coord_id', activeCoordinatorUserId);
+      } else {
+        localStorage.removeItem('docflow_active_coord_id');
+      }
+    } catch {}
+  }, [activeCoordinatorUserId]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    try {
+      if (activeInstitution) {
+        localStorage.setItem('docflow_active_institution', activeInstitution);
+      }
+    } catch {}
+  }, [activeInstitution]);
   useEffect(() => {
     if (toastMessage) {
       const timer = setTimeout(() => setToastMessage(null), 4000);
@@ -245,10 +763,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       timestampUtc: new Date().toISOString(),
     };
     setAuditLogs((prev) => [newLog, ...prev]);
+
+    auditoriaApi
+      .create({
+        action: entry.action,
+        resource_type: entry.resourceTipo,
+        ip_address: entry.ipAddress,
+        detalhes: {
+          userNome: entry.userNome,
+          userRole: entry.userRole,
+          status: entry.status,
+          detalhes: entry.detalhes,
+          sha256Hash: entry.sha256Hash,
+          storageUuid: entry.storageUuid,
+          resourceTipo: entry.resourceTipo,
+        },
+      })
+      .catch(() => {});
   };
 
   const uploadStudentDocument = async (docId: string, file: File): Promise<boolean> => {
-    // 1. Check size (< 10MB)
     if (file.size > 10 * 1024 * 1024) {
       setToastMessage({
         title: 'Bloqueio de Segurança (Payload Limit)',
@@ -270,17 +804,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return false;
     }
 
-    // 2. Compute SHA256 & UUID
     const sha256 = await computeSHA256(file);
     const ext = file.name.split('.').pop() || 'pdf';
     const storageUuid = generateStorageUUID(ext);
 
-    // 3. Update active student & list
+    const targetDoc = student.documentos.find((d) => d.id === docId);
+    let backendDocId = docId;
+
+    if (student.id) {
+      try {
+        let tipoEnvio = targetDoc?.tipo || 'OUTROS';
+        if (tipoEnvio === 'CONTRATO_TCE') {
+          tipoEnvio = student.tipoVinculo === 'APRENDIZ' ? 'CONTRATO_APRENDIZAGEM' : 'TERMO_COMPROMISSO_ESTAGIO';
+        }
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('aluno_id', student.id);
+        formData.append('tipo', tipoEnvio);
+
+        const novoDocBackend = await documentosApi.upload(formData);
+        if (novoDocBackend && novoDocBackend.id) {
+          backendDocId = novoDocBackend.id;
+        }
+      } catch {
+      }
+    }
+
     const updateDocs = (docs: DocumentItem[]): DocumentItem[] => {
       return docs.map((d) => {
         if (d.id === docId) {
           return {
             ...d,
+            id: backendDocId,
             status: 'EM_ANALISE' as StatusDocumento,
             nomeArquivoOriginal: file.name,
             storageUuid,
@@ -321,11 +876,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
 
     setStudent(updatedStudent);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('docflow_student_data', JSON.stringify(updatedStudent));
+    }
     setRawStudentsList((prev) =>
       prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s))
     );
 
-    // 4. Audit Log
     addAuditEntry({
       userId: student.id,
       userNome: student.nome,
@@ -353,7 +910,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     newDocData: Omit<DocumentItem, 'id'>,
     file: File
   ): Promise<boolean> => {
-    // 1. Check size (< 10MB)
     if (file.size > 10 * 1024 * 1024) {
       setToastMessage({
         title: 'Bloqueio de Segurança (Payload Limit)',
@@ -366,7 +922,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const sha256 = await computeSHA256(file);
     const ext = file.name.split('.').pop() || 'pdf';
     const storageUuid = generateStorageUUID(ext);
-    const newDocId = `doc-${Date.now()}`;
+    let newDocId = `doc-${Date.now()}`;
+
+    if (student.id) {
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('aluno_id', student.id);
+        formData.append('tipo', newDocData.tipo || 'OUTROS');
+        const novoDocBackend = await documentosApi.upload(formData);
+        if (novoDocBackend && novoDocBackend.id) {
+          newDocId = novoDocBackend.id;
+        }
+      } catch {}
+    }
 
     const createdDoc: DocumentItem = {
       ...newDocData,
@@ -430,6 +999,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     newStatus: 'APROVADO' | 'RECUSADO',
     justificativa?: string
   ) => {
+    if (docId && !docId.startsWith('doc-')) {
+      documentosApi
+        .validate(docId, {
+          status: newStatus,
+          justificativa_recusa: newStatus === 'RECUSADO' ? justificativa : undefined,
+        })
+        .catch(() => {});
+    }
+
     setRawStudentsList((prev) =>
       prev.map((s) => {
         if (s.id === studentId) {
@@ -466,6 +1044,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
           if (s.id === student.id) {
             setStudent(updatedStudentObj);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('docflow_student_data', JSON.stringify(updatedStudentObj));
+            }
           }
 
           return updatedStudentObj;
@@ -474,7 +1055,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       })
     );
 
-    // Add audit log
     const targetStudent = rawStudentsList.find((s) => s.id === studentId);
     const targetDoc = targetStudent?.documentos.find((d) => d.id === docId);
 
@@ -534,6 +1114,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addNewSystemUser = (data: {
     nome: string;
     email: string;
+    senha?: string;
     cargo: string;
     role: UserRole;
     instituicao: string;
@@ -544,6 +1125,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       id: newUserId,
       nome: data.nome,
       email: data.email,
+      senha: data.senha,
       role: data.role,
       cargo: data.cargo,
       instituicao: data.instituicao,
@@ -576,6 +1158,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addNewTurma = (turma: Turma) => {
+    turmasApi
+      .create({
+        codigo: turma.codigo,
+        nome: turma.nomeCurso,
+        semestre_referencia: turma.periodo,
+      })
+      .catch(() => {});
+
     const turmaWithInstitution: Turma = {
       ...turma,
       instituicao:
@@ -591,9 +1181,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addNewStudent = (data: {
+    id?: string;
     nome: string;
     cpf: string;
     email: string;
+    senha?: string;
     matricula: string;
     tipoVinculo: TipoVinculo;
     dataAdmissao?: string;
@@ -608,12 +1200,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       selectedTurma?.instituicao ||
       (currentRole === 'COORDENADOR' ? activeInstitution : 'ETEC Politécnica de São Paulo');
 
-    const newStudentId = `std-${Date.now()}`;
+    const newStudentId = data.id || `std-${Date.now()}`;
     const newStudent: Student = {
       id: newStudentId,
       nome: data.nome,
       cpf: data.cpf,
       email: data.email,
+      senha: data.senha,
       matricula: data.matricula,
       tipoVinculo: data.tipoVinculo,
       dataAdmissao: data.dataAdmissao || new Date().toISOString().split('T')[0],
@@ -738,12 +1331,149 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const target = rawStudentsList.find((s) => s.id === studentId);
     if (target) {
       setStudent(target);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('docflow_current_student_id', target.id);
+        localStorage.setItem('docflow_student_data', JSON.stringify(target));
+      }
       setToastMessage({
         title: `Perfil Selecionado: ${target.nome}`,
         desc: `Visualizando como ${target.tipoVinculo === 'APRENDIZ' ? 'Jovem Aprendiz' : 'Estagiário'} (${target.instituicao || 'Instituição'}).`,
         type: 'info',
       });
     }
+  };
+
+  const updateStudent = async (
+    studentId: string,
+    data: {
+      nome?: string;
+      email?: string;
+      matricula?: string;
+      empresa?: string;
+      dataAdmissao?: string;
+      turmaId?: string;
+      curso?: string;
+      contrato?: {
+        dataInicio?: string;
+        dataFim?: string;
+        valorBolsa?: string | number;
+      };
+    }
+  ): Promise<void> => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(studentId);
+    if (isUuid) {
+      const apiPayload: { nome?: string; email?: string; matricula?: string } = {};
+      if (data.nome !== undefined) apiPayload.nome = data.nome;
+      if (data.email !== undefined) apiPayload.email = data.email;
+      if (data.matricula !== undefined) apiPayload.matricula = data.matricula;
+      await alunosApi.update(studentId, apiPayload);
+    }
+
+    const currentStudentObj = rawStudentsList.find((s) => s.id === studentId);
+    if (data.contrato && currentStudentObj) {
+      const contratoId = currentStudentObj.contratoAtivo?.id;
+      const isContratoUuid = contratoId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(contratoId);
+      const valorNum = data.contrato.valorBolsa !== undefined
+        ? (typeof data.contrato.valorBolsa === 'number'
+            ? data.contrato.valorBolsa
+            : parseFloat(String(data.contrato.valorBolsa).replace(',', '.')))
+        : undefined;
+
+      if (isContratoUuid) {
+        try {
+          await contratosApi.update(contratoId, {
+            data_inicio: data.contrato.dataInicio,
+            data_fim: data.contrato.dataFim,
+            valor_bolsa: isNaN(valorNum as number) ? undefined : valorNum,
+          });
+        } catch {}
+      } else if (isUuid) {
+        try {
+          const prefixo = currentStudentObj.tipoVinculo === 'APRENDIZ' ? 'APREND' : 'TCE';
+          const novoContrato = await contratosApi.create({
+            aluno_id: studentId,
+            numero_contrato: `${prefixo}-2026-${(data.matricula || currentStudentObj.matricula).trim()}`,
+            data_inicio: data.contrato.dataInicio || data.dataAdmissao || new Date().toISOString().split('T')[0],
+            data_fim: data.contrato.dataFim || '2026-12-15',
+            valor_bolsa: isNaN(valorNum as number) ? 1650 : valorNum,
+          });
+          if (novoContrato?.id) {
+            currentStudentObj.contratoAtivo = {
+              id: novoContrato.id,
+              numeroContrato: novoContrato.numero_contrato,
+              dataInicio: novoContrato.data_inicio,
+              dataFim: novoContrato.data_fim,
+              valorBolsa: novoContrato.valor_bolsa,
+              ativo: novoContrato.ativo,
+            };
+          }
+        } catch {}
+      }
+    }
+
+    setRawStudentsList((prev) => {
+      const updated = prev.map((s) => {
+        if (s.id !== studentId) return s;
+        return {
+          ...s,
+          nome: data.nome ?? s.nome,
+          email: data.email ?? s.email,
+          matricula: data.matricula ?? s.matricula,
+          empresa: data.empresa ?? s.empresa,
+          dataAdmissao: data.dataAdmissao ?? s.dataAdmissao,
+          turmaId: data.turmaId ?? s.turmaId,
+          curso: data.curso ?? s.curso,
+          contratoAtivo: s.contratoAtivo ? {
+            ...s.contratoAtivo,
+            dataInicio: data.contrato?.dataInicio ?? s.contratoAtivo.dataInicio,
+            dataFim: data.contrato?.dataFim ?? s.contratoAtivo.dataFim,
+            valorBolsa: data.contrato?.valorBolsa !== undefined
+              ? (typeof data.contrato.valorBolsa === 'number'
+                  ? data.contrato.valorBolsa
+                  : parseFloat(String(data.contrato.valorBolsa).replace(',', '.')) || data.contrato.valorBolsa)
+              : s.contratoAtivo.valorBolsa,
+          } : (data.contrato ? {
+            id: `contrato-${Date.now()}`,
+            numeroContrato: `CTR-${Date.now()}`,
+            dataInicio: data.contrato.dataInicio || '',
+            dataFim: data.contrato.dataFim || '',
+            valorBolsa: data.contrato.valorBolsa || 0,
+            ativo: true,
+          } : undefined),
+        };
+      });
+      try {
+        localStorage.setItem('docflow_students', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const removeStudent = async (studentId: string): Promise<void> => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(studentId);
+    if (isUuid) {
+      await alunosApi.delete(studentId);
+    }
+    setRawStudentsList((prev) => {
+      const updated = prev.filter((s) => s.id !== studentId);
+      try {
+        localStorage.setItem('docflow_students', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const setStudentDirect = (s: Student) => {
+    setStudent(s);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('docflow_current_student_id', s.id);
+      localStorage.setItem('docflow_student_data', JSON.stringify(s));
+    }
+    setRawStudentsList((prev) => {
+      const exists = prev.find((p) => p.id === s.id);
+      if (exists) return prev.map((p) => (p.id === s.id ? s : p));
+      return [s, ...prev];
+    });
   };
 
   const currentUserProfile: UserProfileData = useMemo(() => {
@@ -767,7 +1497,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         cargo: currentCoordinatorUser.cargo,
       };
     }
-    // SUPERADMIN
     const adminUser = systemUsers.find((u) => u.role === 'SUPERADMIN') || systemUsers[0];
     return {
       nome: adminUser?.nome || 'Super Administrador DocFlow',
@@ -825,7 +1554,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         )
       );
     } else {
-      // SUPERADMIN
       setSystemUsers((prev) =>
         prev.map((u) =>
           u.role === 'SUPERADMIN'
@@ -895,6 +1623,147 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return true;
   };
 
+  const loginUser = (
+    email: string
+  ): { role: UserRole; route: string; user?: SystemUser | Student } => {
+    const emailClean = email.trim().toLowerCase();
+
+    const allUsers: SystemUser[] = [...systemUsers];
+    try {
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('docflow_system_users');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            parsed.forEach((u: SystemUser) => {
+              if (
+                !allUsers.some(
+                  (existing) =>
+                    existing.id === u.id || existing.email.toLowerCase() === u.email.toLowerCase()
+                )
+              ) {
+                allUsers.push(u);
+              }
+            });
+          }
+        }
+      }
+    } catch {}
+
+    const foundSystemUser = allUsers.find(
+      (u) => u.email.trim().toLowerCase() === emailClean
+    );
+
+    if (foundSystemUser) {
+      setCurrentRole(foundSystemUser.role);
+      try {
+        localStorage.setItem('docflow_current_role', foundSystemUser.role);
+      } catch {}
+
+      if (foundSystemUser.role === 'COORDENADOR') {
+        setActiveCoordinatorUserId(foundSystemUser.id);
+        try {
+          localStorage.setItem('docflow_active_coord_id', foundSystemUser.id);
+        } catch {}
+
+        if (foundSystemUser.instituicao) {
+          setActiveInstitution(foundSystemUser.instituicao);
+          try {
+            localStorage.setItem('docflow_active_institution', foundSystemUser.instituicao);
+          } catch {}
+        }
+        return {
+          role: 'COORDENADOR',
+          route: '/coordenador',
+          user: foundSystemUser,
+        };
+      } else {
+        return {
+          role: 'SUPERADMIN',
+          route: '/admin',
+          user: foundSystemUser,
+        };
+      }
+    }
+
+    const allStudents: Student[] = [...rawStudentsList];
+    try {
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('docflow_students');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            parsed.forEach((s: Student) => {
+              if (
+                !allStudents.some(
+                  (existing) =>
+                    existing.id === s.id || existing.email.toLowerCase() === s.email.toLowerCase()
+                )
+              ) {
+                allStudents.push(s);
+              }
+            });
+          }
+        }
+      }
+    } catch {}
+
+    const foundStudent = allStudents.find(
+      (s) => s.email.trim().toLowerCase() === emailClean
+    );
+
+    if (foundStudent) {
+      setCurrentRole('ESTUDANTE');
+      setStudent(foundStudent);
+      try {
+        localStorage.setItem('docflow_current_role', 'ESTUDANTE');
+      } catch {}
+      if (foundStudent.instituicao) {
+        setActiveInstitution(foundStudent.instituicao);
+        try {
+          localStorage.setItem('docflow_active_institution', foundStudent.instituicao);
+        } catch {}
+      }
+      return {
+        role: 'ESTUDANTE',
+        route: '/estudante',
+        user: foundStudent,
+      };
+    }
+
+    if (
+      emailClean.includes('aluno') ||
+      emailClean.includes('estudante') ||
+      emailClean.includes('aprendiz') ||
+      emailClean.includes('estag')
+    ) {
+      setCurrentRole('ESTUDANTE');
+      try {
+        localStorage.setItem('docflow_current_role', 'ESTUDANTE');
+      } catch {}
+      return { role: 'ESTUDANTE', route: '/estudante' };
+    }
+
+    if (
+      emailClean.includes('admin') ||
+      emailClean.includes('super') ||
+      emailClean.includes('root') ||
+      emailClean.includes('diretor')
+    ) {
+      setCurrentRole('SUPERADMIN');
+      try {
+        localStorage.setItem('docflow_current_role', 'SUPERADMIN');
+      } catch {}
+      return { role: 'SUPERADMIN', route: '/admin' };
+    }
+
+    setCurrentRole('COORDENADOR');
+    try {
+      localStorage.setItem('docflow_current_role', 'COORDENADOR');
+    } catch {}
+    return { role: 'COORDENADOR', route: '/coordenador' };
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -907,6 +1776,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         allTurmas,
         empresas,
         systemUsers,
+        setSystemUsers,
         auditLogs,
         activeInstitution,
         setActiveInstitution,
@@ -942,6 +1812,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addNewEmpresa,
         addNewStudent,
         selectStudent,
+        setStudentDirect,
+        logout,
+        loginUser,
+        setActiveCoordinatorUserId,
+        updateStudent,
+        removeStudent,
       }}
     >
       {children}

@@ -459,7 +459,7 @@ export default function HomePage() {
               <ul className="space-y-3">
                 <li><Link href="#" className="hover:text-[#1e40af] dark:hover:text-[#3b82f6] transition-colors">Recursos e Vantagens</Link></li>
                 <li><Link href="#" className="hover:text-[#1e40af] dark:hover:text-[#3b82f6] transition-colors">Como Funciona</Link></li>
-                <li><Link href="#" className="hover:text-[#1e40af] dark:hover:text-[#3b82f6] transition-colors">Segurança e LGPD</Link></li>
+                <li><Link href="#" className="hover:text-[#1e40af] dark:hover:text-[#3b82f6] transition-colors">Segurança e Privacidade</Link></li>
               </ul>
             </div>
 

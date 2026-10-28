@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, ArrowUpDown, ChevronDown, ChevronRight, Layers } from 'lucide-react';
+import { Search, ArrowUpDown, ChevronDown, ChevronRight, Layers, Pencil, Trash2, X, Loader2, AlertTriangle } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { getRiskBadgeConfig, cn, scrollToTop } from '@/lib/utils';
+import { TipoVinculo } from '@/lib/types';
 import DossierViewer from './DossierViewer';
 
 interface StudentMasterListProps {
@@ -11,11 +12,25 @@ interface StudentMasterListProps {
   initialDocId?: string;
 }
 
+interface EditFormState {
+  nome: string;
+  email: string;
+  matricula: string;
+  empresa: string;
+  tipoVinculo: TipoVinculo;
+  dataAdmissao: string;
+  turmaId: string;
+  curso: string;
+  contratoInicio: string;
+  contratoFim: string;
+  contratoValorBolsa: string;
+}
+
 export default function StudentMasterList({
   initialStudentId,
   initialDocId,
 }: StudentMasterListProps) {
-  const { studentsList, turmas, currentRole } = useApp();
+  const { studentsList, turmas, currentRole, updateStudent, removeStudent, setToastMessage } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTurma, setSelectedTurma] = useState<string>('ALL');
   const [selectedRisk, setSelectedRisk] = useState<string>('ALL');
@@ -28,8 +43,26 @@ export default function StudentMasterList({
     initialStudentId || initialDocId ? 'DOSSIER' : 'LIST'
   );
 
-  // Collapsible state for each turma accordion when in 'ALL' mode
   const [collapsedTurmas, setCollapsedTurmas] = useState<Record<string, boolean>>({});
+
+  const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<EditFormState>({
+    nome: '',
+    email: '',
+    matricula: '',
+    empresa: '',
+    tipoVinculo: 'APRENDIZ',
+    dataAdmissao: '',
+    turmaId: '',
+    curso: '',
+    contratoInicio: '',
+    contratoFim: '',
+    contratoValorBolsa: '',
+  });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const toggleTurmaCollapse = (turmaId: string) => {
     setCollapsedTurmas((prev) => ({
@@ -50,7 +83,6 @@ export default function StudentMasterList({
     }
   }, [initialDocId]);
 
-  // Filter & Sort logic
   const processedStudents = useMemo(() => {
     const filtered = studentsList.filter((s) => {
       const matchesSearch =
@@ -93,16 +125,13 @@ export default function StudentMasterList({
     });
   }, [studentsList, searchTerm, selectedTurma, selectedRisk, sortBy]);
 
-  // Group students by Turma
   const groupedByTurma = useMemo(() => {
     const map = new Map<string, typeof processedStudents>();
 
-    // Initialize all turmas so they appear in order
     turmas.forEach((t) => {
       map.set(t.id, []);
     });
 
-    // Populate with filtered students
     processedStudents.forEach((student) => {
       const existing = map.get(student.turmaId) || [];
       existing.push(student);
@@ -115,11 +144,281 @@ export default function StudentMasterList({
   const activeStudent =
     studentsList.find((s) => s.id === activeStudentId) || processedStudents[0] || studentsList[0];
 
+  const openEditModal = (s: typeof processedStudents[0]) => {
+    setEditForm({
+      nome: s.nome,
+      email: s.email,
+      matricula: s.matricula,
+      empresa: s.empresa,
+      tipoVinculo: s.tipoVinculo,
+      dataAdmissao: s.dataAdmissao || '',
+      turmaId: s.turmaId,
+      curso: s.curso,
+      contratoInicio: s.contratoAtivo?.dataInicio || s.dataAdmissao || new Date().toISOString().split('T')[0],
+      contratoFim: s.contratoAtivo?.dataFim || '2026-12-15',
+      contratoValorBolsa: s.contratoAtivo?.valorBolsa ? String(s.contratoAtivo.valorBolsa) : '1650.00',
+    });
+    setEditingStudentId(s.id);
+  };
+
+  const handleEditSave = async () => {
+    if (!editingStudentId) return;
+    if (!editForm.nome.trim() || !editForm.matricula.trim()) {
+      setToastMessage({ title: 'Campos obrigatórios', desc: 'Nome e matrícula são obrigatórios.', type: 'error' });
+      return;
+    }
+    setIsSaving(true);
+    try {
+      await updateStudent(editingStudentId, {
+        nome: editForm.nome.trim(),
+        email: editForm.email.trim(),
+        matricula: editForm.matricula.trim(),
+        empresa: editForm.empresa.trim(),
+        dataAdmissao: editForm.dataAdmissao,
+        turmaId: editForm.turmaId,
+        curso: editForm.curso,
+        contrato: {
+          dataInicio: editForm.contratoInicio,
+          dataFim: editForm.contratoFim,
+          valorBolsa: editForm.contratoValorBolsa,
+        },
+      });
+      setToastMessage({ title: 'Estudante atualizado', desc: `${editForm.nome} foi atualizado com sucesso.`, type: 'success' });
+      setEditingStudentId(null);
+    } catch {
+      setToastMessage({ title: 'Erro ao atualizar', desc: 'Não foi possível salvar as alterações no banco de dados.', type: 'error' });
+    }
+    setIsSaving(false);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirmId) return;
+    setIsDeleting(true);
+    const target = studentsList.find((s) => s.id === deleteConfirmId);
+    try {
+      await removeStudent(deleteConfirmId);
+      setToastMessage({ title: 'Estudante removido', desc: `${target?.nome || 'Estudante'} foi excluído do sistema.`, type: 'success' });
+      setDeleteConfirmId(null);
+      if (activeStudentId === deleteConfirmId) {
+        setActiveStudentId(studentsList.find((s) => s.id !== deleteConfirmId)?.id || '');
+      }
+    } catch {
+      setToastMessage({ title: 'Erro ao excluir', desc: 'Não foi possível remover o estudante no banco de dados.', type: 'error' });
+    }
+    setIsDeleting(false);
+  };
+
+  const studentToDelete = studentsList.find((s) => s.id === deleteConfirmId);
+
   return (
     <div className="space-y-4">
-      {/* Filter Bar */}
+      {editingStudentId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl w-full max-w-lg">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Editar Estudante</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">CPF e senha não podem ser alterados aqui</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingStudentId(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Tipo de Vínculo:</span>
+                <span className="text-xs font-bold text-slate-900 dark:text-white px-2.5 py-1 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xs">
+                  {editForm.tipoVinculo === 'APRENDIZ' ? 'Jovem Aprendiz' : 'Estágio (TCE)'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="sm:col-span-2 space-y-1">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    Nome Completo <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.nome}
+                    onChange={(e) => setEditForm((f) => ({ ...f, nome: e.target.value }))}
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    Matrícula <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.matricula}
+                    onChange={(e) => setEditForm((f) => ({ ...f, matricula: e.target.value }))}
+                    className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">E-mail</label>
+                  <input
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) => setEditForm((f) => ({ ...f, email: e.target.value }))}
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 transition-all"
+                  />
+                </div>
+
+                <div className="sm:col-span-2 space-y-1">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Empresa Concedente</label>
+                  <input
+                    type="text"
+                    value={editForm.empresa}
+                    onChange={(e) => setEditForm((f) => ({ ...f, empresa: e.target.value }))}
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Turma / Curso</label>
+                  <select
+                    value={editForm.turmaId}
+                    onChange={(e) => {
+                      const t = turmas.find((x) => x.id === e.target.value);
+                      setEditForm((f) => ({ ...f, turmaId: e.target.value, curso: t?.nomeCurso || f.curso }));
+                    }}
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
+                  >
+                    {turmas.map((t) => (
+                      <option key={t.id} value={t.id}>{t.codigo} — {t.nomeCurso}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Data de Admissão</label>
+                  <input
+                    type="date"
+                    value={editForm.dataAdmissao}
+                    onChange={(e) => setEditForm((f) => ({ ...f, dataAdmissao: e.target.value }))}
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    Contrato & Remuneração
+                  </span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Vigência e reajuste salarial
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                      Início da Vigência
+                    </label>
+                    <input
+                      type="date"
+                      value={editForm.contratoInicio}
+                      onChange={(e) => setEditForm((f) => ({ ...f, contratoInicio: e.target.value }))}
+                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                      Término da Vigência
+                    </label>
+                    <input
+                      type="date"
+                      value={editForm.contratoFim}
+                      onChange={(e) => setEditForm((f) => ({ ...f, contratoFim: e.target.value }))}
+                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                      {editForm.tipoVinculo === 'APRENDIZ' ? 'Salário / Bolsa (R$)' : 'Bolsa-Auxílio (R$)'}
+                    </label>
+                    <input
+                      type="text"
+                      value={editForm.contratoValorBolsa}
+                      onChange={(e) => setEditForm((f) => ({ ...f, contratoValorBolsa: e.target.value }))}
+                      placeholder="1650.00"
+                      className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 bg-slate-50/80 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setEditingStudentId(null)}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleEditSave}
+                disabled={isSaving}
+                className="px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 dark:bg-cyan-500 dark:text-slate-950 dark:hover:bg-cyan-400 rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
+              >
+                {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                {isSaving ? 'Salvando...' : 'Salvar Alterações'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteConfirmId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-rose-200 dark:border-rose-900 shadow-2xl w-full max-w-sm p-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-rose-100 dark:bg-rose-950/60 rounded-xl shrink-0">
+                <AlertTriangle className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Excluir Estudante?</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Você está prestes a excluir <span className="font-semibold text-slate-700 dark:text-slate-200">{studentToDelete?.nome}</span>. Esta ação não pode ser desfeita e removerá todos os dados vinculados.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmId(null)}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className="px-5 py-2.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
+              >
+                {isDeleting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                {isDeleting ? 'Excluindo...' : 'Sim, excluir'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
-        {/* Search Input */}
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -131,9 +430,7 @@ export default function StudentMasterList({
           />
         </div>
 
-        {/* Filter Dropdowns */}
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          {/* Risk filter */}
           <select
             value={selectedRisk}
             onChange={(e) => setSelectedRisk(e.target.value)}
@@ -145,7 +442,6 @@ export default function StudentMasterList({
             <option value="BAIXO">Regular / Baixo</option>
           </select>
 
-          {/* Sort selector */}
           <div className="flex items-center gap-1 bg-slate-50/60 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 py-1 shadow-2xs">
             <ArrowUpDown className="w-3 h-3 text-slate-500 dark:text-slate-400 shrink-0" />
             <select
@@ -166,7 +462,6 @@ export default function StudentMasterList({
         </div>
       </div>
 
-      {/* Turma Segmented Pills (Fast filter per class) */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
         <button
           type="button"
@@ -206,7 +501,6 @@ export default function StudentMasterList({
         })}
       </div>
 
-      {/* Mobile / Tablet Segmented Tabs (Visible below lg) */}
       <div className="flex lg:hidden bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
         <button
           type="button"
@@ -240,21 +534,17 @@ export default function StudentMasterList({
         </button>
       </div>
 
-      {/* Main Grid: Student List (Left) + Dossier (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        {/* Left Column: Students Grouped by Turma */}
         <div className={cn('lg:col-span-4 space-y-3 max-h-[750px] overflow-y-auto pr-1', mobileTab !== 'LIST' && 'hidden lg:block')}>
           {processedStudents.length === 0 ? (
             <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-medium text-xs">
               Nenhum estudante encontrado.
             </div>
           ) : selectedTurma !== 'ALL' ? (
-            /* Flat view when a single turma is selected */
             <div className="space-y-2">
               {processedStudents.map((s) => renderStudentCard(s))}
             </div>
           ) : (
-            /* Grouped by Turma (Accordion) when 'ALL' is selected */
             Array.from(groupedByTurma.entries()).map(([turmaId, studentsInTurma]) => {
               if (studentsInTurma.length === 0) return null;
               const turmaObj = turmas.find((t) => t.id === turmaId);
@@ -265,7 +555,6 @@ export default function StudentMasterList({
                   key={turmaId}
                   className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm"
                 >
-                  {/* Turma Section Header (Clickable to collapse/expand) */}
                   <button
                     type="button"
                     onClick={() => toggleTurmaCollapse(turmaId)}
@@ -293,7 +582,6 @@ export default function StudentMasterList({
                     </div>
                   </button>
 
-                  {/* Student Cards in Turma */}
                   {!isCollapsed && (
                     <div className="p-2.5 space-y-2.5 bg-slate-50/60 dark:bg-slate-950/30">
                       {studentsInTurma.map((s) => renderStudentCard(s))}
@@ -305,9 +593,7 @@ export default function StudentMasterList({
           )}
         </div>
 
-        {/* Right Column: Dossier Viewer */}
         <div className={cn('lg:col-span-8', mobileTab !== 'DOSSIER' && 'hidden lg:block')}>
-          {/* Back button on mobile */}
           <button
             type="button"
             onClick={() => setMobileTab('LIST')}
@@ -317,7 +603,29 @@ export default function StudentMasterList({
           </button>
 
           {activeStudent ? (
-            <DossierViewer student={activeStudent} initialDocId={activeDocId} />
+            <div className="space-y-3">
+              {currentRole === 'COORDENADOR' && (
+                <div className="flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => openEditModal(activeStudent)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-[#065373] hover:text-[#065373] dark:hover:border-cyan-400 dark:hover:text-cyan-400 transition-all shadow-2xs cursor-pointer"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeleteConfirmId(activeStudent.id)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-rose-600 dark:text-rose-400 hover:border-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all shadow-2xs cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Excluir
+                  </button>
+                </div>
+              )}
+              <DossierViewer student={activeStudent} initialDocId={activeDocId} />
+            </div>
           ) : (
             <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 font-medium text-xs shadow-sm">
               Selecione um estudante para visualizar o dossiê.
@@ -328,7 +636,6 @@ export default function StudentMasterList({
     </div>
   );
 
-  // Helper renderer for student card
   function renderStudentCard(s: typeof processedStudents[0]) {
     const isSelected = s.id === activeStudent?.id;
     const riskBadge = getRiskBadgeConfig(s.nivelRisco);
@@ -386,7 +693,6 @@ export default function StudentMasterList({
           </span>
         </div>
 
-        {/* High contrast, deep tone, easily visible indicators */}
         {(hasExpired > 0 || hasRejected > 0 || hasReview > 0 || hasExpiring > 0) && (
           <div className="mt-2.5 flex flex-wrap gap-1.5">
             {hasExpired > 0 && (

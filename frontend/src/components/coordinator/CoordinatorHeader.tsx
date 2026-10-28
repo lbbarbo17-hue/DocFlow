@@ -7,7 +7,6 @@ import {
   Building2,
   Briefcase,
   ShieldCheck,
-  ChevronDown,
   FolderKanban,
   ArrowRight,
 } from 'lucide-react';
@@ -17,11 +16,7 @@ export default function CoordinatorHeader() {
   const {
     currentCoordinatorUser,
     activeInstitution,
-    setActiveInstitution,
-    systemUsers,
   } = useApp();
-
-  const coordinatorUsers = systemUsers.filter((u) => u.role === 'COORDENADOR');
   
   // Format greeting name (handling "Profª. Mariana" or "Mariana")
   const rawName = currentCoordinatorUser.nome || 'Coordenador';
@@ -111,35 +106,14 @@ export default function CoordinatorHeader() {
           </div>
         </div>
 
-        {/* Right Side: Quick Profile Switcher & Action */}
-        <div className="shrink-0 flex items-center justify-between sm:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800 flex-wrap">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider hidden sm:inline">
-              Simular Perfil:
-            </span>
-            <div className="relative">
-              <select
-                value={activeInstitution}
-                onChange={(e) => setActiveInstitution(e.target.value)}
-                className="appearance-none bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 rounded-xl px-3.5 py-2 pr-8 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 transition-colors"
-                aria-label="Alternar perfil de coordenador"
-              >
-                {coordinatorUsers.map((u) => (
-                  <option key={u.id} value={u.instituicao || ''} className="dark:bg-slate-800 dark:text-white">
-                    {u.nome.replace(/^Profª?\.\s*/i, '').split(' ')[0]} ({u.instituicao ? u.instituicao.split(' ')[0] : 'Geral'})
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
-          </div>
-
+        {/* Right Side: Action Button */}
+        <div className="shrink-0 flex items-center justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
           <Link
             href="/coordenador/dossies"
             className="inline-flex items-center gap-2 text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-all shrink-0 cursor-pointer shadow-xs"
           >
             <FolderKanban className="w-4 h-4 text-[#0284c7] dark:text-[#00b4d8] shrink-0" />
-            <span className="hidden sm:inline">Explorar Dossiês</span>
+            <span>Explorar Dossiês</span>
             <ArrowRight className="w-3.5 h-3.5 ml-0.5 shrink-0 opacity-70" />
           </Link>
         </div>

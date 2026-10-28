@@ -19,13 +19,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [pathname]);
 
-  const isAuthPage = pathname === '/login' || pathname === '/' || pathname === '/landing';
+  const isAuthPage =
+    pathname === '/login' ||
+    pathname === '/' ||
+    pathname === '/landing' ||
+    pathname === '/esqueceu-senha';
 
   if (isAuthPage) {
     return <main className="min-h-screen w-full">{children}</main>;
   }
 
-  // Strict Interface Access Validation
   const isEstudanteRoute = pathname.startsWith('/estudante');
   const isCoordenadorRoute = pathname.startsWith('/coordenador') || pathname.startsWith('/analytics');
   const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/auditoria');
@@ -43,7 +46,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#c5cfdb] dark:bg-slate-950 transition-colors duration-200 relative">
-      {/* Mobile/Tablet Backdrop Overlay */}
       {isSidebarOpen && (
         <div
           onClick={closeSidebar}
@@ -52,7 +54,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         />
       )}
 
-      {/* Sidebar: Mobile Off-canvas Drawer + Desktop Collapsible Container */}
       <div
         className={`fixed inset-y-0 left-0 z-50 lg:static lg:h-screen lg:shrink-0 transition-all duration-300 ease-in-out ${
           isSidebarOpen
@@ -63,7 +64,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <Sidebar />
       </div>
 
-      {/* Main area scrolls independently */}
       <div
         id="main-scroll-container"
         ref={scrollContainerRef}

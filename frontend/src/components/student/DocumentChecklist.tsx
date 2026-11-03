@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   FileText,
   Eye,
-  RefreshCw,
   Calendar,
   AlertTriangle,
   RotateCw,
@@ -16,7 +15,7 @@ import {
 } from 'lucide-react';
 import { DocumentItem } from '@/lib/types';
 import { useApp } from '@/context/AppContext';
-import { getStatusBadgeConfig, formatDateBr, isDocumentApplicableForStudent, scrollToTop } from '@/lib/utils';
+import { formatDateBr, isDocumentApplicableForStudent, scrollToTop } from '@/lib/utils';
 import UploadModal from './UploadModal';
 import DocumentViewModal from './DocumentViewModal';
 
@@ -72,46 +71,28 @@ export default function DocumentChecklist() {
 
   return (
     <div className="space-y-4">
-      {/* Header & Filter Controls for Mobile & Desktop */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 transition-colors duration-200">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-              Filtrar por Categoria ou Situação:
-            </span>
-          </div>
-
-          {/* Quick Search Input */}
-          <div className="relative w-full sm:w-72">
-            <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Buscar documento por nome..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] text-slate-800 dark:text-slate-100 placeholder:text-slate-400 font-medium transition-all"
-            />
-          </div>
-        </div>
-
-        {/* Filter Tabs */}
-        <div className="flex items-center gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800 overflow-x-auto pb-1 sm:pb-0">
+      {/* Barra Superior Unificada: Filtro e Pesquisa */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-xs transition-colors duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        {/* Barra de Filtros Estilo Tabs Unificadas */}
+        <div className="h-10 bg-slate-100 dark:bg-slate-800/60 p-1 rounded-xl flex items-center gap-1 overflow-x-auto min-w-0 max-w-full">
           <button
             type="button"
             onClick={() => {
               setActiveTab('ALL');
               scrollToTop('instant');
             }}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+            className={`h-8 px-3 rounded-lg text-xs transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'ALL'
-                ? 'bg-[#065373] text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                ? 'bg-[#085078] hover:bg-[#063c5a] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] dark:text-white shadow-sm font-bold'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 font-medium'
             }`}
           >
             <span>Todos</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                activeTab === 'ALL' ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                activeTab === 'ALL'
+                  ? 'bg-white/20 text-white dark:bg-white/20 dark:text-white font-bold'
+                  : 'bg-slate-200/70 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 font-medium'
               }`}
             >
               {totalDocs}
@@ -124,16 +105,18 @@ export default function DocumentChecklist() {
               setActiveTab('PRINCIPAL');
               scrollToTop('instant');
             }}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+            className={`h-8 px-3 rounded-lg text-xs transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'PRINCIPAL'
-                ? 'bg-[#065373] text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                ? 'bg-[#085078] hover:bg-[#063c5a] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] dark:text-white shadow-sm font-bold'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 font-medium'
             }`}
           >
             <span>Documentação Principal</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                activeTab === 'PRINCIPAL' ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                activeTab === 'PRINCIPAL'
+                  ? 'bg-white/20 text-white dark:bg-white/20 dark:text-white font-bold'
+                  : 'bg-slate-200/70 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 font-medium'
               }`}
             >
               {essentialDocsCount}
@@ -146,16 +129,18 @@ export default function DocumentChecklist() {
               setActiveTab('COMPLEMENTARES');
               scrollToTop('instant');
             }}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+            className={`h-8 px-3 rounded-lg text-xs transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'COMPLEMENTARES'
-                ? 'bg-[#065373] text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                ? 'bg-[#085078] hover:bg-[#063c5a] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] dark:text-white shadow-sm font-bold'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 font-medium'
             }`}
           >
-            <span>Complementares & Apoio</span>
+            <span>Complementares</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                activeTab === 'COMPLEMENTARES' ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                activeTab === 'COMPLEMENTARES'
+                  ? 'bg-white/20 text-white dark:bg-white/20 dark:text-white font-bold'
+                  : 'bg-slate-200/70 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 font-medium'
               }`}
             >
               {complementaryDocsCount}
@@ -168,16 +153,18 @@ export default function DocumentChecklist() {
               setActiveTab('PENDING');
               scrollToTop('instant');
             }}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+            className={`h-8 px-3 rounded-lg text-xs transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'PENDING'
-                ? 'bg-rose-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                ? 'bg-[#085078] hover:bg-[#063c5a] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] dark:text-white shadow-sm font-bold'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 font-medium'
             }`}
           >
             <span>Requer Atenção</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                activeTab === 'PENDING' ? 'bg-white/20 text-white' : 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300'
+                activeTab === 'PENDING'
+                  ? 'bg-white/20 text-white dark:bg-white/20 dark:text-white font-bold'
+                  : 'bg-rose-100 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 font-bold'
               }`}
             >
               {pendingDocsCount}
@@ -190,176 +177,211 @@ export default function DocumentChecklist() {
               setActiveTab('APPROVED');
               scrollToTop('instant');
             }}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+            className={`h-8 px-3 rounded-lg text-xs transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'APPROVED'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                ? 'bg-[#085078] hover:bg-[#063c5a] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] dark:text-white shadow-sm font-bold'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 font-medium'
             }`}
           >
             <span>Aprovados</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                activeTab === 'APPROVED' ? 'bg-white/20 text-white' : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+                activeTab === 'APPROVED'
+                  ? 'bg-white/20 text-white dark:bg-white/20 dark:text-white font-bold'
+                  : 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 font-bold'
               }`}
             >
               {approvedDocsCount}
             </span>
           </button>
         </div>
+
+        {/* Campo de pesquisa integrado à direita com ícone discreto e altura h-10 perfeitamente alinhada */}
+        <div className="relative w-full md:w-64 lg:w-72 shrink-0">
+          <Search className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Buscar documento por nome..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full h-10 pl-8 pr-3 text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#085078]/20 focus:border-[#085078] dark:focus:ring-[#085078]/30 dark:focus:border-[#085078] text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium transition-all"
+          />
+        </div>
       </div>
 
       {/* Document Cards List */}
       <div className="space-y-3">
         {filteredDocs.length === 0 ? (
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-2">
+          <div className="bg-white dark:bg-slate-900 rounded-xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-2">
             <FileText className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto" />
             <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Nenhum documento encontrado</p>
             <p className="text-xs text-slate-500 dark:text-slate-400">Tente ajustar seus filtros ou termo de busca.</p>
           </div>
         ) : (
           filteredDocs.map((doc) => {
-            const badge = getStatusBadgeConfig(doc.status);
             const isApproved = doc.status === 'APROVADO';
             const isInReview = doc.status === 'EM_ANALISE';
             const isRejected = doc.status === 'RECUSADO';
-            const isExpiringOrExpired = doc.status === 'EXPIRADO' || doc.status === 'VENCENDO';
-            const hasUploadedFile = !!doc.nomeArquivoOriginal || isApproved || isInReview;
+            const isExpiringOrExpired =
+              doc.status === 'EXPIRADO' ||
+              doc.status === 'VENCENDO' ||
+              (doc.diasParaVencer !== undefined && doc.diasParaVencer <= 30);
+
+            // Borda lateral de status (border-l-4) combinando com a badge
+            const statusBorder = isApproved
+              ? 'border-l-emerald-500'
+              : isInReview
+              ? 'border-l-amber-500'
+              : 'border-l-rose-500';
+
+            // Ícone circular com suave opacidade
+            const iconContainerClass = isApproved
+              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+              : isInReview
+              ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+              : 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
+
+            // Badge de status correspondente
+            const badgeClass = isApproved
+              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200/70 dark:border-emerald-800/50'
+              : isInReview
+              ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200/70 dark:border-amber-800/50'
+              : isRejected
+              ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-200 border-rose-300 dark:border-rose-800'
+              : 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200/70 dark:border-rose-900/40';
+
+            const dotClass = isApproved
+              ? 'bg-emerald-500'
+              : isInReview
+              ? 'bg-amber-500'
+              : 'bg-rose-500';
+
+            const badgeLabel = isApproved
+              ? 'Aprovado'
+              : isInReview
+              ? 'Em Análise'
+              : isRejected
+              ? 'Recusado'
+              : 'Pendente';
 
             return (
               <div
                 key={doc.id}
-                className={`bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl p-4 sm:p-5 border shadow-sm transition-all hover:shadow-md ${
-                  isRejected
-                    ? 'border-rose-300 dark:border-rose-800/60 bg-rose-50/20 dark:bg-rose-950/20'
-                    : isExpiringOrExpired
-                    ? 'border-[#eac652]/50 dark:border-[#eac652]/30 bg-[#eac652]/10 dark:bg-[#eac652]/15'
-                    : isInReview
-                    ? 'border-sky-200 dark:border-sky-800/50 bg-sky-50/10 dark:bg-sky-950/10'
-                    : isApproved
-                    ? 'border-emerald-200 dark:border-emerald-800/50 hover:border-emerald-300 dark:hover:border-emerald-700'
-                    : 'border-amber-200/70 dark:border-amber-800/50 bg-amber-50/5 dark:bg-amber-950/10 hover:border-amber-300 dark:hover:border-amber-700'
-                }`}
+                className={`bg-white dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden border-l-4 p-4 sm:p-5 transition-all hover:shadow-md ${statusBorder}`}
               >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   {/* Left: Icon & Main Content */}
                   <div className="flex items-start gap-3.5 flex-1 min-w-0">
-                    {/* Status Icon */}
+                    {/* Status Icon em Círculo com Suave Opacidade */}
                     <div
-                      className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xs ${
-                        isApproved
-                          ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
-                          : isInReview
-                          ? 'bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300'
-                          : isRejected
-                          ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300'
-                          : isExpiringOrExpired
-                          ? 'bg-[#eac652]/20 dark:bg-[#eac652]/20 text-[#8a6e14] dark:text-[#eac652]'
-                          : 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
-                      }`}
+                      className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shrink-0 ${iconContainerClass}`}
                     >
                       {isApproved ? (
-                        <CheckCircle2 className="w-6 h-6" />
+                        <CheckCircle2 className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
                       ) : isInReview ? (
-                        <Clock className="w-6 h-6" />
+                        <Clock className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
                       ) : isRejected ? (
-                        <AlertCircle className="w-6 h-6" />
+                        <AlertCircle className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
                       ) : isExpiringOrExpired ? (
-                        <AlertTriangle className="w-6 h-6" />
+                        <AlertTriangle className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
                       ) : (
-                        <FileText className="w-6 h-6" />
+                        <FileText className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
                       )}
                     </div>
 
                     {/* Information */}
                     <div className="flex-1 min-w-0 space-y-1">
-                      {/* Title & Badges */}
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h4 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white leading-tight">
-                          {doc.nomeExibicao}
-                        </h4>
+                      {/* Title */}
+                      <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 leading-tight">
+                        {doc.nomeExibicao}
+                      </h4>
 
-                        {/* Status Badge with 5 distinct colors signaling gravity */}
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border ${badge.bg}`}
-                        >
-                          <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
-                          {badge.label}
-                        </span>
-
-                        {/* Recorrente tag */}
-                        {doc.recorrente && (
-                          <span
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-50 dark:bg-cyan-950/50 text-cyan-800 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/60"
-                            title="Documento de renovação contínua"
-                          >
-                            <RefreshCw className="w-3 h-3 text-[#065373] dark:text-cyan-300" />
-                            <span>Recorrente</span>
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Atualizado em (visible directly on card) */}
-                      {doc.dataEnvio && (
-                        <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium flex items-center gap-1 pt-0.5">
-                          <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                          <span>Atualizado em {formatDateBr(doc.dataEnvio)}</span>
+                      {/* Descrição */}
+                      {doc.descricao && (
+                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                          {doc.descricao}
                         </p>
+                      )}
+
+                      {/* Metadados: Data de Envio & Recorrente discreto */}
+                      {(doc.dataEnvio || doc.recorrente) && (
+                        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-slate-500 dark:text-slate-400 font-medium pt-0.5">
+                          {doc.dataEnvio && (
+                            <span className="inline-flex items-center gap-1">
+                              <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                              <span>Atualizado em {formatDateBr(doc.dataEnvio)}</span>
+                            </span>
+                          )}
+                          {doc.dataEnvio && doc.recorrente && (
+                            <span className="text-slate-300 dark:text-slate-600">•</span>
+                          )}
+                          {doc.recorrente && (
+                            <span
+                              className="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400"
+                              title="Documento de renovação contínua"
+                            >
+                              <RotateCw className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+                              <span>Recorrente</span>
+                            </span>
+                          )}
+                        </div>
                       )}
 
                       {/* Rejection alert box */}
                       {isRejected && doc.justificativaRecusa && (
-                        <div className="mt-2 p-2.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 rounded-xl text-xs text-rose-800 dark:text-rose-200 space-y-0.5">
-                          <div className="flex items-center gap-1 font-bold text-rose-700 dark:text-rose-300">
-                            <AlertCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
+                        <div className="mt-2.5 p-3 bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/60 rounded-xl text-xs text-rose-800 dark:text-rose-200 space-y-1">
+                          <div className="flex items-center gap-1.5 font-bold text-rose-700 dark:text-rose-300">
+                            <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
                             <span>Motivo da recusa / Correção necessária:</span>
                           </div>
-                          <p className="text-rose-700 dark:text-rose-300 pl-4">{doc.justificativaRecusa}</p>
+                          <p className="text-rose-700 dark:text-rose-300 pl-5.5">{doc.justificativaRecusa}</p>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Right: Quick Action Buttons (Mobile-first ergonomically placed) */}
-                  <div className="flex items-center gap-2 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800 shrink-0">
-                    {/* Visualizar Documento Button (if uploaded) */}
-                    {hasUploadedFile && (
+                  {/* Right: Status Badge & Quick Action Button */}
+                  <div className="flex items-center justify-between sm:justify-end gap-3 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800/60 shrink-0">
+                    {/* Status Badge alinhada à direita em coluna limpa */}
+                    <span
+                      className={`inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shrink-0 min-w-[105px] text-center ${badgeClass}`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass}`} />
+                      <span>{badgeLabel}</span>
+                    </span>
+
+                    {/* Botão de Ação */}
+                    {isApproved || isInReview ? (
                       <button
                         type="button"
                         onClick={() => setActiveViewDoc(doc)}
-                        className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors"
-                        title="Visualizar detalhes do documento"
+                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors shadow-2xs cursor-pointer active:scale-95 shrink-0"
+                        title="Visualizar documento"
                       >
-                        <Eye className="w-3.5 h-3.5 text-[#065373] dark:text-cyan-400" />
+                        <Eye className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                         <span>Visualizar</span>
                       </button>
+                    ) : isRejected ? (
+                      <button
+                        type="button"
+                        onClick={() => setActiveUploadDoc(doc)}
+                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors shadow-2xs cursor-pointer active:scale-95 shrink-0"
+                        title="Substituir documento"
+                      >
+                        <RotateCw className="w-3.5 h-3.5" />
+                        <span>Substituir</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setActiveUploadDoc(doc)}
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-[#085078] hover:bg-[#063c5a] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] dark:text-white shadow-sm transition-all cursor-pointer active:scale-95 shrink-0"
+                        title="Enviar documento"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Enviar Agora</span>
+                      </button>
                     )}
-
-                    {/* Upload / Replace Action Button */}
-                    <button
-                      type="button"
-                      onClick={() => setActiveUploadDoc(doc)}
-                      className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all shadow-sm ${
-                        isApproved
-                          ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
-                          : isRejected || isExpiringOrExpired
-                          ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-200 dark:shadow-none'
-                          : isInReview
-                          ? 'bg-[#065373] dark:bg-cyan-700 hover:bg-[#043c53] dark:hover:bg-cyan-800 text-white shadow-[#065373]/20'
-                          : 'bg-[#065373] dark:bg-cyan-700 hover:bg-[#043c53] dark:hover:bg-cyan-800 text-white shadow-md'
-                      }`}
-                    >
-                      {hasUploadedFile ? (
-                        <>
-                          <RotateCw className="w-3.5 h-3.5" />
-                          <span>Substituir</span>
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="w-3.5 h-3.5" />
-                          <span>Enviar Agora</span>
-                        </>
-                      )}
-                    </button>
                   </div>
                 </div>
               </div>

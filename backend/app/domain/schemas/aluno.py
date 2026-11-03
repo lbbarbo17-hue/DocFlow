@@ -1,8 +1,9 @@
 import uuid
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 from app.domain.enums import StatusAluno
+from app.application.services.document_validators import validate_and_sanitize_cpf
 
 class AlunoBase(BaseModel):
     nome: str = Field(min_length=2, max_length=255)
@@ -10,6 +11,13 @@ class AlunoBase(BaseModel):
     email: EmailStr
     matricula: str = Field(min_length=1, max_length=50)
     status: StatusAluno = StatusAluno.ATIVO
+
+    @field_validator("cpf", mode="before")
+    @classmethod
+    def check_cpf(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            return validate_and_sanitize_cpf(v)
+        return v
 
 class AlunoCreate(AlunoBase):
     instituicao_id: Optional[uuid.UUID] = None
@@ -27,6 +35,13 @@ class AlunoUpdate(BaseModel):
     turma_id: Optional[uuid.UUID] = None
     ativo: Optional[bool] = None
     avatar_path: Optional[str] = None
+
+    @field_validator("cpf", mode="before")
+    @classmethod
+    def check_cpf(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            return validate_and_sanitize_cpf(v)
+        return v
 
 class AlunoRead(AlunoBase):
     model_config = ConfigDict(from_attributes=True)

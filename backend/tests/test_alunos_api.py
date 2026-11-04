@@ -6,7 +6,7 @@ import httpx
 from app.main import app
 from app.domain.enums import StatusAluno
 from app.infrastructure.database.models.aluno import Aluno
-from app.infrastructure.api.dependencies import get_aluno_repository
+from app.infrastructure.api.dependencies import get_aluno_repository, get_usuario_repository
 
 def create_mock_aluno(tenant_id: uuid.UUID, aluno_id: uuid.UUID = None) -> Aluno:
     aluno = Aluno()
@@ -101,10 +101,15 @@ async def test_create_aluno_success(async_client: httpx.AsyncClient, sample_tena
     }
     mock_repo = AsyncMock()
     mock_repo.get_by_cpf.return_value = None
+    mock_repo.get_by_email.return_value = None
     mock_repo.get_by_matricula.return_value = None
     mock_repo.create.return_value = create_mock_aluno(sample_tenant_id)
 
+    mock_user_repo = AsyncMock()
+    mock_user_repo.get_by_email.return_value = None
+
     app.dependency_overrides[get_aluno_repository] = lambda: mock_repo
+    app.dependency_overrides[get_usuario_repository] = lambda: mock_user_repo
     try:
         response = await async_client.post("/api/v1/alunos", json=payload, headers=auth_headers)
         assert response.status_code == 201
@@ -112,6 +117,7 @@ async def test_create_aluno_success(async_client: httpx.AsyncClient, sample_tena
         assert data["nome"] == "Beatriz Helena"
     finally:
         app.dependency_overrides.pop(get_aluno_repository, None)
+        app.dependency_overrides.pop(get_usuario_repository, None)
 
 @pytest.mark.asyncio
 async def test_create_aluno_conflict_cpf(async_client: httpx.AsyncClient, sample_tenant_id: uuid.UUID, auth_headers: dict):
@@ -124,14 +130,69 @@ async def test_create_aluno_conflict_cpf(async_client: httpx.AsyncClient, sample
     }
     mock_repo = AsyncMock()
     mock_repo.get_by_cpf.return_value = create_mock_aluno(sample_tenant_id)
+    mock_repo.get_by_email.return_value = None
+
+    mock_user_repo = AsyncMock()
+    mock_user_repo.get_by_email.return_value = None
 
     app.dependency_overrides[get_aluno_repository] = lambda: mock_repo
+    app.dependency_overrides[get_usuario_repository] = lambda: mock_user_repo
     try:
         response = await async_client.post("/api/v1/alunos", json=payload, headers=auth_headers)
         assert response.status_code == 409
         assert "CPF" in response.json()["detail"]
     finally:
         app.dependency_overrides.pop(get_aluno_repository, None)
+        app.dependency_overrides.pop(get_usuario_repository, None)
+
+@pytest.mark.asyncio
+async def test_create_aluno_conflict_usuario_email(async_client: httpx.AsyncClient, sample_tenant_id: uuid.UUID, auth_headers: dict):
+    payload = {
+        "nome": "Beatriz Helena",
+        "cpf": "11144477735",
+        "email": "beatriz@escola.sp.gov.br",
+        "matricula": "20261042",
+        "status": "ATIVO"
+    }
+    mock_repo = AsyncMock()
+    mock_user_repo = AsyncMock()
+    mock_user_repo.get_by_email.return_value = object()
+
+    app.dependency_overrides[get_aluno_repository] = lambda: mock_repo
+    app.dependency_overrides[get_usuario_repository] = lambda: mock_user_repo
+    try:
+        response = await async_client.post("/api/v1/alunos", json=payload, headers=auth_headers)
+        assert response.status_code == 409
+        assert "coordenador ou administrador" in response.json()["detail"]
+    finally:
+        app.dependency_overrides.pop(get_aluno_repository, None)
+        app.dependency_overrides.pop(get_usuario_repository, None)
+
+@pytest.mark.asyncio
+async def test_create_aluno_conflict_aluno_email(async_client: httpx.AsyncClient, sample_tenant_id: uuid.UUID, auth_headers: dict):
+    payload = {
+        "nome": "Beatriz Helena",
+        "cpf": "11144477735",
+        "email": "beatriz@escola.sp.gov.br",
+        "matricula": "20261042",
+        "status": "ATIVO"
+    }
+    mock_repo = AsyncMock()
+    mock_repo.get_by_cpf.return_value = None
+    mock_repo.get_by_email.return_value = create_mock_aluno(sample_tenant_id)
+
+    mock_user_repo = AsyncMock()
+    mock_user_repo.get_by_email.return_value = None
+
+    app.dependency_overrides[get_aluno_repository] = lambda: mock_repo
+    app.dependency_overrides[get_usuario_repository] = lambda: mock_user_repo
+    try:
+        response = await async_client.post("/api/v1/alunos", json=payload, headers=auth_headers)
+        assert response.status_code == 409
+        assert "e-mail neste Tenant" in response.json()["detail"]
+    finally:
+        app.dependency_overrides.pop(get_aluno_repository, None)
+        app.dependency_overrides.pop(get_usuario_repository, None)
 
 @pytest.mark.asyncio
 async def test_delete_aluno_success(async_client: httpx.AsyncClient, sample_tenant_id: uuid.UUID, auth_headers: dict):

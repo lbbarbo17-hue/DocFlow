@@ -1,11 +1,14 @@
+import uuid
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 from app.domain.schemas.usuario import UsuarioCreate, UsuarioRead, LoginRequest, TokenResponse
 from app.infrastructure.database.models.usuario import Usuario
 from app.infrastructure.repositories.usuario_repository import SQLAlchemyUsuarioRepository
+from app.infrastructure.repositories.aluno_repository import SQLAlchemyAlunoRepository
 from app.application.services.auth_service import SupabaseAuthService
 from app.infrastructure.api.dependencies import (
     get_usuario_repository,
+    get_aluno_repository,
     get_current_user,
     get_storage_service,
     get_current_tenant_id
@@ -18,13 +21,21 @@ router = APIRouter(prefix="/auth", tags=["Autenticação"])
 @router.post("/register", response_model=UsuarioRead, status_code=status.HTTP_201_CREATED)
 async def register(
     user_in: UsuarioCreate,
-    user_repo: SQLAlchemyUsuarioRepository = Depends(get_usuario_repository)
+    user_repo: SQLAlchemyUsuarioRepository = Depends(get_usuario_repository),
+    aluno_repo: SQLAlchemyAlunoRepository = Depends(get_aluno_repository)
 ):
     existing = await user_repo.get_by_email(user_in.email)
     if existing:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Ja existe um usuario cadastrado com este e-mail."
+        )
+
+    aluno_existente = await aluno_repo.get_by_email(email=user_in.email, tenant_id=user_in.tenant_id)
+    if aluno_existente:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Este e-mail ja esta registrado como aluno aprendiz ou estagiario. Um mesmo e-mail nao pode pertencer a aluno e usuario simultaneamente."
         )
 
     supabase_uid = None

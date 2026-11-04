@@ -42,6 +42,17 @@ class SQLAlchemyAlunoRepository(IAlunoRepository):
         result = await self._session.execute(query)
         return result.scalar_one_or_none()
 
+    async def get_by_email(self, email: str, tenant_id: uuid.UUID) -> Optional[Aluno]:
+        query = select(Aluno).where(
+            and_(
+                Aluno.email == email,
+                Aluno.tenant_id == tenant_id,
+                Aluno.ativo.is_(True)
+            )
+        )
+        result = await self._session.execute(query)
+        return result.scalar_one_or_none()
+
     async def list_by_turma(
         self,
         turma_id: uuid.UUID,

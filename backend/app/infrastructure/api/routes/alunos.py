@@ -6,7 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, 
 from app.domain.schemas.aluno import AlunoCreate, AlunoUpdate, AlunoRead
 from app.infrastructure.database.models.aluno import Aluno
 from app.infrastructure.repositories.aluno_repository import SQLAlchemyAlunoRepository
-from app.infrastructure.api.dependencies import get_current_tenant_id, get_aluno_repository, get_storage_service
+from app.infrastructure.repositories.usuario_repository import SQLAlchemyUsuarioRepository
+from app.infrastructure.api.dependencies import get_current_tenant_id, get_aluno_repository, get_storage_service, get_usuario_repository
 from app.application.services.file_validator import compute_file_hash_and_size
 from app.application.services.storage_service import R2StorageService
 
@@ -16,8 +17,23 @@ router = APIRouter(prefix="/alunos", tags=["Alunos"])
 async def create_aluno(
     aluno_in: AlunoCreate,
     tenant_id: uuid.UUID = Depends(get_current_tenant_id),
-    repo: SQLAlchemyAlunoRepository = Depends(get_aluno_repository)
+    repo: SQLAlchemyAlunoRepository = Depends(get_aluno_repository),
+    usuario_repo: SQLAlchemyUsuarioRepository = Depends(get_usuario_repository)
 ):
+    usuario_existente = await usuario_repo.get_by_email(str(aluno_in.email))
+    if usuario_existente:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Este e-mail ja esta registrado como usuario coordenador ou administrador. Um mesmo e-mail nao pode pertencer a aluno e usuario simultaneamente."
+        )
+
+    existing_email = await repo.get_by_email(email=str(aluno_in.email), tenant_id=tenant_id)
+    if existing_email:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ja existe um Aluno com este e-mail neste Tenant."
+        )
+
     existing_cpf = await repo.get_by_cpf(cpf=aluno_in.cpf, tenant_id=tenant_id)
     if existing_cpf:
         raise HTTPException(

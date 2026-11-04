@@ -1,6 +1,8 @@
 import uuid
+import csv
+import io
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, status
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, status, Response
 from app.domain.schemas.aluno import AlunoCreate, AlunoUpdate, AlunoRead
 from app.infrastructure.database.models.aluno import Aluno
 from app.infrastructure.repositories.aluno_repository import SQLAlchemyAlunoRepository
@@ -53,6 +55,34 @@ async def list_alunos(
     repo: SQLAlchemyAlunoRepository = Depends(get_aluno_repository)
 ):
     return await repo.list_all(tenant_id=tenant_id, skip=skip, limit=limit)
+
+@router.get("/export", status_code=status.HTTP_200_OK)
+async def export_alunos_csv(
+    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    repo: SQLAlchemyAlunoRepository = Depends(get_aluno_repository)
+):
+    alunos = await repo.list_all(tenant_id=tenant_id, skip=0, limit=1000)
+    output = io.StringIO()
+    output.write("\ufeff")
+    writer = csv.writer(output, delimiter=";")
+    writer.writerow(["Nome", "Matricula", "CPF", "Email", "Status", "Ativo"])
+    for aluno in alunos:
+        writer.writerow([
+            aluno.nome,
+            aluno.matricula,
+            aluno.cpf,
+            aluno.email,
+            aluno.status.value if hasattr(aluno.status, "value") else str(aluno.status),
+            "Sim" if aluno.ativo else "Nao"
+        ])
+    content = output.getvalue()
+    return Response(
+        content=content,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": "attachment; filename=relatorio_estudantes.csv"
+        }
+    )
 
 @router.get("/{aluno_id}", response_model=AlunoRead, status_code=status.HTTP_200_OK)
 async def get_aluno(

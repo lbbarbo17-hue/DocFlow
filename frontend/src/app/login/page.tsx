@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { DocFlowLogo } from '@/components/DocFlowLogo';
 import { useApp } from '@/context/AppContext';
 import { UserRole } from '@/lib/types';
 import {
@@ -17,23 +16,19 @@ import {
 } from '@/lib/api';
 import { mapAlunoResponseToStudent } from '@/context/AppContext';
 import confetti from 'canvas-confetti';
-import {
-  Lock,
-  Mail,
-  Eye,
-  EyeOff,
-  ArrowRight,
-  ShieldCheck,
-  Zap,
-  Clock,
-  KeyRound,
-  Loader2,
-  AlertCircle,
-} from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 
-export default function LoginPage() {
+export default function Login() {
   const router = useRouter();
-  const { setCurrentRole, setToastMessage, setStudentDirect, loginUser, setSystemUsers, setActiveCoordinatorUserId, setActiveInstitution } = useApp();
+  const {
+    setCurrentRole,
+    setToastMessage,
+    setStudentDirect,
+    loginUser,
+    setSystemUsers,
+    setActiveCoordinatorUserId,
+    setActiveInstitution,
+  } = useApp();
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -54,10 +49,7 @@ export default function LoginPage() {
     let hasError = false;
 
     if (!emailClean) {
-      setEmailError('Informe seu e-mail cadastrado.');
-      hasError = true;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailClean)) {
-      setEmailError('Digite um formato de e-mail válido.');
+      setEmailError('Informe seu e-mail institucional.');
       hasError = true;
     }
 
@@ -131,7 +123,7 @@ export default function LoginPage() {
           particleCount: 50,
           spread: 60,
           origin: { y: 0.6 },
-          colors: ['#065373', '#226a8b', '#3f81a3', '#5b98bb', '#77afd3', '#38bdf8'],
+          colors: ['#085078', '#063c5a', '#38bdf8', '#0284c7'],
         });
       } catch {}
 
@@ -182,7 +174,7 @@ export default function LoginPage() {
       if (!loginResult || !loginResult.user) {
         const msg = 'E-mail ou senha não encontrados no sistema.';
         setGeneralError(msg);
-        setEmailError('E-mail não localizado');
+        setEmailError('Credencial não localizada');
         setPasswordError('Senha incorreta');
         setToastMessage({
           title: 'Falha na Autenticação',
@@ -198,7 +190,7 @@ export default function LoginPage() {
           particleCount: 50,
           spread: 60,
           origin: { y: 0.6 },
-          colors: ['#065373', '#226a8b', '#3f81a3', '#5b98bb', '#77afd3', '#38bdf8'],
+          colors: ['#085078', '#063c5a', '#38bdf8', '#0284c7'],
         });
       } catch {}
 
@@ -217,103 +209,62 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#043c53] relative overflow-hidden flex items-center justify-center p-4 lg:p-8 font-sans selection:bg-cyan-400 selection:text-slate-900">
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#065373] rounded-full blur-3xl opacity-70 animate-pulse-glow pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-[32rem] h-[32rem] bg-[#226a8b] rounded-full blur-3xl opacity-60 animate-pulse-glow pointer-events-none" />
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#3f81a3]/30 rounded-full blur-2xl pointer-events-none" />
+    <div className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-12 p-0 m-0 font-sans selection:bg-[#085078] selection:text-white">
+      {/* LADO ESQUERDO: Apresentação Institucional em Tela Cheia (lg:col-span-7) */}
+      <div className="lg:col-span-7 bg-[#085078] p-8 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between relative overflow-hidden text-white">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none" />
 
-      <div
-        className="absolute inset-0 opacity-[0.07] pointer-events-none"
-        style={{
-          backgroundImage:
-            'radial-gradient(#77afd3 1px, transparent 1px), radial-gradient(#77afd3 1px, #043c53 1px)',
-          backgroundSize: '36px 36px',
-          backgroundPosition: '0 0, 18px 18px',
-        }}
-      />
-
-      <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center py-6 sm:py-0">
-        <div className="order-2 lg:order-1 lg:col-span-6 space-y-4 sm:space-y-6 text-white text-center lg:text-left">
-          <div className="inline-flex items-center px-4 py-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
-            <DocFlowLogo inverted size="lg" showSubtitle />
-          </div>
-
-          <div className="space-y-3">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
-              Sua carreira sem{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-[#77afd3] to-white">
-                burocracia documental.
-              </span>
-            </h1>
-            <p className="text-sm sm:text-base text-cyan-100/80 max-w-lg leading-relaxed mx-auto lg:mx-0">
-              Envie seus comprovantes, RG e TCE direto do seu celular ou computador com confirmação
-              imediata, sem risco de perder o estágio e com total proteção dos seus dados.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
-            <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 shadow-xl hover:bg-white/15 transition-all duration-300 hover:scale-[1.02] group text-left animate-float-slow">
-              <div className="w-10 h-10 rounded-xl bg-cyan-400/20 text-cyan-300 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                <Zap className="w-5 h-5 text-cyan-300" />
-              </div>
-              <h4 className="font-bold text-sm text-white">Upload Rápido & Fácil</h4>
-              <p className="text-xs text-cyan-100/70 mt-1 leading-snug">
-                Envie fotos ou PDFs dos seus documentos em instantes. Tudo rápido, aprovado na hora e sem complicação.
-              </p>
+        {/* Topo: Logótipo Oficial DocFlow */}
+        <div className="relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-inner">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
             </div>
-
-            <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 shadow-xl hover:bg-white/15 transition-all duration-300 hover:scale-[1.02] group text-left animate-float-reverse">
-              <div className="w-10 h-10 rounded-xl bg-emerald-400/20 text-emerald-300 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                <ShieldCheck className="w-5 h-5 text-emerald-300" />
-              </div>
-              <h4 className="font-bold text-sm text-white">Privacidade & Segurança</h4>
-              <p className="text-xs text-cyan-100/70 mt-1 leading-snug">
-                Seus dados pessoais sensíveis ficam protegidos e com visualização restrita para sua segurança.
-              </p>
-            </div>
-
-            <div className="sm:col-span-2 p-3.5 rounded-2xl bg-gradient-to-r from-[#226a8b]/60 to-[#065373]/60 backdrop-blur-md border border-white/15 flex items-center gap-3.5 text-left">
-              <div className="p-2.5 rounded-xl bg-amber-400/20 text-amber-300 shrink-0">
-                <Clock className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="font-bold text-xs text-white">Avisos de Renovação</p>
-                <p className="text-[11px] text-cyan-100/80">
-                  O sistema avisa com antecedência quando chegar a hora de renovar o comprovante da faculdade ou curso técnico.
-                </p>
-              </div>
-            </div>
+            <span className="text-2xl sm:text-3xl font-bold tracking-tight text-white">DocFlow</span>
           </div>
         </div>
 
-        <div className="order-1 lg:order-2 lg:col-span-6 w-full max-w-md mx-auto">
-          <div className="relative rounded-2xl sm:rounded-3xl bg-slate-900/80 backdrop-blur-2xl border border-white/20 shadow-2xl p-5 sm:p-8 text-white overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-[#77afd3] to-[#226a8b]" />
+        {/* Meio: Título principal sólido e frase descritiva */}
+        <div className="relative z-10 my-auto py-12 max-w-xl space-y-4">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight">
+            Sua central segura de documentos e comprovantes.
+          </h1>
+          <p className="text-base sm:text-lg text-white/90 leading-relaxed font-normal">
+            Envie termos e comprovantes para validação e mantenha seus arquivos organizados para consultar sempre que precisar.
+          </p>
+        </div>
+      </div>
 
-            <div className="space-y-1 mb-6">
-              <h3 className="text-lg font-bold text-white tracking-tight">Entrar na sua conta</h3>
-              <p className="text-xs text-slate-400">
-                Informe seu e-mail e senha cadastrados para acessar a plataforma.
-              </p>
+      {/* LADO DIREITO: Formulário de Alto Contraste e Legibilidade (lg:col-span-5) */}
+      <div className="lg:col-span-5 bg-[#070c18] p-8 sm:p-12 lg:p-16 flex flex-col justify-center items-center">
+        <div className="max-w-md w-full space-y-7">
+          <div className="space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              Entrar na sua conta
+            </h2>
+            <p className="text-slate-400 text-sm">
+              Insira suas credenciais institucionais para continuar.
+            </p>
+          </div>
+
+          {generalError && (
+            <div className="p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs sm:text-sm flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              <span className="leading-relaxed">{generalError}</span>
             </div>
+          )}
 
-            <form noValidate onSubmit={handleLoginSubmit} className="space-y-4">
-              {generalError && (
-                <div className="p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs flex items-start gap-2.5">
-                  <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                  <span className="leading-relaxed">{generalError}</span>
-                </div>
-              )}
-
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-300 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>E-mail</span>
-                  </span>
-                </label>
+          <form className="space-y-5" onSubmit={handleLoginSubmit}>
+            {/* Campo E-mail */}
+            <div>
+              <label className="block text-xs font-semibold text-[#cbd5e1] uppercase tracking-wider mb-2">
+                E-mail institucional
+              </label>
+              <div className="relative">
                 <input
-                  type="email"
+                  type="text"
                   value={identifier}
                   onChange={(e) => {
                     setIdentifier(e.target.value);
@@ -321,105 +272,106 @@ export default function LoginPage() {
                     if (generalError) setGeneralError('');
                   }}
                   placeholder="seu.email@exemplo.com"
-                  className={`w-full bg-slate-950/90 border ${
-                    emailError
-                      ? 'border-rose-500 focus:border-rose-400 focus:ring-rose-400/40'
-                      : 'border-slate-700 focus:border-cyan-400 focus:ring-cyan-400'
-                  } focus:ring-1 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 transition-all font-sans outline-none`}
+                  className={`w-full px-4 py-3.5 bg-[#1e293b] border ${
+                    emailError ? 'border-rose-500 focus:ring-rose-500' : 'border-[#334155] focus:ring-[#085078]'
+                  } rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
                 />
-                {emailError && (
-                  <p className="text-[11px] text-rose-400 font-medium flex items-center gap-1.5 pt-0.5">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{emailError}</span>
-                  </p>
-                )}
+                <span className="absolute right-3.5 top-3.5 text-slate-400 pointer-events-none">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                  </svg>
+                </span>
               </div>
-
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
-                    <KeyRound className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>Senha</span>
-                  </label>
-                  <Link
-                    href="/esqueceu-senha"
-                    className="text-[11px] text-cyan-300 hover:text-cyan-200 transition-colors"
-                  >
-                    Esqueceu a senha?
-                  </Link>
-                </div>
-
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                      if (passwordError) setPasswordError('');
-                      if (generalError) setGeneralError('');
-                    }}
-                    placeholder="••••••••••••"
-                    className={`w-full bg-slate-950/90 border ${
-                      passwordError
-                        ? 'border-rose-500 focus:border-rose-400 focus:ring-rose-400/40'
-                        : 'border-slate-700 focus:border-cyan-400 focus:ring-cyan-400'
-                    } focus:ring-1 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 transition-all font-mono outline-none pr-10`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-300 transition-colors p-1 cursor-pointer"
-                    title={showPassword ? 'Ocultar senha' : 'Ver senha'}
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                {passwordError && (
-                  <p className="text-[11px] text-rose-400 font-medium flex items-center gap-1.5 pt-0.5">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{passwordError}</span>
-                  </p>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between pt-1">
-                <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-700 bg-slate-950 text-[#065373] focus:ring-cyan-400 focus:ring-offset-0 cursor-pointer"
-                  />
-                  <span>Lembrar meu dispositivo</span>
-                </label>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-[#065373] via-[#226a8b] to-[#3f81a3] hover:from-[#0a6d96] hover:to-[#226a8b] text-white py-3 px-4 font-bold text-xs shadow-lg shadow-[#065373]/50 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 group disabled:opacity-50 cursor-pointer"
-              >
-                <div className="absolute top-0 bottom-0 w-24 bg-white/20 skew-x-12 animate-shine pointer-events-none" />
-
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin text-cyan-300" />
-                    <span>Entrando no DocFlow...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Acessar Plataforma</span>
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1 text-cyan-300" />
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="mt-5 pt-4 border-t border-slate-800/80 text-center text-[10px] text-slate-500 flex items-center justify-center gap-1.5">
-              <Lock className="w-3 h-3 text-cyan-400" />
-              <span>Ambiente Seguro • Guarda Digital com Conformidade</span>
+              {emailError && (
+                <p className="text-xs text-rose-400 font-medium flex items-center gap-1.5 pt-1.5">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{emailError}</span>
+                </p>
+              )}
             </div>
-          </div>
+
+            {/* Campo Senha */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-semibold text-[#cbd5e1] uppercase tracking-wider">
+                  Senha
+                </label>
+                <Link
+                  href="/esqueceu-senha"
+                  className="text-xs text-sky-400 hover:text-sky-300 font-medium transition-colors"
+                >
+                  Esqueceu a senha?
+                </Link>
+              </div>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (passwordError) setPasswordError('');
+                    if (generalError) setGeneralError('');
+                  }}
+                  placeholder="••••••••••••"
+                  className={`w-full px-4 py-3.5 bg-[#1e293b] border ${
+                    passwordError ? 'border-rose-500 focus:ring-rose-500' : 'border-[#334155] focus:ring-[#085078]'
+                  } rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:border-transparent transition-all pr-12`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  title={showPassword ? 'Ocultar senha' : 'Ver senha'}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
+              </div>
+              {passwordError && (
+                <p className="text-xs text-rose-400 font-medium flex items-center gap-1.5 pt-1.5">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{passwordError}</span>
+                </p>
+              )}
+            </div>
+
+            {/* Checkbox */}
+            <div className="flex items-center gap-2 pt-1">
+              <input
+                type="checkbox"
+                id="remember"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="rounded border-slate-700 bg-[#1e293b] text-[#085078] focus:ring-[#085078] w-4 h-4 cursor-pointer"
+              />
+              <label htmlFor="remember" className="text-xs text-slate-300 cursor-pointer select-none">
+                Manter conectado neste navegador
+              </label>
+            </div>
+
+            {/* Botão Entrar na Plataforma */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-[#085078] hover:bg-[#063c5a] active:scale-[0.99] text-white font-bold py-3.5 rounded-xl shadow-lg shadow-[#085078]/25 transition-all text-sm sm:text-base flex items-center justify-center gap-2 mt-3 cursor-pointer disabled:opacity-50"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin text-white" />
+                  <span>Entrando na Plataforma...</span>
+                </>
+              ) : (
+                <>
+                  <span>Entrar na Plataforma</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </>
+              )}
+            </button>
+          </form>
         </div>
       </div>
     </div>

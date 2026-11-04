@@ -49,6 +49,7 @@ export default function AdminDashboard() {
 
     // System Users (Coordenadores & Superadmins)
     systemUsers.forEach((u) => {
+      if (u.role === 'ESTUDANTE') return;
       const isSuper = u.role === 'SUPERADMIN';
       list.push({
         id: u.id,

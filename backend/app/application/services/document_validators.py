@@ -30,23 +30,29 @@ def validate_and_sanitize_cnpj(raw_cnpj: str) -> str:
     if not raw_cnpj or not isinstance(raw_cnpj, str):
         raise ValueError("CNPJ e obrigatorio e deve ser uma string.")
 
-    cnpj = re.sub(r"\D", "", raw_cnpj)
+    cnpj = re.sub(r"[^A-Za-z0-9]", "", raw_cnpj).upper()
 
     if len(cnpj) != 14:
-        raise ValueError("CNPJ deve conter exatamente 14 digitos numericos.")
+        raise ValueError("CNPJ deve conter exatamente 14 caracteres alfanumericos.")
+
+    if not cnpj[:12].isalnum():
+        raise ValueError("Os primeiros 12 caracteres do CNPJ devem ser alfanumericos.")
+
+    if not cnpj[12:].isdigit():
+        raise ValueError("Os dois ultimos caracteres do CNPJ devem ser digitos numericos verificadores.")
 
     if len(set(cnpj)) == 1:
-        raise ValueError("CNPJ invalido: sequencia de digitos repetidos.")
+        raise ValueError("CNPJ invalido: sequencia de caracteres repetidos.")
 
     multipliers_1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
-    soma_1 = sum(int(cnpj[i]) * multipliers_1[i] for i in range(12))
+    soma_1 = sum((ord(cnpj[i]) - 48) * multipliers_1[i] for i in range(12))
     resto_1 = soma_1 % 11
     digito_1 = 0 if resto_1 < 2 else 11 - resto_1
     if digito_1 != int(cnpj[12]):
         raise ValueError("CNPJ invalido: primeiro digito verificador incorreto.")
 
     multipliers_2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
-    soma_2 = sum(int(cnpj[i]) * multipliers_2[i] for i in range(13))
+    soma_2 = sum((ord(cnpj[i]) - 48) * multipliers_2[i] for i in range(12)) + (digito_1 * 2)
     resto_2 = soma_2 % 11
     digito_2 = 0 if resto_2 < 2 else 11 - resto_2
     if digito_2 != int(cnpj[13]):

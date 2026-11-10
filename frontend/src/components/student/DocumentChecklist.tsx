@@ -4,16 +4,15 @@ import React, { useState } from 'react';
 import {
   Upload,
   AlertCircle,
-  Clock,
-  CheckCircle2,
   FileText,
   Eye,
   Calendar,
   AlertTriangle,
   RotateCw,
   Search,
+  ChevronDown,
 } from 'lucide-react';
-import { DocumentItem } from '@/lib/types';
+import { DocumentItem, StatusDocumento } from '@/lib/types';
 import { useApp } from '@/context/AppContext';
 import { formatDateBr, isDocumentApplicableForStudent, scrollToTop } from '@/lib/utils';
 import UploadModal from './UploadModal';
@@ -25,6 +24,30 @@ export default function DocumentChecklist() {
   const [activeViewDoc, setActiveViewDoc] = useState<DocumentItem | null>(null);
   const [activeTab, setActiveTab] = useState<'ALL' | 'PRINCIPAL' | 'COMPLEMENTARES' | 'PENDING' | 'APPROVED'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedDocs, setExpandedDocs] = useState<Record<string, boolean>>({});
+
+  const toggleDoc = (id: string) => {
+    setExpandedDocs((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const getStatusCardStyle = (status: StatusDocumento) => {
+    switch (status) {
+      case 'APROVADO':
+        return 'border border-emerald-300 bg-emerald-50/50 dark:border-emerald-500/30 dark:bg-emerald-950/10';
+      case 'EM_ANALISE':
+      case 'EXPIRADO':
+      case 'VENCENDO':
+        return 'border border-amber-300 bg-amber-50/50 dark:border-amber-500/30 dark:bg-amber-950/10';
+      case 'RECUSADO':
+        return 'border border-rose-300 bg-rose-50/50 dark:border-rose-500/30 dark:bg-rose-950/10';
+      case 'PENDENTE':
+      default:
+        return 'border border-slate-300 bg-slate-50/50 dark:border-slate-700/60 dark:bg-slate-900/50';
+    }
+  };
 
   const applicableDocs = student.documentos.filter((d) =>
     isDocumentApplicableForStudent(d.tipo, student)
@@ -37,6 +60,14 @@ export default function DocumentChecklist() {
     (d) => d.status === 'PENDENTE' || d.status === 'RECUSADO' || d.status === 'EXPIRADO' || d.status === 'VENCENDO'
   ).length;
   const approvedDocsCount = applicableDocs.filter((d) => d.status === 'APROVADO').length;
+
+  const tabs = [
+    { id: 'ALL' as const, label: 'Todos', count: totalDocs },
+    { id: 'PRINCIPAL' as const, label: 'Documentação Principal', count: essentialDocsCount },
+    { id: 'COMPLEMENTARES' as const, label: 'Complementares', count: complementaryDocsCount },
+    { id: 'PENDING' as const, label: 'Requer Atenção', count: pendingDocsCount, alert: true },
+    { id: 'APPROVED' as const, label: 'Aprovados', count: approvedDocsCount, success: true },
+  ];
 
   const filteredDocs = applicableDocs.filter((doc) => {
     // Tab filter
@@ -71,141 +102,54 @@ export default function DocumentChecklist() {
 
   return (
     <div className="space-y-4">
-      {/* Barra Superior Unificada: Filtro e Pesquisa */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-xs transition-colors duration-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
-        {/* Barra de Filtros Estilo Tabs Unificadas */}
-        <div className="h-10 bg-slate-100 dark:bg-slate-800/60 p-1 rounded-xl flex items-center gap-1 overflow-x-auto min-w-0 max-w-full">
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('ALL');
-              scrollToTop('instant');
-            }}
-            className={`h-8 px-3 rounded-lg text-xs transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-              activeTab === 'ALL'
-                ? 'bg-[#085078] hover:bg-[#063c5a] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] dark:text-white shadow-sm font-bold'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 font-medium'
-            }`}
-          >
-            <span>Todos</span>
-            <span
-              className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                activeTab === 'ALL'
-                  ? 'bg-white/20 text-white dark:bg-white/20 dark:text-white font-bold'
-                  : 'bg-slate-200/70 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 font-medium'
+      {/* Barra Superior: Filtro em Abas com Linha Inferior e Pesquisa */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800">
+        {/* Abas simples com linha inferior (border-b-2 border-[#085078]) */}
+        <div className="flex items-center gap-6 overflow-x-auto min-w-0 max-w-full -mb-px">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => {
+                setActiveTab(tab.id);
+                scrollToTop('instant');
+              }}
+              className={`pb-3 text-xs sm:text-sm transition-all shrink-0 flex items-center gap-2 cursor-pointer border-b-2 ${
+                activeTab === tab.id
+                  ? 'border-[#085078] text-[#085078] dark:text-cyan-400 dark:border-cyan-400 font-bold'
+                  : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-medium'
               }`}
             >
-              {totalDocs}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('PRINCIPAL');
-              scrollToTop('instant');
-            }}
-            className={`h-8 px-3 rounded-lg text-xs transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-              activeTab === 'PRINCIPAL'
-                ? 'bg-[#085078] hover:bg-[#063c5a] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] dark:text-white shadow-sm font-bold'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 font-medium'
-            }`}
-          >
-            <span>Documentação Principal</span>
-            <span
-              className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                activeTab === 'PRINCIPAL'
-                  ? 'bg-white/20 text-white dark:bg-white/20 dark:text-white font-bold'
-                  : 'bg-slate-200/70 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 font-medium'
-              }`}
-            >
-              {essentialDocsCount}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('COMPLEMENTARES');
-              scrollToTop('instant');
-            }}
-            className={`h-8 px-3 rounded-lg text-xs transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-              activeTab === 'COMPLEMENTARES'
-                ? 'bg-[#085078] hover:bg-[#063c5a] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] dark:text-white shadow-sm font-bold'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 font-medium'
-            }`}
-          >
-            <span>Complementares</span>
-            <span
-              className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                activeTab === 'COMPLEMENTARES'
-                  ? 'bg-white/20 text-white dark:bg-white/20 dark:text-white font-bold'
-                  : 'bg-slate-200/70 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 font-medium'
-              }`}
-            >
-              {complementaryDocsCount}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('PENDING');
-              scrollToTop('instant');
-            }}
-            className={`h-8 px-3 rounded-lg text-xs transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-              activeTab === 'PENDING'
-                ? 'bg-[#085078] hover:bg-[#063c5a] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] dark:text-white shadow-sm font-bold'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 font-medium'
-            }`}
-          >
-            <span>Requer Atenção</span>
-            <span
-              className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                activeTab === 'PENDING'
-                  ? 'bg-white/20 text-white dark:bg-white/20 dark:text-white font-bold'
-                  : 'bg-rose-100 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 font-bold'
-              }`}
-            >
-              {pendingDocsCount}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('APPROVED');
-              scrollToTop('instant');
-            }}
-            className={`h-8 px-3 rounded-lg text-xs transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-              activeTab === 'APPROVED'
-                ? 'bg-[#085078] hover:bg-[#063c5a] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] dark:text-white shadow-sm font-bold'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 font-medium'
-            }`}
-          >
-            <span>Aprovados</span>
-            <span
-              className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                activeTab === 'APPROVED'
-                  ? 'bg-white/20 text-white dark:bg-white/20 dark:text-white font-bold'
-                  : 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 font-bold'
-              }`}
-            >
-              {approvedDocsCount}
-            </span>
-          </button>
+              <span>{tab.label}</span>
+              <span
+                className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${
+                  activeTab === tab.id
+                    ? 'bg-[#085078]/10 text-[#085078] dark:bg-cyan-500/20 dark:text-cyan-300'
+                    : tab.alert && tab.count > 0
+                    ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300'
+                    : tab.success && tab.count > 0
+                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                }`}
+              >
+                {tab.count}
+              </span>
+            </button>
+          ))}
         </div>
 
-        {/* Campo de pesquisa integrado à direita com ícone discreto e altura h-10 perfeitamente alinhada */}
-        <div className="relative w-full md:w-64 lg:w-72 shrink-0">
-          <Search className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Buscar documento por nome..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-10 pl-8 pr-3 text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#085078]/20 focus:border-[#085078] dark:focus:ring-[#085078]/30 dark:focus:border-[#085078] text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium transition-all"
-          />
+        {/* Campo de pesquisa integrado à direita */}
+        <div className="pb-3 md:pb-2 w-full md:w-64 shrink-0">
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Buscar documento por nome..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-9 pl-8 pr-3 text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#085078] focus:border-[#085078] dark:focus:ring-cyan-500/40 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all"
+            />
+          </div>
         </div>
       </div>
 
@@ -222,39 +166,25 @@ export default function DocumentChecklist() {
             const isApproved = doc.status === 'APROVADO';
             const isInReview = doc.status === 'EM_ANALISE';
             const isRejected = doc.status === 'RECUSADO';
-            const isExpiringOrExpired =
-              doc.status === 'EXPIRADO' ||
-              doc.status === 'VENCENDO' ||
-              (doc.diasParaVencer !== undefined && doc.diasParaVencer <= 30);
-
-            // Borda lateral de status (border-l-4) combinando com a badge
-            const statusBorder = isApproved
-              ? 'border-l-emerald-500'
-              : isInReview
-              ? 'border-l-amber-500'
-              : 'border-l-rose-500';
-
-            // Ícone circular com suave opacidade
-            const iconContainerClass = isApproved
-              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-              : isInReview
-              ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
-              : 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
+            const isExpanded = !!expandedDocs[doc.id];
+            const statusCardStyle = getStatusCardStyle(doc.status);
 
             // Badge de status correspondente
             const badgeClass = isApproved
               ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200/70 dark:border-emerald-800/50'
-              : isInReview
+              : isInReview || doc.status === 'VENCENDO' || doc.status === 'EXPIRADO'
               ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200/70 dark:border-amber-800/50'
               : isRejected
               ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-200 border-rose-300 dark:border-rose-800'
-              : 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200/70 dark:border-rose-900/40';
+              : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700';
 
             const dotClass = isApproved
               ? 'bg-emerald-500'
-              : isInReview
+              : isInReview || doc.status === 'VENCENDO' || doc.status === 'EXPIRADO'
               ? 'bg-amber-500'
-              : 'bg-rose-500';
+              : isRejected
+              ? 'bg-rose-500'
+              : 'bg-slate-400 dark:bg-slate-500';
 
             const badgeLabel = isApproved
               ? 'Aprovado'
@@ -262,126 +192,214 @@ export default function DocumentChecklist() {
               ? 'Em Análise'
               : isRejected
               ? 'Recusado'
+              : doc.status === 'EXPIRADO'
+              ? 'Expirado'
+              : doc.status === 'VENCENDO'
+              ? 'Vencendo'
               : 'Pendente';
 
             return (
               <div
                 key={doc.id}
-                className={`bg-white dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden border-l-4 p-4 sm:p-5 transition-all hover:shadow-md ${statusBorder}`}
+                className={`rounded-xl ${statusCardStyle} shadow-xs overflow-hidden transition-all hover:shadow-sm`}
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  {/* Left: Icon & Main Content */}
-                  <div className="flex items-start gap-3.5 flex-1 min-w-0">
-                    {/* Status Icon em Círculo com Suave Opacidade */}
-                    <div
-                      className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shrink-0 ${iconContainerClass}`}
-                    >
-                      {isApproved ? (
-                        <CheckCircle2 className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
-                      ) : isInReview ? (
-                        <Clock className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
-                      ) : isRejected ? (
-                        <AlertCircle className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
-                      ) : isExpiringOrExpired ? (
-                        <AlertTriangle className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
-                      ) : (
-                        <FileText className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
-                      )}
-                    </div>
+                {/* 1. Cabeçalho Clicável (Estado Fechado / Base: Apenas Nome e Chevron) */}
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => toggleDoc(doc.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggleDoc(doc.id);
+                    }
+                  }}
+                  aria-expanded={isExpanded}
+                  className="p-4 sm:p-5 flex items-center justify-between gap-4 cursor-pointer select-none transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                >
+                  {/* Lado Esquerdo: Nome do documento em destaque */}
+                  <div className="flex items-center min-w-0 flex-1">
+                    <h3 className="font-semibold text-sm sm:text-base text-slate-900 dark:text-slate-100 leading-tight truncate">
+                      {doc.nomeExibicao}
+                    </h3>
+                  </div>
 
-                    {/* Information */}
-                    <div className="flex-1 min-w-0 space-y-1">
-                      {/* Title */}
-                      <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 leading-tight">
-                        {doc.nomeExibicao}
-                      </h4>
+                  {/* Lado Direito: Apenas Seta Chevron */}
+                  <div
+                    className="p-1 rounded-md text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors shrink-0"
+                    aria-label={isExpanded ? 'Recolher detalhes' : 'Expandir detalhes'}
+                  >
+                    <ChevronDown
+                      className={`w-5 h-5 transition-transform duration-300 shrink-0 ${
+                        isExpanded ? 'rotate-180 text-slate-700 dark:text-slate-200' : ''
+                      }`}
+                    />
+                  </div>
+                </div>
 
-                      {/* Descrição */}
-                      {doc.descricao && (
-                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                          {doc.descricao}
-                        </p>
-                      )}
+                {/* 2. Painel Interno Expansível (Accordion Body: Revela Badge, Ações e Detalhes) */}
+                <div
+                  className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+                    isExpanded
+                      ? 'grid-rows-[1fr] opacity-100'
+                      : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+                  }`}
+                >
+                  <div className="overflow-hidden">
+                    <div className="px-4 pb-4 sm:px-5 sm:pb-5 pt-3.5 border-t border-slate-200/60 dark:border-slate-800/60 space-y-4">
+                      {/* Linha de Ações: Badge de Status e Botão de Ação Principal */}
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
+                            Status:
+                          </span>
+                          <span
+                            className={`inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shrink-0 ${badgeClass}`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass}`} />
+                            <span>{badgeLabel}</span>
+                          </span>
+                        </div>
 
-                      {/* Metadados: Data de Envio & Recorrente discreto */}
-                      {(doc.dataEnvio || doc.recorrente) && (
-                        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-slate-500 dark:text-slate-400 font-medium pt-0.5">
-                          {doc.dataEnvio && (
-                            <span className="inline-flex items-center gap-1">
-                              <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                              <span>Atualizado em {formatDateBr(doc.dataEnvio)}</span>
-                            </span>
-                          )}
-                          {doc.dataEnvio && doc.recorrente && (
-                            <span className="text-slate-300 dark:text-slate-600">•</span>
-                          )}
-                          {doc.recorrente && (
-                            <span
-                              className="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400"
-                              title="Documento de renovação contínua"
+                        {/* Botão de Ação Principal */}
+                        <div>
+                          {isApproved || isInReview ? (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveViewDoc(doc);
+                              }}
+                              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-2xs cursor-pointer active:scale-95 shrink-0"
+                              title="Visualizar documento"
                             >
-                              <RotateCw className="w-3 h-3 text-slate-400 dark:text-slate-500" />
-                              <span>Recorrente</span>
-                            </span>
+                              <Eye className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                              <span>Visualizar</span>
+                            </button>
+                          ) : isRejected ? (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveUploadDoc(doc);
+                              }}
+                              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold border border-rose-200 dark:border-rose-800/80 bg-rose-50/60 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100/80 dark:hover:bg-rose-900/50 transition-colors shadow-2xs cursor-pointer active:scale-95 shrink-0"
+                              title="Substituir documento"
+                            >
+                              <RotateCw className="w-3.5 h-3.5" />
+                              <span>Substituir</span>
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveUploadDoc(doc);
+                              }}
+                              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-[#085078] hover:bg-[#063c5a] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] dark:text-white shadow-sm transition-all cursor-pointer active:scale-95 shrink-0"
+                              title="Enviar documento"
+                            >
+                              <Upload className="w-3.5 h-3.5" />
+                              <span>Enviar Agora</span>
+                            </button>
                           )}
+                        </div>
+                      </div>
+
+                      {/* Descrição do documento */}
+                      {doc.descricao && (
+                        <div className="space-y-1">
+                          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                            Descrição e Diretrizes
+                          </p>
+                          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                            {doc.descricao}
+                          </p>
                         </div>
                       )}
 
-                      {/* Rejection alert box */}
-                      {isRejected && doc.justificativaRecusa && (
-                        <div className="mt-2.5 p-3 bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/60 rounded-xl text-xs text-rose-800 dark:text-rose-200 space-y-1">
+                      {/* Observação condicional se houver */}
+                      {doc.condicional && (
+                        <p className="text-xs text-amber-700 dark:text-amber-300 bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-800/40 p-2.5 rounded-lg">
+                          <span className="font-semibold">Condição de aplicabilidade:</span> {doc.condicional}
+                        </p>
+                      )}
+
+                      {/* Metadados: Data e Hora de Atualização */}
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500 dark:text-slate-400 pt-0.5">
+                        <span className="inline-flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                          <span>
+                            {doc.dataEnvio ? (
+                              <>
+                                Atualizado em{' '}
+                                <strong className="font-semibold text-slate-700 dark:text-slate-200">
+                                  {formatDateBr(doc.dataEnvio)}
+                                </strong>
+                              </>
+                            ) : (
+                              <span className="italic">Pendente de envio</span>
+                            )}
+                          </span>
+                        </span>
+
+                        {doc.nomeArquivoOriginal && (
+                          <span className="inline-flex items-center gap-1.5 truncate max-w-[240px] sm:max-w-xs">
+                            <FileText className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                            <span className="truncate">
+                              Arquivo: <strong className="font-semibold text-slate-700 dark:text-slate-200">{doc.nomeArquivoOriginal}</strong>
+                            </span>
+                          </span>
+                        )}
+
+                        {doc.recorrente && (
+                          <span
+                            className="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400"
+                            title="Documento de renovação contínua"
+                          >
+                            <RotateCw className="w-3 h-3 text-slate-400 dark:text-slate-500 shrink-0" />
+                            <span>Recorrente</span>
+                          </span>
+                        )}
+
+                        {doc.validadeAte && (
+                          <span className="inline-flex items-center gap-1">
+                            <span>
+                              Validade:{' '}
+                              <strong className="font-semibold text-slate-700 dark:text-slate-200">
+                                {formatDateBr(doc.validadeAte)}
+                              </strong>
+                            </span>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Motivo de recusa ou observações da instituição (caso exista) */}
+                      {doc.justificativaRecusa && (
+                        <div className="p-3 bg-rose-50/90 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/70 rounded-xl text-xs space-y-1">
                           <div className="flex items-center gap-1.5 font-bold text-rose-700 dark:text-rose-300">
                             <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
                             <span>Motivo da recusa / Correção necessária:</span>
                           </div>
-                          <p className="text-rose-700 dark:text-rose-300 pl-5.5">{doc.justificativaRecusa}</p>
+                          <p className="text-rose-700 dark:text-rose-300 pl-5.5 leading-relaxed">
+                            {doc.justificativaRecusa}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Observações da instituição (se houver) */}
+                      {doc.observacaoValidade && (
+                        <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-xl text-xs space-y-1">
+                          <div className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-300">
+                            <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+                            <span>Observações da instituição:</span>
+                          </div>
+                          <p className="text-slate-600 dark:text-slate-400 pl-5.5 leading-relaxed">
+                            {doc.observacaoValidade}
+                          </p>
                         </div>
                       )}
                     </div>
-                  </div>
-
-                  {/* Right: Status Badge & Quick Action Button */}
-                  <div className="flex items-center justify-between sm:justify-end gap-3 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800/60 shrink-0">
-                    {/* Status Badge alinhada à direita em coluna limpa */}
-                    <span
-                      className={`inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shrink-0 min-w-[105px] text-center ${badgeClass}`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass}`} />
-                      <span>{badgeLabel}</span>
-                    </span>
-
-                    {/* Botão de Ação */}
-                    {isApproved || isInReview ? (
-                      <button
-                        type="button"
-                        onClick={() => setActiveViewDoc(doc)}
-                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors shadow-2xs cursor-pointer active:scale-95 shrink-0"
-                        title="Visualizar documento"
-                      >
-                        <Eye className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-                        <span>Visualizar</span>
-                      </button>
-                    ) : isRejected ? (
-                      <button
-                        type="button"
-                        onClick={() => setActiveUploadDoc(doc)}
-                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors shadow-2xs cursor-pointer active:scale-95 shrink-0"
-                        title="Substituir documento"
-                      >
-                        <RotateCw className="w-3.5 h-3.5" />
-                        <span>Substituir</span>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setActiveUploadDoc(doc)}
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-[#085078] hover:bg-[#063c5a] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] dark:text-white shadow-sm transition-all cursor-pointer active:scale-95 shrink-0"
-                        title="Enviar documento"
-                      >
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>Enviar Agora</span>
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>

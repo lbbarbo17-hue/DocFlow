@@ -19,7 +19,6 @@ import {
   HardDrive,
 } from 'lucide-react';
 import { cn, scrollToTop } from '@/lib/utils';
-import { DocFlowLogo } from '@/components/DocFlowLogo';
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -126,27 +125,34 @@ export default function Sidebar() {
     .toUpperCase();
 
   return (
-    <aside className="w-64 bg-[#085078] dark:bg-[#0b132b] text-white flex flex-col shrink-0 border-r border-white/10 dark:border-slate-800/80 shadow-md z-30 min-h-screen transition-colors duration-200">
-      {/* Topo com Logo */}
-      <div className="p-4 flex items-center justify-between gap-2 border-b border-white/10 dark:border-slate-800/80">
-        <Link href="/" className="min-w-0 flex items-center hover:opacity-90 transition-opacity">
-          <DocFlowLogo inverted />
+    <aside className="w-64 bg-[#085078] dark:bg-[#0b192c] text-white flex flex-col shrink-0 border-r border-white/10 dark:border-slate-800 shadow-md z-30 min-h-screen transition-colors duration-200">
+      {/* Topo com Logo Oficial DocFlow */}
+      <div className="p-4 flex items-center justify-between gap-2 border-b border-white/10 dark:border-slate-800">
+        <Link href="/" className="min-w-0 flex items-center gap-2.5 hover:opacity-90 transition-opacity">
+          <div className="w-9 h-9 rounded-xl bg-white/20 dark:bg-[#085078] flex items-center justify-center text-white shadow-sm shrink-0">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <span className="text-lg font-bold tracking-tight text-white">
+            DocFlow
+          </span>
         </Link>
 
         <button
           type="button"
           onClick={closeSidebar}
-          className="p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60 transition-colors shrink-0 cursor-pointer"
+          className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60 transition-colors shrink-0 cursor-pointer"
           title="Ocultar menu lateral"
           aria-label="Ocultar menu lateral"
         >
-          <PanelLeftClose className="w-4 h-4" />
+          <PanelLeftClose className="w-4 h-4 text-white" />
         </button>
       </div>
 
       {/* Navegação */}
       <div className="flex-1 py-5 px-3 space-y-1.5 overflow-y-auto">
-        <div className="px-3 pb-2 text-[10px] font-bold text-white/60 dark:text-slate-400 uppercase tracking-wider truncate">
+        <div className="px-3 pb-2 text-[10px] font-bold text-white/70 dark:text-slate-400 uppercase tracking-wider truncate">
           Menu de Navegação
         </div>
 
@@ -167,10 +173,10 @@ export default function Sidebar() {
                 }
               }}
               className={cn(
-                'group relative flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-r-lg rounded-l-none overflow-hidden text-xs transition-colors duration-150',
+                'group relative flex items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-xl text-xs transition-colors duration-150',
                 isActive
-                  ? 'bg-white/10 dark:bg-slate-800 text-white font-semibold border-l-4 border-blue-400 dark:border-blue-500 shadow-2xs'
-                  : 'text-white/80 hover:text-white hover:bg-white/10 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/40 border-l-4 border-transparent'
+                  ? 'bg-white/20 dark:bg-[#085078] text-white font-semibold shadow-xs'
+                  : 'text-white/80 hover:text-white hover:bg-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/50'
               )}
             >
               <div className="flex items-center gap-2.5 min-w-0">
@@ -178,11 +184,11 @@ export default function Sidebar() {
                   className={cn(
                     'w-4 h-4 shrink-0 transition-transform group-hover:scale-105',
                     isActive
-                      ? 'text-blue-300 dark:text-blue-400'
-                      : 'text-white/70 group-hover:text-white dark:text-slate-400 dark:group-hover:text-slate-200'
+                      ? 'text-white'
+                      : 'text-white/80 group-hover:text-white dark:text-slate-400 dark:group-hover:text-white'
                   )}
                 />
-                <span className="truncate">{item.label}</span>
+                <span className="truncate text-white font-medium">{item.label}</span>
               </div>
               {item.hasAlert && (
                 <span className="relative flex h-2 w-2 shrink-0">
@@ -206,7 +212,7 @@ export default function Sidebar() {
       </div>
 
       {/* Rodapé do Perfil */}
-      <div className="p-3 border-t border-white/10 dark:border-slate-800/80 bg-black/10 dark:bg-slate-950/40">
+      <div className="p-3 border-t border-white/10 dark:border-slate-800 bg-black/10 dark:bg-[#0b192c]/90">
         <Link
           href="/perfil"
           onClick={() => {
@@ -216,16 +222,16 @@ export default function Sidebar() {
             }
           }}
           className={cn(
-            'w-full flex items-center gap-3 p-2 rounded-xl transition-colors text-left group cursor-pointer',
+            'w-full flex items-center gap-3 p-2.5 rounded-xl transition-all text-left group cursor-pointer border border-transparent dark:border-slate-800/80',
             pathname === '/perfil'
-              ? 'bg-white/20 dark:bg-slate-800/60 text-white'
-              : 'hover:bg-white/10 dark:hover:bg-slate-800/30 text-white/90 dark:text-slate-300 hover:text-white'
+              ? 'bg-white/20 dark:bg-[#085078] text-white shadow-xs'
+              : 'hover:bg-white/10 dark:hover:bg-slate-800/50 text-white'
           )}
           title="Clique para gerenciar seu perfil"
           aria-label="Abrir página de configurações de perfil"
         >
           <div className="relative shrink-0">
-            <div className="w-9 h-9 rounded-full bg-white/20 dark:bg-slate-800 text-white dark:text-slate-200 flex items-center justify-center font-bold text-xs shadow-xs overflow-hidden border border-white/20 dark:border-slate-700">
+            <div className="w-9 h-9 rounded-full bg-white/20 dark:bg-[#085078] text-white flex items-center justify-center font-bold text-xs shadow-xs overflow-hidden shrink-0">
               {currentUserProfile.avatarUrl ? (
                 <Image
                   src={currentUserProfile.avatarUrl}
@@ -240,7 +246,7 @@ export default function Sidebar() {
               )}
             </div>
             <div
-              className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border border-[#085078] dark:border-[#0b132b]"
+              className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border border-[#085078] dark:border-[#0b192c]"
               title="Online"
             />
           </div>
@@ -248,12 +254,12 @@ export default function Sidebar() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-1">
               <span
-                className="block text-white font-medium text-xs truncate group-hover:text-white/90 dark:group-hover:text-blue-300 transition-colors"
+                className="block text-white font-semibold text-xs truncate"
                 title={currentUserProfile.nome}
               >
                 {currentUserProfile.nome}
               </span>
-              <Settings className="w-3.5 h-3.5 text-white/70 group-hover:text-white dark:text-slate-400 dark:group-hover:text-slate-200 transition-transform group-hover:rotate-45 shrink-0" />
+              <Settings className="w-3.5 h-3.5 text-white/70 group-hover:text-white dark:text-slate-400 dark:group-hover:text-white transition-transform group-hover:rotate-45 shrink-0" />
             </div>
             <span
               className="text-[11px] text-white/70 dark:text-slate-400 block truncate"

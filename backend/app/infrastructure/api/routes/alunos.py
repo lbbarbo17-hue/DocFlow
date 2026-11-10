@@ -1,10 +1,13 @@
 import uuid
+import csv
+import io
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, status
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, status, Response
 from app.domain.schemas.aluno import AlunoCreate, AlunoUpdate, AlunoRead
 from app.infrastructure.database.models.aluno import Aluno
 from app.infrastructure.repositories.aluno_repository import SQLAlchemyAlunoRepository
-from app.infrastructure.api.dependencies import get_current_tenant_id, get_aluno_repository, get_storage_service
+from app.infrastructure.repositories.usuario_repository import SQLAlchemyUsuarioRepository
+from app.infrastructure.api.dependencies import get_current_tenant_id, get_aluno_repository, get_storage_service, get_usuario_repository
 from app.application.services.file_validator import compute_file_hash_and_size
 from app.application.services.storage_service import R2StorageService
 
@@ -14,8 +17,23 @@ router = APIRouter(prefix="/alunos", tags=["Alunos"])
 async def create_aluno(
     aluno_in: AlunoCreate,
     tenant_id: uuid.UUID = Depends(get_current_tenant_id),
-    repo: SQLAlchemyAlunoRepository = Depends(get_aluno_repository)
+    repo: SQLAlchemyAlunoRepository = Depends(get_aluno_repository),
+    usuario_repo: SQLAlchemyUsuarioRepository = Depends(get_usuario_repository)
 ):
+    usuario_existente = await usuario_repo.get_by_email(str(aluno_in.email))
+    if usuario_existente:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Este e-mail ja esta registrado como usuario coordenador ou administrador. Um mesmo e-mail nao pode pertencer a aluno e usuario simultaneamente."
+        )
+
+    existing_email = await repo.get_by_email(email=str(aluno_in.email), tenant_id=tenant_id)
+    if existing_email:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ja existe um Aluno com este e-mail neste Tenant."
+        )
+
     existing_cpf = await repo.get_by_cpf(cpf=aluno_in.cpf, tenant_id=tenant_id)
     if existing_cpf:
         raise HTTPException(
@@ -53,6 +71,34 @@ async def list_alunos(
     repo: SQLAlchemyAlunoRepository = Depends(get_aluno_repository)
 ):
     return await repo.list_all(tenant_id=tenant_id, skip=skip, limit=limit)
+
+@router.get("/export", status_code=status.HTTP_200_OK)
+async def export_alunos_csv(
+    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    repo: SQLAlchemyAlunoRepository = Depends(get_aluno_repository)
+):
+    alunos = await repo.list_all(tenant_id=tenant_id, skip=0, limit=1000)
+    output = io.StringIO()
+    output.write("\ufeff")
+    writer = csv.writer(output, delimiter=";")
+    writer.writerow(["Nome", "Matricula", "CPF", "Email", "Status", "Ativo"])
+    for aluno in alunos:
+        writer.writerow([
+            aluno.nome,
+            aluno.matricula,
+            aluno.cpf,
+            aluno.email,
+            aluno.status.value if hasattr(aluno.status, "value") else str(aluno.status),
+            "Sim" if aluno.ativo else "Nao"
+        ])
+    content = output.getvalue()
+    return Response(
+        content=content,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": "attachment; filename=relatorio_estudantes.csv"
+        }
+    )
 
 @router.get("/{aluno_id}", response_model=AlunoRead, status_code=status.HTTP_200_OK)
 async def get_aluno(

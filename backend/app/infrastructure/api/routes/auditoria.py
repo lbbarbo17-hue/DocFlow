@@ -2,7 +2,7 @@ import uuid
 from typing import List, Optional, Any, Dict
 from datetime import datetime
 from fastapi import APIRouter, Depends, Query, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 from app.infrastructure.api.dependencies import get_db, get_current_tenant_id, get_current_user
@@ -30,8 +30,8 @@ class AuditLogResponse(BaseModel):
     detalhes: Optional[Dict[str, Any]] = None
     timestamp_utc: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
 
 @router.get("", response_model=List[AuditLogResponse], status_code=status.HTTP_200_OK)
 async def list_audit_logs(

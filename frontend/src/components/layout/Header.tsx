@@ -35,7 +35,7 @@ export default function Header() {
   } = useApp();
 
   return (
-    <header className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-300 dark:border-slate-800 px-4 sm:px-6 py-3 shadow-2xs transition-colors duration-200">
+    <header className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3 shadow-2xs transition-colors duration-200">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         {/* Left Side: Sidebar Toggle & Portal Title */}
         <div className="flex items-center gap-3">
@@ -46,7 +46,7 @@ export default function Header() {
             title={isSidebarOpen ? 'Ocultar menu lateral' : 'Exibir menu lateral'}
             aria-label="Alternar visibilidade do menu lateral"
           >
-            <Menu className="w-4 h-4 text-[#065373] dark:text-cyan-300" />
+            <Menu className="w-4 h-4 text-[#085078] dark:text-cyan-300" />
           </button>
 
           {/* Logo oficial DocFlow */}
@@ -57,7 +57,7 @@ export default function Header() {
           <div className="hidden sm:block h-6 w-[1px] bg-slate-200 dark:bg-slate-700" />
 
           <div>
-            <h1 className="text-sm sm:text-base font-extrabold text-[#065373] dark:text-cyan-300 tracking-tight">
+            <h1 className="text-sm sm:text-base font-extrabold text-[#085078] dark:text-cyan-300 tracking-tight">
               {currentRole === 'ESTUDANTE'
                 ? 'Portal do Aprendiz'
                 : currentRole === 'COORDENADOR'
@@ -74,8 +74,8 @@ export default function Header() {
         <div className="flex items-center flex-wrap gap-2.5 sm:gap-3">
           {/* Institution Selector for Coordenador */}
           {currentRole === 'COORDENADOR' && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/90 text-xs shadow-2xs">
-              <Building2 className="w-3.5 h-3.5 text-[#065373] dark:text-cyan-400 shrink-0" />
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/90 text-xs text-slate-700 dark:text-slate-200 shadow-2xs">
+              <Building2 className="w-3.5 h-3.5 text-[#085078] dark:text-cyan-400 shrink-0" />
               <span className="font-semibold text-slate-500 dark:text-slate-400 hidden md:inline">
                 Instituição:
               </span>
@@ -102,8 +102,8 @@ export default function Header() {
 
           {/* Student Institution Indicator */}
           {currentRole === 'ESTUDANTE' && student.instituicao && (
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-700 dark:text-slate-300 shadow-2xs">
-              <Building2 className="w-3.5 h-3.5 text-[#065373] dark:text-cyan-400 shrink-0" />
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-xs text-slate-700 dark:text-slate-300 shadow-2xs">
+              <Building2 className="w-3.5 h-3.5 text-[#085078] dark:text-cyan-400 shrink-0" />
               <span className="font-semibold truncate max-w-[210px]">{student.instituicao}</span>
             </div>
           )}

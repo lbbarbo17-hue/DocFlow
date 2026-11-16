@@ -596,7 +596,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      if (window.innerWidth < 1024) {
+      if (window.innerWidth < 768) {
         setIsSidebarOpen(false);
       }
     }

@@ -13,6 +13,7 @@ import {
   FileCheck,
   UploadCloud,
   PanelLeftClose,
+  PanelLeftOpen,
   UserPlus,
   Settings,
   History,
@@ -27,9 +28,18 @@ export default function Sidebar() {
     student,
     studentsList,
     closeSidebar,
+    toggleSidebar,
+    isSidebarOpen,
     activeInstitution,
     currentUserProfile,
   } = useApp();
+
+  const homeRoute =
+    currentRole === 'ESTUDANTE'
+      ? '/estudante'
+      : currentRole === 'COORDENADOR'
+      ? '/coordenador'
+      : '/admin';
 
   const pendingStudentDocs = student.documentos.filter(
     (d) => d.status === 'PENDENTE' || d.status === 'RECUSADO'
@@ -125,42 +135,109 @@ export default function Sidebar() {
     .toUpperCase();
 
   return (
-    <aside className="w-64 bg-[#085078] dark:bg-[#0b192c] text-white flex flex-col shrink-0 border-r border-white/10 dark:border-slate-800 shadow-md z-30 min-h-screen transition-colors duration-200">
-      {/* Topo com Logo Oficial DocFlow */}
-      <div className="p-4 flex items-center justify-between gap-2 border-b border-white/10 dark:border-slate-800">
-        <Link href="/" className="min-w-0 flex items-center gap-2.5 hover:opacity-90 transition-opacity">
-          <div className="w-9 h-9 rounded-xl bg-white/20 dark:bg-[#085078] flex items-center justify-center text-white shadow-sm shrink-0">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          <span className="text-lg font-bold tracking-tight text-white">
-            DocFlow
-          </span>
-        </Link>
+    <aside
+      className={cn(
+        'bg-[#085078] dark:bg-[#0b192c] text-white flex flex-col shrink-0 border-r border-white/10 dark:border-slate-800 shadow-md z-30 min-h-screen transition-all duration-300 ease-in-out',
+        isSidebarOpen ? 'w-64' : 'w-16'
+      )}
+    >
+      {/* Topo: Logo Oficial e Botão de Recolher/Expandir */}
+      {isSidebarOpen ? (
+        <div className="p-4 flex items-center justify-between gap-2 border-b border-white/10 dark:border-slate-800 min-h-[65px]">
+          <Link
+            href={homeRoute}
+            className="min-w-0 flex items-center gap-2.5 hover:opacity-90 transition-opacity"
+            title="Ir para o Dashboard"
+          >
+            <div className="w-9 h-9 rounded-xl bg-white/20 dark:bg-[#085078] flex items-center justify-center text-white shadow-sm shrink-0">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <span className="text-lg font-bold tracking-tight text-white truncate">
+              DocFlow
+            </span>
+          </Link>
 
-        <button
-          type="button"
-          onClick={closeSidebar}
-          className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60 transition-colors shrink-0 cursor-pointer"
-          title="Ocultar menu lateral"
-          aria-label="Ocultar menu lateral"
-        >
-          <PanelLeftClose className="w-4 h-4 text-white" />
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className="hidden md:flex p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60 transition-colors shrink-0 cursor-pointer items-center justify-center"
+            title="Recolher menu lateral"
+            aria-label="Recolher menu lateral"
+          >
+            <PanelLeftClose className="w-4 h-4 text-white" />
+          </button>
+        </div>
+      ) : (
+        <div className="p-3 flex items-center justify-center border-b border-white/10 dark:border-slate-800 min-h-[65px]">
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className="hidden md:flex p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60 transition-colors shrink-0 cursor-pointer items-center justify-center"
+            title="Expandir menu lateral"
+            aria-label="Expandir menu lateral"
+          >
+            <PanelLeftOpen className="w-5 h-5 text-white" />
+          </button>
+        </div>
+      )}
 
       {/* Navegação */}
-      <div className="flex-1 py-5 px-3 space-y-1.5 overflow-y-auto">
-        <div className="px-3 pb-2 text-[10px] font-bold text-white/70 dark:text-slate-400 uppercase tracking-wider truncate">
-          Menu de Navegação
-        </div>
+      <div className="flex-1 py-5 px-2 sm:px-3 space-y-1.5 overflow-y-auto">
+        {isSidebarOpen && (
+          <div className="px-3 pb-2 text-[10px] font-bold text-white/70 dark:text-slate-400 uppercase tracking-wider truncate">
+            Menu de Navegação
+          </div>
+        )}
 
         {navItems.map((item) => {
           const isActive =
             pathname === item.href ||
             (item.href === '/coordenador' && pathname === '/coordenador/dashboard');
           const Icon = item.icon;
+
+          if (!isSidebarOpen) {
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                title={item.label}
+                onClick={() => scrollToTop('instant')}
+                className={cn(
+                  'group relative flex items-center justify-center p-2.5 rounded-xl text-xs transition-colors duration-150',
+                  isActive
+                    ? 'bg-white/20 dark:bg-[#085078] text-white font-semibold shadow-xs'
+                    : 'text-white/80 hover:text-white hover:bg-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/50'
+                )}
+              >
+                <Icon
+                  className={cn(
+                    'w-5 h-5 shrink-0 transition-transform group-hover:scale-110',
+                    isActive
+                      ? 'text-white'
+                      : 'text-white/80 group-hover:text-white dark:text-slate-400 dark:group-hover:text-white'
+                  )}
+                />
+                {item.hasAlert && (
+                  <span className="absolute top-1.5 right-1.5 flex h-2 w-2 shrink-0">
+                    <span
+                      className={cn(
+                        'animate-ping absolute inline-flex h-full w-full rounded-full opacity-75',
+                        item.alertColor || 'bg-rose-400'
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        'relative inline-flex rounded-full h-2 w-2',
+                        item.alertColor || 'bg-rose-500'
+                      )}
+                    />
+                  </span>
+                )}
+              </Link>
+            );
+          }
 
           return (
             <Link
@@ -222,12 +299,13 @@ export default function Sidebar() {
             }
           }}
           className={cn(
-            'w-full flex items-center gap-3 p-2.5 rounded-xl transition-all text-left group cursor-pointer border border-transparent dark:border-slate-800/80',
+            'w-full flex items-center gap-3 p-2 rounded-xl transition-all text-left group cursor-pointer border border-transparent dark:border-slate-800/80',
+            !isSidebarOpen && 'justify-center p-1.5',
             pathname === '/perfil'
               ? 'bg-white/20 dark:bg-[#085078] text-white shadow-xs'
               : 'hover:bg-white/10 dark:hover:bg-slate-800/50 text-white'
           )}
-          title="Clique para gerenciar seu perfil"
+          title={`Meu Perfil (${currentUserProfile.nome})`}
           aria-label="Abrir página de configurações de perfil"
         >
           <div className="relative shrink-0">
@@ -251,35 +329,37 @@ export default function Sidebar() {
             />
           </div>
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-1">
+          {isSidebarOpen && (
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-1">
+                <span
+                  className="block text-white font-semibold text-xs truncate"
+                  title={currentUserProfile.nome}
+                >
+                  {currentUserProfile.nome}
+                </span>
+                <Settings className="w-3.5 h-3.5 text-white/70 group-hover:text-white dark:text-slate-400 dark:group-hover:text-white transition-transform group-hover:rotate-45 shrink-0" />
+              </div>
               <span
-                className="block text-white font-semibold text-xs truncate"
-                title={currentUserProfile.nome}
+                className="text-[11px] text-white/70 dark:text-slate-400 block truncate"
+                title={
+                  currentRole === 'ESTUDANTE'
+                    ? student.instituicao || (student.tipoVinculo === 'APRENDIZ' ? 'Jovem Aprendiz' : 'Estagiário')
+                    : currentRole === 'COORDENADOR'
+                    ? activeInstitution
+                    : 'Super Administrador (Global)'
+                }
               >
-                {currentUserProfile.nome}
-              </span>
-              <Settings className="w-3.5 h-3.5 text-white/70 group-hover:text-white dark:text-slate-400 dark:group-hover:text-white transition-transform group-hover:rotate-45 shrink-0" />
-            </div>
-            <span
-              className="text-[11px] text-white/70 dark:text-slate-400 block truncate"
-              title={
-                currentRole === 'ESTUDANTE'
-                  ? student.instituicao || (student.tipoVinculo === 'APRENDIZ' ? 'Jovem Aprendiz' : 'Estagiário')
+                {currentRole === 'ESTUDANTE'
+                  ? student.tipoVinculo === 'APRENDIZ'
+                    ? 'Jovem Aprendiz'
+                    : 'Estagiário'
                   : currentRole === 'COORDENADOR'
                   ? activeInstitution
-                  : 'Super Administrador (Global)'
-              }
-            >
-              {currentRole === 'ESTUDANTE'
-                ? student.tipoVinculo === 'APRENDIZ'
-                  ? 'Jovem Aprendiz'
-                  : 'Estagiário'
-                : currentRole === 'COORDENADOR'
-                ? activeInstitution
-                : 'Super Administrador (Global)'}
-            </span>
-          </div>
+                  : 'Super Administrador (Global)'}
+              </span>
+            </div>
+          )}
         </Link>
       </div>
     </aside>

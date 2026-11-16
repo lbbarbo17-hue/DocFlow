@@ -154,7 +154,7 @@ export default function EsqueceuSenhaPage() {
                     placeholder="seu.email@exemplo.com"
                     className={`w-full px-4 py-3.5 bg-[#1e293b] border ${
                       emailError ? 'border-rose-500 focus:ring-rose-500' : 'border-[#334155] focus:ring-[#085078]'
-                    } rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
+                    } rounded-xl text-white placeholder-slate-500 text-base focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
                   />
                   <span className="absolute right-3.5 top-3.5 text-slate-400 pointer-events-none">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

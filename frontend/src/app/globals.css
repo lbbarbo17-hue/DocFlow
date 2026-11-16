@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --background: #c5cfdb;
+  --background: #f8fafc;
   --foreground: #0f172a;
 }
 
@@ -97,4 +97,10 @@ body {
 
 .animate-shine {
   animation: shineEffect 2.5s infinite linear;
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+  }
 }

@@ -33,19 +33,19 @@ export default function DocumentChecklist() {
     }));
   };
 
-  const getStatusCardStyle = (status: StatusDocumento) => {
+  const getStatusBorder = (status: StatusDocumento) => {
     switch (status) {
       case 'APROVADO':
-        return 'border border-emerald-300 bg-emerald-50/50 dark:border-emerald-500/30 dark:bg-emerald-950/10';
+        return 'border-emerald-500';
       case 'EM_ANALISE':
       case 'EXPIRADO':
       case 'VENCENDO':
-        return 'border border-amber-300 bg-amber-50/50 dark:border-amber-500/30 dark:bg-amber-950/10';
+        return 'border-amber-500';
       case 'RECUSADO':
-        return 'border border-rose-300 bg-rose-50/50 dark:border-rose-500/30 dark:bg-rose-950/10';
+        return 'border-rose-500';
       case 'PENDENTE':
       default:
-        return 'border border-slate-300 bg-slate-50/50 dark:border-slate-700/60 dark:bg-slate-900/50';
+        return 'border-slate-300 dark:border-slate-700';
     }
   };
 
@@ -147,7 +147,7 @@ export default function DocumentChecklist() {
               placeholder="Buscar documento por nome..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-9 pl-8 pr-3 text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#085078] focus:border-[#085078] dark:focus:ring-cyan-500/40 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all"
+              className="w-full h-9 pl-8 pr-3 text-base sm:text-xs bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#085078] focus:border-[#085078] dark:focus:ring-cyan-500/40 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all shadow-2xs"
             />
           </div>
         </div>
@@ -167,7 +167,7 @@ export default function DocumentChecklist() {
             const isInReview = doc.status === 'EM_ANALISE';
             const isRejected = doc.status === 'RECUSADO';
             const isExpanded = !!expandedDocs[doc.id];
-            const statusCardStyle = getStatusCardStyle(doc.status);
+            const statusBorder = getStatusBorder(doc.status);
 
             // Badge de status correspondente
             const badgeClass = isApproved
@@ -201,7 +201,7 @@ export default function DocumentChecklist() {
             return (
               <div
                 key={doc.id}
-                className={`rounded-xl ${statusCardStyle} shadow-xs overflow-hidden transition-all hover:shadow-sm`}
+                className={`rounded-xl bg-white dark:bg-slate-900 border ${statusBorder} shadow-sm overflow-hidden transition-all hover:shadow-md`}
               >
                 {/* 1. Cabeçalho Clicável (Estado Fechado / Base: Apenas Nome e Chevron) */}
                 <div
@@ -215,11 +215,11 @@ export default function DocumentChecklist() {
                     }
                   }}
                   aria-expanded={isExpanded}
-                  className="p-4 sm:p-5 flex items-center justify-between gap-4 cursor-pointer select-none transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                  className="p-4 sm:p-5 flex items-center justify-between gap-4 cursor-pointer select-none transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/40"
                 >
                   {/* Lado Esquerdo: Nome do documento em destaque */}
                   <div className="flex items-center min-w-0 flex-1">
-                    <h3 className="font-semibold text-sm sm:text-base text-slate-900 dark:text-slate-100 leading-tight truncate">
+                    <h3 className="font-semibold text-sm sm:text-base text-slate-800 dark:text-slate-100 leading-tight truncate">
                       {doc.nomeExibicao}
                     </h3>
                   </div>

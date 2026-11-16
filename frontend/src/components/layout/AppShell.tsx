@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
+import BottomNav from '@/components/layout/BottomNav';
 import AccessDenied from '@/components/common/AccessDenied';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -45,17 +46,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     : 'Super Administrador';
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#c5cfdb] dark:bg-slate-950 transition-colors duration-200 relative">
+    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors duration-200 relative">
       {isSidebarOpen && (
         <div
           onClick={closeSidebar}
-          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 lg:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 hidden md:block lg:hidden transition-opacity duration-300"
           aria-label="Fechar menu lateral"
         />
       )}
 
       <div
-        className={`fixed inset-y-0 left-0 z-50 lg:static lg:h-screen lg:shrink-0 transition-all duration-300 ease-in-out ${
+        className={`hidden md:block fixed inset-y-0 left-0 z-50 lg:static lg:h-screen lg:shrink-0 transition-all duration-300 ease-in-out ${
           isSidebarOpen
             ? 'translate-x-0 w-64 opacity-100'
             : '-translate-x-full lg:translate-x-0 lg:w-0 lg:opacity-0 lg:overflow-hidden'
@@ -70,10 +71,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         className="flex-1 flex flex-col min-w-0 overflow-y-auto"
       >
         <Header />
-        <main className="flex-1 p-3.5 sm:p-6 md:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-3.5 sm:p-6 md:p-8 pb-24 md:pb-8 max-w-7xl w-full mx-auto">
           {isDenied ? <AccessDenied requiredRoleName={requiredRoleLabel} /> : children}
         </main>
       </div>
+
+      {/* Barra de Navegação Inferior Fixa para Mobile (< 768px) */}
+      <BottomNav />
     </div>
   );
 }

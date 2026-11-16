@@ -42,7 +42,7 @@ export default function Header() {
           <button
             type="button"
             onClick={toggleSidebar}
-            className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors shadow-2xs flex items-center justify-center shrink-0 cursor-pointer active:scale-95"
+            className="hidden md:flex p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors shadow-2xs items-center justify-center shrink-0 cursor-pointer active:scale-95"
             title={isSidebarOpen ? 'Ocultar menu lateral' : 'Exibir menu lateral'}
             aria-label="Alternar visibilidade do menu lateral"
           >

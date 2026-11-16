@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, JetBrains_Mono, Outfit } from 'next/font/google';
 import './globals.css';
 import { AppProvider } from '@/context/AppContext';
@@ -28,6 +28,11 @@ export const metadata: Metadata = {
     'Plataforma B2B corporativa para guarda e gestão de documentos de aprendizes e estagiários.',
 };
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -40,7 +45,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body
-        className="font-sans antialiased bg-[#c5cfdb] dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen"
+        className="font-sans antialiased bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen"
         suppressHydrationWarning
       >
         <AppProvider>

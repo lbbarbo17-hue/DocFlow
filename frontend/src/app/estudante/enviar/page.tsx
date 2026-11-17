@@ -252,19 +252,28 @@ export default function AdicionarDocumentoPage() {
 
   return (
     <div className="space-y-6 pb-12 animate-fadeIn">
-      {/* 1. Cabeçalho da Página (Estilo Dashboard / Checklist) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs transition-colors duration-200">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <UploadCloud className="w-6 h-6 text-[#085078] dark:text-cyan-400 shrink-0" />
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight truncate">
-            Adicionar e Enviar Documentos
-          </h1>
+      {/* 1. Header Card Banner Padrão */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-sm transition-colors duration-200">
+        {/* Lado Esquerdo (Ícone + Textos) */}
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="w-12 h-12 rounded-xl bg-[#085078]/10 dark:bg-[#085078]/30 text-[#085078] dark:text-cyan-400 flex items-center justify-center shrink-0">
+            <UploadCloud className="w-6 h-6" />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+              Adicionar e Enviar Documentos
+            </h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+              Selecione o tipo de documento obrigatório ou complementar e anexe o arquivo digitalizado.
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        {/* Lado Direito: Botão "← Ver Meus Documentos" */}
+        <div className="shrink-0 flex items-center">
           <Link
             href="/estudante/checklist"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 dark:hover:text-cyan-400 hover:text-[#085078] transition-all shadow-xs cursor-pointer active:scale-95"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shadow-xs"
           >
             <span>← Ver Meus Documentos</span>
           </Link>

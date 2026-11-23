@@ -25,7 +25,7 @@ export default function StudentHeader() {
     .toUpperCase() || 'BH';
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm transition-colors duration-200">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6 shadow-sm transition-colors duration-200">
       <div className="flex items-center gap-4">
         {/* Avatar Simples: foto ou iniciais, sem sobreposição de ícones ou badges */}
         <div className="relative shrink-0">

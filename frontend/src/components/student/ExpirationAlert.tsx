@@ -41,7 +41,7 @@ export default function ExpirationAlert({ documents, onUploadClick }: Expiration
   const daysRemaining = primaryDoc?.diasParaVencer !== undefined ? primaryDoc.diasParaVencer : 3;
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-6 shadow-xs flex flex-col justify-between transition-colors duration-200 gap-5">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-lg p-6 shadow-xs flex flex-col justify-between transition-colors duration-200 gap-5">
       {/* 1. Header do Painel */}
       <div className="flex items-center justify-between">
         <div className="space-y-0.5">
@@ -61,11 +61,11 @@ export default function ExpirationAlert({ documents, onUploadClick }: Expiration
 
       {/* 2. Card de Destaque com Suporte a Tema Claro e Escuro */}
       {primaryDoc ? (
-        <div className="p-5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-500/15 shadow-xs flex flex-col gap-3.5">
+        <div className="p-5 rounded-lg bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-500/15 shadow-xs flex flex-col gap-3.5">
           {/* Topo: Ícone + Título e Descrição */}
           <div className="flex items-start gap-3.5">
             {/* Ícone de Alerta */}
-            <div className="w-10 h-10 rounded-xl bg-amber-100 border border-amber-200 text-amber-800 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-300 flex items-center justify-center shrink-0 mt-0.5">
+            <div className="w-10 h-10 rounded-lg bg-amber-100 border border-amber-200 text-amber-800 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-300 flex items-center justify-center shrink-0 mt-0.5">
               <AlertTriangle className="w-5 h-5" />
             </div>
 
@@ -112,7 +112,7 @@ export default function ExpirationAlert({ documents, onUploadClick }: Expiration
           </div>
         </div>
       ) : (
-        <div className="p-5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800/60 flex items-center gap-3">
+        <div className="p-5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800/60 flex items-center gap-3">
           <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
           <p className="text-xs text-slate-600 dark:text-slate-300">
             Nenhuma pendência crítica ou renovação pendente no momento.

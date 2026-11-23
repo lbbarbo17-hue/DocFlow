@@ -1,30 +1,25 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import MetricsOverview from '@/components/analytics/MetricsOverview';
 import TurmaRiskTable from '@/components/analytics/TurmaRiskTable';
-import PageBanner from '@/components/layout/PageBanner';
-import { BarChart3, FolderPlus, ShieldCheck } from 'lucide-react';
 
 export default function AnalyticsPage() {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Page Header Banner */}
-      <PageBanner
-        title="Gestão e Monitoramento de Turmas"
-        icon={BarChart3}
-        backHref="/coordenador"
-        backLabel="Voltar ao Painel"
-        badge={{
-          label: 'Ambiente da Coordenação',
-          icon: ShieldCheck,
-        }}
-        action={{
-          label: 'Cadastrar Turma',
-          href: '/coordenador/cadastro',
-          icon: FolderPlus,
-        }}
-      />
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6 mb-6 flex items-center justify-between shadow-sm">
+        <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
+          Gestão e Monitoramento de Turmas
+        </h1>
+        <Link
+          href="/coordenador/cadastro"
+          className="bg-[#085078] hover:bg-[#063f60] text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors shadow-sm inline-flex items-center gap-2"
+        >
+          Cadastrar Turma
+        </Link>
+      </div>
 
       {/* Strategic KPIs Overview */}
       <MetricsOverview />

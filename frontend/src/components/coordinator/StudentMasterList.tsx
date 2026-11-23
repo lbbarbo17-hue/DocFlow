@@ -214,7 +214,7 @@ export default function StudentMasterList({
     <div className="space-y-4">
       {editingStudentId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl w-full max-w-lg">
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg">
             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">Editar Estudante</h3>
@@ -230,7 +230,7 @@ export default function StudentMasterList({
             </div>
 
             <div className="p-6 space-y-4">
-              <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-lg border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Tipo de Vínculo:</span>
                 <span className="text-xs font-bold text-slate-900 dark:text-white px-2.5 py-1 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xs">
                   {editForm.tipoVinculo === 'APRENDIZ' ? 'Jovem Aprendiz' : 'Estágio (TCE)'}
@@ -240,25 +240,25 @@ export default function StudentMasterList({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="sm:col-span-2 space-y-1">
                   <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Nome Completo <span className="text-rose-500">*</span>
+                    Nome Completo
                   </label>
                   <input
                     type="text"
                     value={editForm.nome}
                     onChange={(e) => setEditForm((f) => ({ ...f, nome: e.target.value }))}
-                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 transition-all"
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#085078] transition-all"
                   />
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Matrícula <span className="text-rose-500">*</span>
+                    Matrícula
                   </label>
                   <input
                     type="text"
                     value={editForm.matricula}
                     onChange={(e) => setEditForm((f) => ({ ...f, matricula: e.target.value }))}
-                    className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 transition-all"
+                    className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#085078] transition-all"
                   />
                 </div>
 
@@ -268,7 +268,7 @@ export default function StudentMasterList({
                     type="email"
                     value={editForm.email}
                     onChange={(e) => setEditForm((f) => ({ ...f, email: e.target.value }))}
-                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 transition-all"
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#085078] transition-all"
                   />
                 </div>
 
@@ -278,7 +278,7 @@ export default function StudentMasterList({
                     type="text"
                     value={editForm.empresa}
                     onChange={(e) => setEditForm((f) => ({ ...f, empresa: e.target.value }))}
-                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 transition-all"
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#085078] transition-all"
                   />
                 </div>
 
@@ -290,7 +290,7 @@ export default function StudentMasterList({
                       const t = turmas.find((x) => x.id === e.target.value);
                       setEditForm((f) => ({ ...f, turmaId: e.target.value, curso: t?.nomeCurso || f.curso }));
                     }}
-                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#085078] cursor-pointer"
                   >
                     {turmas.map((t) => (
                       <option key={t.id} value={t.id}>{t.codigo} — {t.nomeCurso}</option>
@@ -304,7 +304,7 @@ export default function StudentMasterList({
                     type="date"
                     value={editForm.dataAdmissao}
                     onChange={(e) => setEditForm((f) => ({ ...f, dataAdmissao: e.target.value }))}
-                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#085078]"
                   />
                 </div>
               </div>
@@ -328,7 +328,7 @@ export default function StudentMasterList({
                       type="date"
                       value={editForm.contratoInicio}
                       onChange={(e) => setEditForm((f) => ({ ...f, contratoInicio: e.target.value }))}
-                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#085078]"
                     />
                   </div>
 
@@ -340,7 +340,7 @@ export default function StudentMasterList({
                       type="date"
                       value={editForm.contratoFim}
                       onChange={(e) => setEditForm((f) => ({ ...f, contratoFim: e.target.value }))}
-                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#085078]"
                     />
                   </div>
 
@@ -353,7 +353,7 @@ export default function StudentMasterList({
                       value={editForm.contratoValorBolsa}
                       onChange={(e) => setEditForm((f) => ({ ...f, contratoValorBolsa: e.target.value }))}
                       placeholder="1650.00"
-                      className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                      className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#085078]"
                     />
                   </div>
                 </div>
@@ -364,7 +364,7 @@ export default function StudentMasterList({
               <button
                 type="button"
                 onClick={() => setEditingStudentId(null)}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
@@ -372,7 +372,7 @@ export default function StudentMasterList({
                 type="button"
                 onClick={handleEditSave}
                 disabled={isSaving}
-                className="px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 dark:bg-cyan-500 dark:text-slate-950 dark:hover:bg-cyan-400 rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                className="px-5 py-2.5 text-xs font-medium text-white bg-[#085078] hover:bg-[#063f60] rounded-lg shadow-sm transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
               >
                 {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 {isSaving ? 'Salvando...' : 'Salvar Alterações'}
@@ -384,9 +384,9 @@ export default function StudentMasterList({
 
       {deleteConfirmId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-rose-200 dark:border-rose-900 shadow-2xl w-full max-w-sm p-6 space-y-4">
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-rose-200 dark:border-rose-900 shadow-2xl w-full max-w-sm p-6 space-y-4">
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-rose-100 dark:bg-rose-950/60 rounded-xl shrink-0">
+              <div className="p-2 bg-rose-100 dark:bg-rose-950/60 rounded-lg shrink-0">
                 <AlertTriangle className="w-5 h-5 text-rose-600 dark:text-rose-400" />
               </div>
               <div>
@@ -400,7 +400,7 @@ export default function StudentMasterList({
               <button
                 type="button"
                 onClick={() => setDeleteConfirmId(null)}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
@@ -408,7 +408,7 @@ export default function StudentMasterList({
                 type="button"
                 onClick={handleDeleteConfirm}
                 disabled={isDeleting}
-                className="px-5 py-2.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                className="px-5 py-2.5 text-xs font-medium text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-sm transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
               >
                 {isDeleting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 {isDeleting ? 'Excluindo...' : 'Sim, excluir'}
@@ -418,7 +418,7 @@ export default function StudentMasterList({
         </div>
       )}
 
-      <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -426,7 +426,7 @@ export default function StudentMasterList({
             placeholder="Buscar por nome, matrícula ou empresa..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3.5 py-2 text-xs rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800 text-slate-950 dark:text-white placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#0284c7] focus:ring-2 focus:ring-[#0284c7]/20 transition-all"
+            className="w-full pl-9 pr-3.5 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800 text-slate-950 dark:text-white placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#085078] transition-all"
           />
         </div>
 
@@ -434,7 +434,7 @@ export default function StudentMasterList({
           <select
             value={selectedRisk}
             onChange={(e) => setSelectedRisk(e.target.value)}
-            className="text-xs py-1.5 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-semibold focus:outline-none focus:border-[#065373] cursor-pointer shadow-2xs"
+            className="text-xs py-1.5 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-semibold focus:outline-none focus:border-[#085078] cursor-pointer shadow-2xs"
           >
             <option value="ALL">Todos os Riscos</option>
             <option value="CRITICO">Risco Crítico</option>
@@ -442,7 +442,7 @@ export default function StudentMasterList({
             <option value="BAIXO">Regular / Baixo</option>
           </select>
 
-          <div className="flex items-center gap-1 bg-slate-50/60 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 py-1 shadow-2xs">
+          <div className="flex items-center gap-1 bg-slate-50/60 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 shadow-2xs">
             <ArrowUpDown className="w-3 h-3 text-slate-500 dark:text-slate-400 shrink-0" />
             <select
               value={sortBy}
@@ -466,9 +466,9 @@ export default function StudentMasterList({
         <button
           type="button"
           onClick={() => setSelectedTurma('ALL')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
             selectedTurma === 'ALL'
-              ? 'bg-[#065373] text-white shadow-xs'
+              ? 'bg-[#085078] text-white shadow-xs'
               : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800 shadow-2xs'
           }`}
         >
@@ -484,14 +484,14 @@ export default function StudentMasterList({
               key={t.id}
               type="button"
               onClick={() => setSelectedTurma(t.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1.5 ${
                 isSelected
-                  ? 'bg-[#065373] text-white shadow-xs'
+                  ? 'bg-[#085078] text-white shadow-xs'
                   : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800 shadow-2xs'
               }`}
             >
               <span>{t.codigo}</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-md font-mono font-bold ${
                 isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
               }`}>
                 {count}
@@ -501,7 +501,7 @@ export default function StudentMasterList({
         })}
       </div>
 
-      <div className="flex lg:hidden bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
+      <div className="flex lg:hidden bg-slate-100 dark:bg-slate-800/80 p-1 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xs">
         <button
           type="button"
           onClick={() => {
@@ -509,9 +509,9 @@ export default function StudentMasterList({
             scrollToTop('instant');
           }}
           className={cn(
-            'flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer',
+            'flex-1 py-2 text-xs font-medium rounded-lg transition-colors cursor-pointer',
             mobileTab === 'LIST'
-              ? 'bg-[#065373] text-white shadow-xs'
+              ? 'bg-[#085078] text-white shadow-xs'
               : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
           )}
         >
@@ -524,9 +524,9 @@ export default function StudentMasterList({
             scrollToTop('instant');
           }}
           className={cn(
-            'flex-1 py-2 text-xs font-bold rounded-lg transition-all truncate px-2 cursor-pointer',
+            'flex-1 py-2 text-xs font-medium rounded-lg transition-colors truncate px-2 cursor-pointer',
             mobileTab === 'DOSSIER'
-              ? 'bg-[#065373] text-white shadow-xs'
+              ? 'bg-[#085078] text-white shadow-xs'
               : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
           )}
         >
@@ -537,7 +537,7 @@ export default function StudentMasterList({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         <div className={cn('lg:col-span-4 space-y-3 max-h-[750px] overflow-y-auto pr-1', mobileTab !== 'LIST' && 'hidden lg:block')}>
           {processedStudents.length === 0 ? (
-            <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-medium text-xs">
+            <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-medium text-xs">
               Nenhum estudante encontrado.
             </div>
           ) : selectedTurma !== 'ALL' ? (
@@ -553,7 +553,7 @@ export default function StudentMasterList({
               return (
                 <div
                   key={turmaId}
-                  className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm"
+                  className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm"
                 >
                   <button
                     type="button"
@@ -561,7 +561,7 @@ export default function StudentMasterList({
                     className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center justify-between text-left cursor-pointer border-b border-slate-300 dark:border-b dark:border-slate-700"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <Layers className="w-3.5 h-3.5 text-[#065373] dark:text-cyan-400 shrink-0" />
+                      <Layers className="w-3.5 h-3.5 text-[#085078] dark:text-cyan-400 shrink-0" />
                       <span className="font-bold text-xs text-slate-950 dark:text-white truncate">
                         {turmaObj?.codigo || 'Turma'}
                       </span>
@@ -571,7 +571,7 @@ export default function StudentMasterList({
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200/80 dark:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-600">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-200/80 dark:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-600">
                         {studentsInTurma.length}
                       </span>
                       {isCollapsed ? (
@@ -597,7 +597,7 @@ export default function StudentMasterList({
           <button
             type="button"
             onClick={() => setMobileTab('LIST')}
-            className="lg:hidden mb-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 text-[#065373] dark:text-cyan-300 border border-slate-200 dark:border-slate-800 text-xs font-bold shadow-2xs hover:bg-slate-50 transition-colors"
+            className="lg:hidden mb-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 text-[#085078] dark:text-cyan-300 border border-slate-200 dark:border-slate-800 text-xs font-medium shadow-2xs hover:bg-slate-50 transition-colors"
           >
             ← Voltar para lista de aprendizes
           </button>
@@ -609,7 +609,7 @@ export default function StudentMasterList({
                   <button
                     type="button"
                     onClick={() => openEditModal(activeStudent)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-[#065373] hover:text-[#065373] dark:hover:border-cyan-400 dark:hover:text-cyan-400 transition-all shadow-2xs cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-[#085078] hover:text-[#085078] dark:hover:border-cyan-400 dark:hover:text-cyan-400 transition-all shadow-2xs cursor-pointer"
                   >
                     <Pencil className="w-3.5 h-3.5" />
                     Editar
@@ -617,7 +617,7 @@ export default function StudentMasterList({
                   <button
                     type="button"
                     onClick={() => setDeleteConfirmId(activeStudent.id)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-rose-600 dark:text-rose-400 hover:border-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all shadow-2xs cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-rose-600 dark:text-rose-400 hover:border-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all shadow-2xs cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     Excluir
@@ -627,7 +627,7 @@ export default function StudentMasterList({
               <DossierViewer student={activeStudent} initialDocId={activeDocId} />
             </div>
           ) : (
-            <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 font-medium text-xs shadow-sm">
+            <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 font-medium text-xs shadow-sm">
               Selecione um estudante para visualizar o dossiê.
             </div>
           )}
@@ -663,9 +663,9 @@ export default function StudentMasterList({
             scrollToTop('instant');
           }
         }}
-        className={`p-3.5 rounded-2xl border cursor-pointer transition-all duration-200 ${
+        className={`p-3.5 rounded-lg border cursor-pointer transition-all duration-200 ${
           isSelected
-            ? 'bg-white dark:bg-slate-800 border-[#0284c7] dark:border-[#00b4d8] shadow-sm ring-1 ring-[#0284c7]'
+            ? 'bg-white dark:bg-slate-900 border-[#085078] shadow-sm ring-1 ring-[#085078]'
             : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 border-slate-200 dark:border-slate-800 text-slate-950 dark:text-slate-100 shadow-2xs hover:shadow-sm'
         }`}
       >
@@ -696,22 +696,22 @@ export default function StudentMasterList({
         {(hasExpired > 0 || hasRejected > 0 || hasReview > 0 || hasExpiring > 0) && (
           <div className="mt-2.5 flex flex-wrap gap-1.5">
             {hasExpired > 0 && (
-              <span className="text-[10px] font-bold text-rose-900 dark:text-white bg-rose-100 dark:bg-[#7f1d1d] border border-rose-300 dark:border-red-600 px-2 py-0.5 rounded shadow-2xs">
+              <span className="text-[10px] font-semibold text-rose-900 dark:text-white bg-rose-100 dark:bg-[#7f1d1d] border border-rose-300 dark:border-red-600 px-2 py-0.5 rounded-md shadow-2xs">
                 {hasExpired} expirado
               </span>
             )}
             {hasRejected > 0 && (
-              <span className="text-[10px] font-bold text-rose-900 dark:text-white bg-rose-100 dark:bg-[#7f1d1d] border border-rose-300 dark:border-red-600 px-2 py-0.5 rounded shadow-2xs">
+              <span className="text-[10px] font-semibold text-rose-900 dark:text-white bg-rose-100 dark:bg-[#7f1d1d] border border-rose-300 dark:border-red-600 px-2 py-0.5 rounded-md shadow-2xs">
                 {hasRejected} recusado
               </span>
             )}
             {hasReview > 0 && (
-              <span className="text-[10px] font-bold text-sky-900 dark:text-white bg-sky-100 dark:bg-[#0c4a6e] border border-sky-300 dark:border-sky-500 px-2 py-0.5 rounded shadow-2xs">
+              <span className="text-[10px] font-semibold text-sky-900 dark:text-white bg-sky-100 dark:bg-[#0c4a6e] border border-sky-300 dark:border-sky-500 px-2 py-0.5 rounded-md shadow-2xs">
                 {hasReview} em análise
               </span>
             )}
             {hasExpiring > 0 && (
-              <span className="text-[10px] font-bold text-amber-950 dark:text-white bg-amber-100 dark:bg-[#78350f] border border-amber-300 dark:border-amber-500 px-2 py-0.5 rounded shadow-2xs">
+              <span className="text-[10px] font-semibold text-amber-950 dark:text-white bg-amber-100 dark:bg-[#78350f] border border-amber-300 dark:border-amber-500 px-2 py-0.5 rounded-md shadow-2xs">
                 {hasExpiring} a vencer
               </span>
             )}

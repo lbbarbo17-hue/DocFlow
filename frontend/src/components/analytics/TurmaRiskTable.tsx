@@ -8,15 +8,15 @@ export default function TurmaRiskTable() {
   const { turmas } = useApp();
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
       {/* Table Header */}
-      <div className="p-5 border-b border-slate-200/80 dark:border-b dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h3 className="font-bold text-base text-slate-950 dark:text-white">
             Monitoramento por Turma
           </h3>
         </div>
-        <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 shadow-2xs">
+        <span className="text-xs font-mono font-medium px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700">
           Total: {turmas.length} Turmas Monitoradas
         </span>
       </div>
@@ -25,7 +25,7 @@ export default function TurmaRiskTable() {
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50/80 dark:bg-slate-800/60 text-[11px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider border-b border-slate-200/80 dark:border-b dark:border-slate-800">
+            <tr className="bg-slate-50/80 dark:bg-slate-800/60 text-[11px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
               <th className="py-3 px-5">Código / Turma</th>
               <th className="py-3 px-5">Curso Técnico</th>
               <th className="py-3 px-5">Período</th>
@@ -43,7 +43,7 @@ export default function TurmaRiskTable() {
                 <tr key={turma.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                   <td className="py-4 px-5">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-[#065373]/10 dark:bg-cyan-950/60 text-[#065373] dark:text-cyan-400 flex items-center justify-center font-bold font-mono text-xs">
+                      <div className="w-8 h-8 rounded-lg bg-[#085078]/10 dark:bg-cyan-950/60 text-[#085078] dark:text-cyan-400 flex items-center justify-center font-bold font-mono text-xs">
                         <GraduationCap className="w-4 h-4" />
                       </div>
                       <span className="font-bold font-mono text-slate-950 dark:text-white">{turma.codigo}</span>
@@ -54,7 +54,7 @@ export default function TurmaRiskTable() {
                     <div>{turma.nomeCurso}</div>
                     {turma.instituicao && (
                       <div className="flex items-center gap-1 text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
-                        <Building2 className="w-3 h-3 text-[#065373] dark:text-cyan-400 shrink-0" />
+                        <Building2 className="w-3 h-3 text-[#085078] dark:text-cyan-400 shrink-0" />
                         <span className="truncate max-w-[240px]">{turma.instituicao}</span>
                       </div>
                     )}
@@ -95,12 +95,12 @@ export default function TurmaRiskTable() {
 
                   <td className="py-4 px-5 text-center">
                     {hasCriticalRisk ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200 border border-rose-300 dark:border-rose-800">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-rose-100 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200 border border-rose-300 dark:border-rose-800">
                         <AlertTriangle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
                         <span>{turma.alunosEmRisco} em risco</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800">
                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                         <span>100% Seguro</span>
                       </span>

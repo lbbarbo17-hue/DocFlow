@@ -124,9 +124,9 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col h-full">
+    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col h-full">
       {/* Dossier Header */}
-      <div className="p-4 sm:p-5 border-b border-slate-300 dark:border-b dark:border-slate-700 bg-slate-50/90 dark:bg-slate-900">
+      <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2.5">
@@ -153,7 +153,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
             <button
               type="button"
               onClick={handleBulkDownload}
-              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs"
+              className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs"
             >
               <Download className="w-3.5 h-3.5 text-slate-500 dark:text-slate-300" />
               <span>Exportar Dossiê</span>
@@ -165,8 +165,8 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
       {/* Main Grid: Document List (Left) + Document Details (Right) */}
       <div className="grid grid-cols-1 md:grid-cols-12 flex-1 min-h-[500px]">
         {/* Document List */}
-        <div className="md:col-span-4 border-r border-slate-300 dark:border-r dark:border-slate-700 p-3 space-y-1.5 bg-slate-50/50 dark:bg-slate-950/20">
-          <div className="text-[11px] font-extrabold text-slate-700 dark:text-slate-200 uppercase tracking-wider px-2 py-1">
+        <div className="md:col-span-4 border-r border-slate-200 dark:border-slate-800 p-3 space-y-1.5 bg-slate-50/50 dark:bg-slate-950/20">
+          <div className="text-[11px] font-semibold text-slate-700 dark:text-slate-200 uppercase tracking-wider px-2 py-1">
             Documentos ({student.documentos.length})
           </div>
 
@@ -180,10 +180,10 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                 type="button"
                 onClick={() => setSelectedDoc(doc)}
                 title={`${doc.nomeExibicao} (${b.label})`}
-                className={`w-full text-left p-2.5 rounded-xl border-[1.5px] transition-all duration-200 flex items-center justify-between gap-2.5 cursor-pointer ${
+                className={`w-full text-left p-2.5 rounded-lg border transition-all duration-200 flex items-center justify-between gap-2.5 cursor-pointer ${
                   isSelected
-                    ? 'bg-white dark:bg-slate-800 border-[#065373] dark:border-cyan-400 shadow-sm ring-1 ring-[#065373]'
-                    : 'bg-white dark:bg-slate-900 border-slate-400 dark:border-slate-700 hover:border-slate-500 dark:hover:border-slate-600 shadow-2xs hover:shadow-xs'
+                    ? 'bg-white dark:bg-slate-800 border-[#085078] shadow-sm ring-1 ring-[#085078]'
+                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-2xs hover:shadow-xs'
                 }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -211,7 +211,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                   {selectedDoc.nomeExibicao}
                 </h3>
-                <span className={`text-[10px] px-2 py-0.5 rounded font-medium border ${statusBadge.bg}`}>
+                <span className={`text-[10px] px-2 py-0.5 rounded-md font-medium border ${statusBadge.bg}`}>
                   {statusBadge.label}
                 </span>
               </div>
@@ -222,10 +222,10 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                   type="button"
                   disabled={selectedDoc.status === 'PENDENTE' || isOpeningFile}
                   onClick={() => handleViewDocumentFile(selectedDoc)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs ${
                     selectedDoc.status === 'PENDENTE'
                       ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed border border-slate-200 dark:border-slate-700'
-                      : 'bg-[#065373] hover:bg-[#05435c] text-white'
+                      : 'bg-[#085078] hover:bg-[#063f60] text-white'
                   }`}
                   title={
                     selectedDoc.status === 'PENDENTE'
@@ -304,7 +304,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
             </div>
 
             {/* Document Metadata Details Card */}
-            <div className="bg-slate-50/60 dark:bg-slate-800/60 rounded-xl border border-slate-200/80 dark:border-slate-700/60 p-4 space-y-4 text-xs shadow-2xs">
+            <div className="bg-slate-50/60 dark:bg-slate-800/60 rounded-lg border border-slate-200 dark:border-slate-800 p-4 space-y-4 text-xs shadow-2xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
                   <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Titular</span>
@@ -388,10 +388,10 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
             </div>
 
             {selectedDoc.status !== 'PENDENTE' ? (
-              <div className="p-4 bg-sky-50/60 dark:bg-slate-800/80 rounded-xl border border-sky-200/80 dark:border-slate-700 space-y-3">
+              <div className="p-4 bg-sky-50/60 dark:bg-slate-800/80 rounded-lg border border-slate-200 dark:border-slate-800 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-[#065373]/10 dark:bg-cyan-500/10 flex items-center justify-center text-[#065373] dark:text-cyan-400">
+                    <div className="w-8 h-8 rounded-lg bg-[#085078]/10 dark:bg-cyan-500/10 flex items-center justify-center text-[#085078] dark:text-cyan-400">
                       <FileText className="w-4 h-4" />
                     </div>
                     <div>
@@ -408,7 +408,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                     type="button"
                     disabled={isOpeningFile}
                     onClick={() => handleViewDocumentFile(selectedDoc)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#065373] hover:bg-[#05435c] text-white transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#085078] hover:bg-[#063f60] text-white transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
                   >
                     {isOpeningFile ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -444,7 +444,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
                 )}
               </div>
             ) : (
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 text-center space-y-1">
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 text-center space-y-1">
                 <Clock className="w-5 h-5 text-amber-500 mx-auto" />
                 <p className="font-bold text-xs text-slate-800 dark:text-slate-200">
                   Documento Pendente de Envio

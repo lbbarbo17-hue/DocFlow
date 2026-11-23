@@ -3,10 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { contratosApi, ContratoResponse } from '@/lib/api';
-import PageBanner from '@/components/layout/PageBanner';
+import Link from 'next/link';
 import {
-  FileSignature,
-  UserCheck,
   RefreshCw,
   CheckCircle2,
   Calendar,
@@ -111,26 +109,22 @@ export default function ContratosPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-2 px-2 sm:px-0 animate-fadeIn space-y-6">
-      <PageBanner
-        title="Contratos & TCE"
-        icon={FileSignature}
-        backHref="/coordenador"
-        backLabel="Voltar ao Painel"
-        badge={{
-          label: 'Gestão Contratual',
-          icon: FileSignature,
-        }}
-        action={{
-          label: 'Ver Aprendizes',
-          href: '/coordenador/dossies',
-          icon: UserCheck,
-        }}
-      />
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6 mb-6 flex items-center justify-between shadow-sm">
+        <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
+          Contratos & TCE
+        </h1>
+        <Link
+          href="/coordenador/dossies"
+          className="bg-[#085078] hover:bg-[#063f60] text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors shadow-sm inline-flex items-center gap-2"
+        >
+          Ver Aprendizes
+        </Link>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-5">
+        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-5">
           <div>
-            <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">
               Registrar Novo Contrato / TCE
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -140,14 +134,14 @@ export default function ContratosPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             <div>
-              <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
+              <label className="font-semibold text-slate-900 dark:text-slate-100 block mb-1.5">
                 Estudante
               </label>
               <select
                 required
                 value={contratoAlunoId}
                 onChange={(e) => setContratoAlunoId(e.target.value)}
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all cursor-pointer"
+                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 hover:border-slate-400 rounded-lg px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#085078] focus:bg-white dark:focus:bg-slate-900 transition-all cursor-pointer"
               >
                 <option value="">Selecione o estudante...</option>
                 {allStudentsList.map((s) => (
@@ -159,7 +153,7 @@ export default function ContratosPage() {
             </div>
 
             <div>
-              <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
+              <label className="font-semibold text-slate-900 dark:text-slate-100 block mb-1.5">
                 Número do Contrato / TCE
               </label>
               <input
@@ -168,13 +162,13 @@ export default function ContratosPage() {
                 value={contratoNumero}
                 onChange={(e) => setContratoNumero(e.target.value)}
                 placeholder="Ex: TCE-2026-042 ou APREND-2026-0199"
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 rounded-xl px-3.5 py-2.5 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 hover:border-slate-400 rounded-lg px-3.5 py-2.5 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 font-medium focus:outline-none focus:border-[#085078] focus:bg-white dark:focus:bg-slate-900 transition-all"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
+                <label className="font-semibold text-slate-900 dark:text-slate-100 block mb-1.5">
                   Data de Início
                 </label>
                 <input
@@ -182,12 +176,12 @@ export default function ContratosPage() {
                   required
                   value={contratoInicio}
                   onChange={(e) => setContratoInicio(e.target.value)}
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 hover:border-slate-400 rounded-lg px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#085078] focus:bg-white dark:focus:bg-slate-900 transition-all"
                 />
               </div>
 
               <div>
-                <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5">
+                <label className="font-semibold text-slate-900 dark:text-slate-100 block mb-1.5">
                   Data de Término
                 </label>
                 <input
@@ -195,14 +189,13 @@ export default function ContratosPage() {
                   required
                   value={contratoFim}
                   onChange={(e) => setContratoFim(e.target.value)}
-                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 rounded-xl px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                  className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 hover:border-slate-400 rounded-lg px-3.5 py-2.5 text-slate-950 dark:text-white font-medium focus:outline-none focus:border-[#085078] focus:bg-white dark:focus:bg-slate-900 transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="font-bold text-slate-900 dark:text-slate-100 block mb-1.5 flex items-center gap-1.5">
-                <DollarSign className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <label className="font-semibold text-slate-900 dark:text-slate-100 block mb-1.5">
                 Bolsa-Auxílio (R$)
               </label>
               <input
@@ -211,7 +204,7 @@ export default function ContratosPage() {
                 value={contratoBolsa}
                 onChange={(e) => setContratoBolsa(e.target.value)}
                 placeholder="Ex: 1650.00"
-                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-slate-400 rounded-xl px-3.5 py-2.5 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 font-medium focus:outline-none focus:border-[#065373] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 hover:border-slate-400 rounded-lg px-3.5 py-2.5 font-mono text-slate-950 dark:text-white placeholder:text-slate-500 font-medium focus:outline-none focus:border-[#085078] focus:bg-white dark:focus:bg-slate-900 transition-all"
               />
             </div>
 
@@ -219,7 +212,7 @@ export default function ContratosPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full px-7 py-3 text-xs font-extrabold text-white bg-gradient-to-r from-[#065373] to-[#0284c7] hover:from-[#05435c] hover:to-sky-600 rounded-2xl shadow-lg shadow-[#065373]/25 hover:shadow-xl transition-all cursor-pointer disabled:opacity-50"
+                className="w-full px-6 py-2.5 text-sm font-medium text-white bg-[#085078] hover:bg-[#063f60] rounded-lg shadow-sm transition-colors cursor-pointer disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center gap-2">
@@ -234,10 +227,10 @@ export default function ContratosPage() {
           </form>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-4">
+        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">
                 Contratos Registrados
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -248,7 +241,7 @@ export default function ContratosPage() {
               type="button"
               onClick={loadContratos}
               disabled={isLoading}
-              className="p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-2 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               title="Recarregar contratos"
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -257,7 +250,7 @@ export default function ContratosPage() {
 
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-6 h-6 animate-spin text-[#065373] dark:text-cyan-400" />
+              <Loader2 className="w-6 h-6 animate-spin text-[#085078] dark:text-cyan-400" />
             </div>
           ) : contratos.length === 0 ? (
             <div className="text-center py-10 text-xs text-slate-500 dark:text-slate-400">
@@ -271,12 +264,12 @@ export default function ContratosPage() {
                 return (
                   <div
                     key={c.id}
-                    className={`p-3.5 rounded-2xl border text-xs ${
+                    className={`p-3.5 rounded-lg border text-xs bg-white dark:bg-slate-900 ${
                       expired
-                        ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800'
+                        ? 'border-rose-500/70 dark:border-rose-500/70'
                         : expiring
-                        ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800'
-                        : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'
+                        ? 'border-amber-500/70 dark:border-amber-500/70'
+                        : 'border-slate-200 dark:border-slate-800'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -289,7 +282,7 @@ export default function ContratosPage() {
                         </p>
                       </div>
                       <span
-                        className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                        className={`shrink-0 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${
                           expired
                             ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
                             : expiring

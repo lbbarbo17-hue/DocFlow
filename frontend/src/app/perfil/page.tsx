@@ -19,7 +19,6 @@ import {
   Sparkles,
   Save,
   KeyRound,
-  IdCard,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -173,17 +172,16 @@ export default function PerfilPage() {
   return (
     <div className="space-y-6 pb-12 animate-fadeIn max-w-6xl mx-auto">
       {/* CABEÇALHO DA PÁGINA */}
-      <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
-          <IdCard className="w-6 h-6 text-[#085078] dark:text-cyan-400" />
-          <span>Meu Perfil & Configurações</span>
+      <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+          Meu Perfil & Configurações
         </h1>
       </div>
 
       {/* GRID PRINCIPAL: RESUMO DO PERFIL À ESQUERDA + FORMULÁRIO À DIREITA */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* COLUNA ESQUERDA: CARD VISUAL DE FOTO E IDENTIFICAÇÃO (4 colunas) */}
-        <div className="lg:col-span-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 text-center space-y-5">
+        <div className="lg:col-span-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm p-6 text-center space-y-5">
           {/* Avatar com moldura e botão de câmera */}
           <div className="relative inline-block mx-auto group">
             <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-[#085078] text-white font-bold text-3xl border-4 border-white dark:border-slate-800 shadow-lg flex items-center justify-center mx-auto relative">
@@ -233,7 +231,7 @@ export default function PerfilPage() {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-xs transition-colors cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-xs transition-colors cursor-pointer"
             >
               <Camera className="w-4 h-4 text-slate-500 dark:text-slate-400" />
               <span>Alterar Foto de Perfil</span>
@@ -243,7 +241,7 @@ export default function PerfilPage() {
               <button
                 type="button"
                 onClick={handleRemovePhoto}
-                className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Remover Foto Atual</span>
@@ -257,7 +255,7 @@ export default function PerfilPage() {
               Vínculo Registrado
             </span>
 
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-2.5 text-xs">
+            <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-2.5 text-xs">
               {currentRole === 'ESTUDANTE' ? (
                 <>
                   <div className="flex items-center justify-between text-xs pb-1.5 border-b border-slate-200 dark:border-slate-700/60">
@@ -300,7 +298,7 @@ export default function PerfilPage() {
         </div>
 
         {/* COLUNA DIREITA: FORMULÁRIO COM ABAS (8 colunas) */}
-        <div className="lg:col-span-8 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+        <div className="lg:col-span-8 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
           {/* Navegação por Abas */}
           <div className="flex items-center border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 px-4 sm:px-6">
             <button
@@ -348,7 +346,7 @@ export default function PerfilPage() {
                       value={nome}
                       onChange={(e) => setNome(e.target.value)}
                       placeholder="Seu nome completo"
-                      className="w-full px-4 py-3 rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#085078] focus:border-transparent transition-all font-medium"
+                      className="w-full px-4 py-3 rounded-lg text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#085078] focus:border-transparent transition-all font-medium"
                       required
                     />
                   </div>
@@ -364,7 +362,7 @@ export default function PerfilPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="seu.email@dominio.com"
-                      className="w-full px-4 py-3 rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#085078] focus:border-transparent transition-all font-medium"
+                      className="w-full px-4 py-3 rounded-lg text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#085078] focus:border-transparent transition-all font-medium"
                       required
                     />
                   </div>
@@ -381,7 +379,7 @@ export default function PerfilPage() {
                       onChange={(e) => setTelefone(formatPhone(e.target.value))}
                       placeholder="(11) 98765-4321"
                       maxLength={15}
-                      className="w-full px-4 py-3 rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#085078] focus:border-transparent transition-all font-medium"
+                      className="w-full px-4 py-3 rounded-lg text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#085078] focus:border-transparent transition-all font-medium"
                     />
                   </div>
 
@@ -397,7 +395,7 @@ export default function PerfilPage() {
                       onChange={(e) => setCpf(formatCPF(e.target.value))}
                       placeholder="000.000.000-00"
                       maxLength={14}
-                      className="w-full px-4 py-3 rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#085078] focus:border-transparent transition-all font-medium"
+                      className="w-full px-4 py-3 rounded-lg text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#085078] focus:border-transparent transition-all font-medium"
                     />
                   </div>
 
@@ -416,7 +414,7 @@ export default function PerfilPage() {
                           ? 'Jovem Aprendiz'
                           : 'Coordenador Acadêmico / RH'
                       }
-                      className="w-full px-4 py-3 rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#085078] focus:border-transparent transition-all font-medium"
+                      className="w-full px-4 py-3 rounded-lg text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#085078] focus:border-transparent transition-all font-medium"
                     />
                   </div>
                 </div>
@@ -426,7 +424,7 @@ export default function PerfilPage() {
                   <button
                     type="submit"
                     disabled={isSaving}
-                    className="bg-[#085078] hover:bg-[#063c5a] text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 text-xs"
+                    className="bg-[#085078] hover:bg-[#063c5a] text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 text-xs"
                   >
                     <Save className="w-4 h-4" />
                     <span>{isSaving ? 'Salvando Alterações...' : 'Salvar Alterações do Perfil'}</span>
@@ -436,7 +434,7 @@ export default function PerfilPage() {
             ) : (
               /* ABA DE SEGURANÇA E SENHA */
               <form onSubmit={handleSavePassword} className="space-y-5">
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 text-xs flex items-start gap-3">
+                <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 text-xs flex items-start gap-3">
                   <Lock className="w-5 h-5 shrink-0 text-[#085078] dark:text-cyan-400 mt-0.5" />
                   <div className="leading-relaxed">
                     <span className="font-bold text-slate-900 dark:text-white block mb-0.5">
@@ -447,14 +445,14 @@ export default function PerfilPage() {
                 </div>
 
                 {passwordError && (
-                  <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-bold flex items-center gap-2.5">
+                  <div className="p-3.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs font-bold flex items-center gap-2.5">
                     <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
                     <span>{passwordError}</span>
                   </div>
                 )}
 
                 {passwordSuccess && (
-                  <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-2.5">
+                  <div className="p-3.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-2.5">
                     <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
                     <span>{passwordSuccess}</span>
                   </div>
@@ -471,7 +469,7 @@ export default function PerfilPage() {
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       placeholder="Digite sua senha atual de acesso"
-                      className="w-full px-4 py-3 pr-10 rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#085078] focus:border-transparent transition-all font-medium"
+                      className="w-full px-4 py-3 pr-10 rounded-lg text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#085078] focus:border-transparent transition-all font-medium"
                       required
                     />
                     <button
@@ -495,7 +493,7 @@ export default function PerfilPage() {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Nova senha (mínimo 6 caracteres)"
-                      className="w-full px-4 py-3 pr-10 rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#085078] focus:border-transparent transition-all font-medium"
+                      className="w-full px-4 py-3 pr-10 rounded-lg text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#085078] focus:border-transparent transition-all font-medium"
                       required
                     />
                     <button
@@ -519,7 +517,7 @@ export default function PerfilPage() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Repita a nova combinação de senha"
-                      className="w-full px-4 py-3 pr-10 rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#085078] focus:border-transparent transition-all font-medium"
+                      className="w-full px-4 py-3 pr-10 rounded-lg text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#085078] focus:border-transparent transition-all font-medium"
                       required
                     />
                     <button
@@ -553,7 +551,7 @@ export default function PerfilPage() {
                   <button
                     type="submit"
                     disabled={isSaving}
-                    className="bg-[#085078] hover:bg-[#063c5a] text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 text-xs"
+                    className="bg-[#085078] hover:bg-[#063c5a] text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 text-xs"
                   >
                     <Lock className="w-4 h-4" />
                     <span>{isSaving ? 'Atualizando...' : 'Atualizar Minha Senha'}</span>

@@ -39,7 +39,7 @@ export default function StudentHealthCard({ onUploadClick }: StudentHealthCardPr
   const sortedDocs = [...documents].sort((a, b) => getPriorityScore(a) - getPriorityScore(b));
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-6 shadow-xs flex flex-col justify-between transition-colors duration-200 gap-5">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-lg p-6 shadow-xs flex flex-col justify-between transition-colors duration-200 gap-5">
       {/* 1. Topo: Percentual com Destaque Forte + Barra de Progresso com Trilho Escuro */}
       <div className="space-y-3.5">
         <div className="flex items-center justify-between">

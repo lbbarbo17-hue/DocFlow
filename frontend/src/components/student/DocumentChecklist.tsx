@@ -156,7 +156,7 @@ export default function DocumentChecklist() {
       {/* Document Cards List */}
       <div className="space-y-3">
         {filteredDocs.length === 0 ? (
-          <div className="bg-white dark:bg-slate-900 rounded-xl p-8 border border-slate-200 dark:border-slate-800 text-center space-y-2">
+          <div className="bg-white dark:bg-slate-900 rounded-lg p-8 border border-slate-200 dark:border-slate-800 text-center space-y-2">
             <FileText className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto" />
             <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Nenhum documento encontrado</p>
             <p className="text-xs text-slate-500 dark:text-slate-400">Tente ajustar seus filtros ou termo de busca.</p>
@@ -201,7 +201,7 @@ export default function DocumentChecklist() {
             return (
               <div
                 key={doc.id}
-                className={`rounded-xl bg-white dark:bg-slate-900 border ${statusBorder} shadow-sm overflow-hidden transition-all hover:shadow-md`}
+                className={`rounded-lg bg-white dark:bg-slate-900 border ${statusBorder} shadow-sm overflow-hidden transition-all hover:shadow-md`}
               >
                 {/* 1. Cabeçalho Clicável (Estado Fechado / Base: Apenas Nome e Chevron) */}
                 <div
@@ -376,7 +376,7 @@ export default function DocumentChecklist() {
 
                       {/* Motivo de recusa ou observações da instituição (caso exista) */}
                       {doc.justificativaRecusa && (
-                        <div className="p-3 bg-rose-50/90 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/70 rounded-xl text-xs space-y-1">
+                        <div className="p-3 bg-rose-50/90 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/70 rounded-lg text-xs space-y-1">
                           <div className="flex items-center gap-1.5 font-bold text-rose-700 dark:text-rose-300">
                             <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
                             <span>Motivo da recusa / Correção necessária:</span>
@@ -389,7 +389,7 @@ export default function DocumentChecklist() {
 
                       {/* Observações da instituição (se houver) */}
                       {doc.observacaoValidade && (
-                        <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-xl text-xs space-y-1">
+                        <div className="p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-lg text-xs space-y-1">
                           <div className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-300">
                             <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
                             <span>Observações da instituição:</span>

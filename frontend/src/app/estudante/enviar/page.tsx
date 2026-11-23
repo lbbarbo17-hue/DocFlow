@@ -252,29 +252,24 @@ export default function AdicionarDocumentoPage() {
 
   return (
     <div className="space-y-6 pb-12 animate-fadeIn">
-      {/* 1. Cabeçalho da Página (Estilo Dashboard / Checklist) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs transition-colors duration-200">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <UploadCloud className="w-6 h-6 text-[#085078] dark:text-cyan-400 shrink-0" />
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight truncate">
-            Adicionar e Enviar Documentos
-          </h1>
-        </div>
+      {/* 1. Header Card Banner Padrão */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6 mb-6 flex items-center justify-between shadow-sm">
+        <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
+          Adicionar e Enviar Documentos
+        </h1>
 
-        <div className="flex items-center gap-3 shrink-0">
-          <Link
-            href="/estudante/checklist"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 dark:hover:text-cyan-400 hover:text-[#085078] transition-all shadow-xs cursor-pointer active:scale-95"
-          >
-            <span>← Ver Meus Documentos</span>
-          </Link>
-        </div>
+        <Link
+          href="/estudante/checklist"
+          className="bg-[#085078] hover:bg-[#063f60] text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors shadow-sm"
+        >
+          ← Ver Meus Documentos
+        </Link>
       </div>
 
       {/* 2. Tela de Sucesso após Envio */}
       {uploadSuccess ? (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-emerald-200 dark:border-emerald-800/60 shadow-xs text-center space-y-5 animate-fadeIn">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-xs">
+        <div className="bg-white dark:bg-slate-900 rounded-lg p-8 border border-emerald-200 dark:border-emerald-800/60 shadow-xs text-center space-y-5 animate-fadeIn">
+          <div className="w-16 h-16 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-xs">
             <CheckCircle2 className="w-8 h-8" />
           </div>
           <div className="space-y-1.5 max-w-md mx-auto">
@@ -286,7 +281,7 @@ export default function AdicionarDocumentoPage() {
             </p>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/80 max-w-lg mx-auto border border-slate-200 dark:border-slate-700 text-left font-mono text-xs space-y-2">
+          <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/80 max-w-lg mx-auto border border-slate-200 dark:border-slate-700 text-left font-mono text-xs space-y-2">
             <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
               <span>Arquivo:</span>
               <span className="font-bold text-slate-800 dark:text-white truncate max-w-[260px]">{selectedFile?.name}</span>
@@ -308,13 +303,13 @@ export default function AdicionarDocumentoPage() {
             <button
               type="button"
               onClick={handleResetForm}
-              className="px-5 py-2.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors"
+              className="px-5 py-2.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors"
             >
               Enviar Outro Documento
             </button>
             <Link
               href="/estudante/checklist"
-              className="px-6 py-2.5 rounded-xl text-xs font-bold bg-[#085078] hover:bg-[#063c5a] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] shadow-sm transition-all flex items-center gap-2"
+              className="px-6 py-2.5 rounded-lg text-xs font-bold bg-[#085078] hover:bg-[#063f60] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] shadow-sm transition-all flex items-center gap-2"
             >
               <span>Acompanhar em Meus Documentos</span>
               <ArrowRight className="w-4 h-4" />
@@ -326,7 +321,7 @@ export default function AdicionarDocumentoPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Coluna Esquerda (7 colunas): 1. Selecionar Documento */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-xs space-y-5 transition-colors">
+            <div className="bg-white dark:bg-slate-900 rounded-lg p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-xs space-y-5 transition-colors">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <FilePlus2 className="w-4 h-4 text-[#085078] dark:text-cyan-400" />
@@ -335,13 +330,13 @@ export default function AdicionarDocumentoPage() {
               </div>
 
               {/* Toggle de Categoria: Padrão Tabs Unificadas */}
-              <div className="p-1 bg-slate-100 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/50 grid grid-cols-2 gap-1">
+              <div className="p-1 bg-slate-100 dark:bg-slate-800/60 rounded-lg border border-slate-200 dark:border-slate-700/50 grid grid-cols-2 gap-1">
                 <button
                   type="button"
                   onClick={() => setIsSupplementary(false)}
                   className={`h-9 px-3 rounded-lg text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                     !isSupplementary
-                      ? 'bg-[#085078] hover:bg-[#063c5a] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] dark:text-white shadow-sm font-bold'
+                      ? 'bg-[#085078] hover:bg-[#063f60] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] dark:text-white shadow-sm font-bold'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 font-medium'
                   }`}
                 >
@@ -352,7 +347,7 @@ export default function AdicionarDocumentoPage() {
                   onClick={() => setIsSupplementary(true)}
                   className={`h-9 px-3 rounded-lg text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                     isSupplementary
-                      ? 'bg-[#085078] hover:bg-[#063c5a] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] dark:text-white shadow-sm font-bold'
+                      ? 'bg-[#085078] hover:bg-[#063f60] text-white dark:bg-[#085078] dark:hover:bg-[#063c5a] dark:text-white shadow-sm font-bold'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 font-medium'
                   }`}
                 >
@@ -406,7 +401,7 @@ export default function AdicionarDocumentoPage() {
                       <div
                         key={doc.id}
                         onClick={() => setSelectedDocId(doc.id)}
-                        className={`p-3.5 rounded-xl border border-l-4 cursor-pointer transition-all ${statusBorder} ${
+                        className={`p-3.5 rounded-lg border border-l-4 cursor-pointer transition-all ${statusBorder} ${
                           isSelected
                             ? 'bg-slate-100 dark:bg-slate-800/90 border-slate-300 dark:border-slate-700 shadow-2xs'
                             : 'bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50/50 dark:hover:bg-slate-800/40'
@@ -494,7 +489,7 @@ export default function AdicionarDocumentoPage() {
                       <div
                         key={opt.nomeExibicao}
                         onClick={() => setSelectedSupplementaryIndex(idx)}
-                        className={`p-3.5 rounded-xl border border-l-4 cursor-pointer transition-all ${statusBorder} ${
+                        className={`p-3.5 rounded-lg border border-l-4 cursor-pointer transition-all ${statusBorder} ${
                           isSelected
                             ? 'bg-slate-100 dark:bg-slate-800/90 border-slate-300 dark:border-slate-700 shadow-2xs'
                             : 'bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50/50 dark:hover:bg-slate-800/40'
@@ -528,7 +523,7 @@ export default function AdicionarDocumentoPage() {
 
           {/* Coluna Direita (5 colunas): 2. Anexar Arquivo & Pré-visualização */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-xs space-y-5 transition-colors">
+            <div className="bg-white dark:bg-slate-900 rounded-lg p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-xs space-y-5 transition-colors">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <Upload className="w-4 h-4 text-[#085078] dark:text-cyan-400" />
@@ -545,7 +540,7 @@ export default function AdicionarDocumentoPage() {
                     onDragOver={handleDrag}
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+                    className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all ${
                       dragActive
                         ? 'border-[#085078] dark:border-cyan-400 bg-[#085078]/5 dark:bg-cyan-500/10 scale-[0.99]'
                         : 'border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/40 hover:border-[#085078] dark:hover:border-cyan-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/70'
@@ -563,7 +558,7 @@ export default function AdicionarDocumentoPage() {
                       }}
                     />
 
-                    <div className="w-14 h-14 mx-auto rounded-2xl bg-[#085078]/10 dark:bg-cyan-500/10 flex items-center justify-center text-[#085078] dark:text-cyan-400 mb-3.5">
+                    <div className="w-14 h-14 mx-auto rounded-lg bg-[#085078]/10 dark:bg-cyan-500/10 flex items-center justify-center text-[#085078] dark:text-cyan-400 mb-3.5">
                       <UploadCloud className="w-7 h-7 text-[#085078] dark:text-cyan-400" />
                     </div>
                     <p className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">
@@ -591,7 +586,7 @@ export default function AdicionarDocumentoPage() {
                     <button
                       type="button"
                       onClick={() => cameraInputRef.current?.click()}
-                      className="flex items-center justify-center gap-2 p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 font-semibold text-xs sm:text-sm transition-all active:scale-95 shadow-2xs"
+                      className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 font-semibold text-xs sm:text-sm transition-all active:scale-95 shadow-2xs"
                     >
                       <Camera className="w-4 h-4 text-slate-600 dark:text-slate-400" />
                       <span>Tirar Foto com a Câmera</span>
@@ -600,7 +595,7 @@ export default function AdicionarDocumentoPage() {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex items-center justify-center gap-2 p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 font-semibold text-xs sm:text-sm transition-all active:scale-95 shadow-2xs"
+                      className="flex items-center justify-center gap-2 p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 font-semibold text-xs sm:text-sm transition-all active:scale-95 shadow-2xs"
                     >
                       <FolderOpen className="w-4 h-4 text-slate-600 dark:text-slate-400" />
                       <span>Buscar na Galeria / Pastas</span>
@@ -610,7 +605,7 @@ export default function AdicionarDocumentoPage() {
               ) : (
                 /* Arquivo Selecionado e Painel de Pré-visualização */
                 <div className="space-y-4">
-                  <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 flex items-center justify-between gap-3">
+                  <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-9 h-9 rounded-lg bg-[#085078]/10 dark:bg-cyan-500/10 text-[#085078] dark:text-cyan-400 flex items-center justify-center font-bold shrink-0">
                         <FileText className="w-5 h-5" />
@@ -638,7 +633,7 @@ export default function AdicionarDocumentoPage() {
                   </div>
 
                   {/* Frame de Pré-visualização */}
-                  <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-100 dark:bg-slate-800/80 p-3.5 space-y-2.5">
+                  <div className="border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-100 dark:bg-slate-800/80 p-3.5 space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
                         <Eye className="w-4 h-4 text-[#085078] dark:text-cyan-400" />
@@ -696,7 +691,7 @@ export default function AdicionarDocumentoPage() {
                         </div>
                       ) : (
                         <div className="text-center p-6 space-y-2">
-                          <div className="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto shadow-xs">
+                          <div className="w-12 h-12 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto shadow-xs">
                             <FileText className="w-6 h-6" />
                           </div>
                           <p className="font-bold text-xs text-slate-800 dark:text-white">
@@ -711,7 +706,7 @@ export default function AdicionarDocumentoPage() {
                   </div>
 
                   {/* Pipeline de Segurança & Integridade */}
-                  <div className="p-4 rounded-xl bg-slate-900 dark:bg-slate-950 text-slate-200 space-y-3 font-mono text-xs shadow-md border border-slate-800">
+                  <div className="p-4 rounded-lg bg-slate-900 dark:bg-slate-950 text-slate-200 space-y-3 font-mono text-xs shadow-md border border-slate-800">
                     <div className="flex items-center justify-between border-b border-slate-800 pb-2 text-[11px] text-cyan-400 font-bold uppercase">
                       <div className="flex items-center gap-1.5">
                         <Cpu className="w-4 h-4" />
@@ -757,7 +752,7 @@ export default function AdicionarDocumentoPage() {
 
               {/* Mensagem de Erro */}
               {errorMessage && (
-                <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 rounded-xl text-xs text-rose-800 dark:text-rose-200 flex items-center gap-2">
+                <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 rounded-lg text-xs text-rose-800 dark:text-rose-200 flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
                   <span>{errorMessage}</span>
                 </div>
@@ -769,7 +764,7 @@ export default function AdicionarDocumentoPage() {
                   type="button"
                   disabled={!selectedFile || isProcessing || pipelineStep < 2}
                   onClick={handleSubmit}
-                  className="w-full py-3 rounded-xl text-sm font-bold text-white bg-[#085078] hover:bg-[#063c5a] dark:bg-[#085078] dark:hover:bg-[#063c5a] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer"
+                  className="w-full py-3 rounded-lg text-sm font-bold text-white bg-[#085078] hover:bg-[#063c5a] dark:bg-[#085078] dark:hover:bg-[#063c5a] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 active:scale-98 cursor-pointer"
                 >
                   {isProcessing ? (
                     <>

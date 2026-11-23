@@ -210,8 +210,8 @@ export default function Login() {
 
   return (
     <div className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-12 p-0 m-0 font-sans selection:bg-[#085078] selection:text-white">
-      {/* LADO ESQUERDO: Apresentação Institucional em Tela Cheia (lg:col-span-7) */}
-      <div className="lg:col-span-7 bg-[#085078] p-8 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between relative overflow-hidden text-white">
+      {/* LADO ESQUERDO: Apresentação Institucional em Tela Cheia (hidden lg:flex lg:col-span-7) */}
+      <div className="hidden lg:flex lg:col-span-7 bg-[#085078] p-8 sm:p-12 lg:p-16 xl:p-20 flex-col justify-between relative overflow-hidden text-white">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none" />
 
         {/* Topo: Logótipo Oficial DocFlow */}
@@ -237,9 +237,19 @@ export default function Login() {
         </div>
       </div>
 
-      {/* LADO DIREITO: Formulário de Alto Contraste e Legibilidade (lg:col-span-5) */}
-      <div className="lg:col-span-5 bg-[#070c18] p-8 sm:p-12 lg:p-16 flex flex-col justify-center items-center">
+      {/* LADO DIREITO: Formulário de Alto Contraste e Legibilidade (w-full px-4 lg:col-span-5) */}
+      <div className="w-full lg:col-span-5 bg-[#070c18] px-4 py-8 sm:p-12 lg:p-16 min-h-screen lg:min-h-0 flex flex-col justify-center items-center">
         <div className="max-w-md w-full space-y-7">
+          {/* Topo Mobile: Logótipo DocFlow em telas pequenas */}
+          <div className="flex items-center gap-3 lg:hidden">
+            <div className="w-10 h-10 rounded-xl bg-[#085078] border border-white/20 flex items-center justify-center shadow-inner">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <span className="text-2xl font-bold tracking-tight text-white">DocFlow</span>
+          </div>
+
           <div className="space-y-2">
             <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
               Entrar na sua conta
@@ -274,7 +284,7 @@ export default function Login() {
                   placeholder="seu.email@exemplo.com"
                   className={`w-full px-4 py-3.5 bg-[#1e293b] border ${
                     emailError ? 'border-rose-500 focus:ring-rose-500' : 'border-[#334155] focus:ring-[#085078]'
-                  } rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
+                  } rounded-xl text-white placeholder-slate-500 text-base focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
                 />
                 <span className="absolute right-3.5 top-3.5 text-slate-400 pointer-events-none">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -315,7 +325,7 @@ export default function Login() {
                   placeholder="••••••••••••"
                   className={`w-full px-4 py-3.5 bg-[#1e293b] border ${
                     passwordError ? 'border-rose-500 focus:ring-rose-500' : 'border-[#334155] focus:ring-[#085078]'
-                  } rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:border-transparent transition-all pr-12`}
+                  } rounded-xl text-white placeholder-slate-500 text-base focus:outline-none focus:ring-2 focus:border-transparent transition-all pr-12`}
                 />
                 <button
                   type="button"

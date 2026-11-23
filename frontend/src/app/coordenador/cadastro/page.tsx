@@ -4,18 +4,15 @@ import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { TipoVinculo } from '@/lib/types';
+import Link from 'next/link';
 import { alunosApi, contratosApi, authApi, getTenantId } from '@/lib/api';
 import { scrollToTop } from '@/lib/utils';
-import PageBanner from '@/components/layout/PageBanner';
 import {
   UserPlus,
-  UserCheck,
   FolderPlus,
   Building2,
   Check,
-  ShieldCheck,
   CalendarDays,
-  DollarSign,
   KeyRound,
   Eye,
   EyeOff,
@@ -318,37 +315,35 @@ export default function CadastroPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-4 px-4 sm:px-6 animate-fadeIn space-y-6">
-      <PageBanner
-        title="Central de Cadastros"
-        icon={UserPlus}
-        backHref="/coordenador"
-        backLabel="Voltar ao Painel"
-        badge={{
-          label: 'Ambiente da Coordenação',
-          icon: ShieldCheck,
-        }}
-        action={{
-          label: 'Ver Aprendizes',
-          href: '/coordenador/dossies',
-          icon: UserCheck,
-        }}
-      />
+      {/* Card Banner Padrão */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6 mb-6 flex items-center justify-between shadow-sm">
+        <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
+          Central de Cadastros
+        </h1>
+
+        <Link
+          href="/coordenador/dossies"
+          className="bg-[#085078] hover:bg-[#063f60] text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors shadow-sm"
+        >
+          Ver Aprendizes
+        </Link>
+      </div>
 
       <div className="flex justify-center">
-        <div className="inline-flex bg-slate-100 dark:bg-slate-800/60 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm max-w-xl w-full">
+        <div className="inline-flex bg-slate-100 dark:bg-slate-800/60 p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm max-w-xl w-full">
           <button
             type="button"
             onClick={() => {
               setActiveTab('ALUNO');
               scrollToTop('instant');
             }}
-            className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === 'ALUNO'
-                ? 'bg-white dark:bg-slate-900 text-[#0284c7] dark:text-[#00b4d8] shadow-xs border border-slate-200 dark:border-slate-700'
+                ? 'bg-white dark:bg-slate-900 text-[#085078] dark:text-cyan-400 shadow-xs border border-slate-200 dark:border-slate-700'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
             }`}
           >
-            <UserPlus className="w-4 h-4 text-[#0284c7] dark:text-[#00b4d8]" />
+            <UserPlus className="w-4 h-4 text-[#085078] dark:text-cyan-400" />
             <span>Estudante</span>
           </button>
 
@@ -358,13 +353,13 @@ export default function CadastroPage() {
               setActiveTab('TURMA');
               scrollToTop('instant');
             }}
-            className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === 'TURMA'
-                ? 'bg-white dark:bg-slate-900 text-[#0284c7] dark:text-[#00b4d8] shadow-xs border border-slate-200 dark:border-slate-700'
+                ? 'bg-white dark:bg-slate-900 text-[#085078] dark:text-cyan-400 shadow-xs border border-slate-200 dark:border-slate-700'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
             }`}
           >
-            <FolderPlus className="w-4 h-4 text-[#0284c7] dark:text-[#00b4d8]" />
+            <FolderPlus className="w-4 h-4 text-[#085078] dark:text-cyan-400" />
             <span>Turma</span>
           </button>
 
@@ -374,19 +369,19 @@ export default function CadastroPage() {
               setActiveTab('CONTRATO');
               scrollToTop('instant');
             }}
-            className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === 'CONTRATO'
-                ? 'bg-white dark:bg-slate-900 text-[#0284c7] dark:text-[#00b4d8] shadow-xs border border-slate-200 dark:border-slate-700'
+                ? 'bg-white dark:bg-slate-900 text-[#085078] dark:text-cyan-400 shadow-xs border border-slate-200 dark:border-slate-700'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
             }`}
           >
-            <FileSignature className="w-4 h-4 text-[#0284c7] dark:text-[#00b4d8]" />
+            <FileSignature className="w-4 h-4 text-[#085078] dark:text-cyan-400" />
             <span>Contrato / TCE</span>
           </button>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         {activeTab === 'ALUNO' && (
           <form onSubmit={handleAlunoSubmit}>
             <div className="px-6 sm:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
@@ -405,7 +400,7 @@ export default function CadastroPage() {
             </div>
 
             <div className="p-6 sm:p-8 space-y-6">
-              <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-xl border border-slate-200/80 dark:border-slate-800">
+              <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-200/80 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setTipoVinculo('APRENDIZ')}
@@ -415,7 +410,7 @@ export default function CadastroPage() {
                       : 'text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white'
                   }`}
                 >
-                  <GraduationCap className="w-4 h-4 text-[#065373] dark:text-cyan-400" />
+                  <GraduationCap className="w-4 h-4 text-[#085078] dark:text-cyan-400" />
                   <span>Jovem Aprendiz</span>
                 </button>
                 <button
@@ -427,7 +422,7 @@ export default function CadastroPage() {
                       : 'text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white'
                   }`}
                 >
-                  <Briefcase className="w-4 h-4 text-[#065373] dark:text-cyan-400" />
+                  <Briefcase className="w-4 h-4 text-[#085078] dark:text-cyan-400" />
                   <span>Estágio (TCE)</span>
                 </button>
               </div>
@@ -440,7 +435,7 @@ export default function CadastroPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2 space-y-1">
                     <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      Nome Completo <span className="text-rose-500">*</span>
+                      Nome Completo
                     </label>
                     <input
                       type="text"
@@ -448,13 +443,13 @@ export default function CadastroPage() {
                       value={nome}
                       onChange={(e) => setNome(e.target.value)}
                       placeholder="Nome do estudante"
-                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                     />
                   </div>
 
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      CPF <span className="text-rose-500">*</span>
+                      CPF
                     </label>
                     <input
                       type="text"
@@ -463,13 +458,13 @@ export default function CadastroPage() {
                       onChange={(e) => setCpf(formatCPF(e.target.value))}
                       placeholder="000.000.000-00"
                       maxLength={14}
-                      className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                      className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                     />
                   </div>
 
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      Matrícula <span className="text-rose-500">*</span>
+                      Matrícula
                     </label>
                     <input
                       type="text"
@@ -477,7 +472,7 @@ export default function CadastroPage() {
                       value={matricula}
                       onChange={(e) => setMatricula(e.target.value)}
                       placeholder="Ex: 2026-DS-0199"
-                      className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                      className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                     />
                   </div>
 
@@ -492,7 +487,7 @@ export default function CadastroPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="email@exemplo.com"
-                        className="w-full h-10 pl-9 pr-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                        className="w-full h-10 pl-9 pr-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                       />
                     </div>
                   </div>
@@ -505,7 +500,7 @@ export default function CadastroPage() {
                       <button
                         type="button"
                         onClick={() => setShowSenha(!showSenha)}
-                        className="text-[11px] text-[#065373] dark:text-cyan-400 hover:underline flex items-center gap-1 cursor-pointer"
+                        className="text-[11px] text-[#085078] dark:text-cyan-400 hover:underline flex items-center gap-1 cursor-pointer"
                       >
                         {showSenha ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                         <span>{showSenha ? 'Ocultar' : 'Exibir'}</span>
@@ -518,7 +513,7 @@ export default function CadastroPage() {
                         value={senha}
                         onChange={(e) => setSenha(e.target.value)}
                         placeholder="Padrão: DocFlow@2026"
-                        className="w-full h-10 pl-9 pr-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all font-mono"
+                        className="w-full h-10 pl-9 pr-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all font-mono"
                       />
                     </div>
                     {senha.length > 0 && (
@@ -569,7 +564,7 @@ export default function CadastroPage() {
                     <select
                       value={turmaSelect}
                       onChange={(e) => handleTurmaChange(e.target.value)}
-                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
+                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 cursor-pointer"
                     >
                       <optgroup label="Turmas Disponíveis">
                         {availableTurmasList.map((t) => (
@@ -592,8 +587,8 @@ export default function CadastroPage() {
                           setCustomTurma(e.target.value);
                           setCurso(e.target.value);
                         }}
-                        placeholder="Código e Nome da Turma (Ex: DS-2026 / Redes) *"
-                        className="w-full h-10 px-3 text-xs bg-white dark:bg-slate-900 border border-[#065373] dark:border-cyan-400 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] mt-2"
+                        placeholder="Código e Nome da Turma (Ex: DS-2026 / Redes)"
+                        className="w-full h-10 px-3 text-xs bg-white dark:bg-slate-900 border border-[#085078] dark:border-cyan-400 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] mt-2"
                       />
                     )}
                   </div>
@@ -606,7 +601,7 @@ export default function CadastroPage() {
                       type="date"
                       value={dataAdmissao}
                       onChange={(e) => setDataAdmissao(e.target.value)}
-                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400"
                     />
                   </div>
 
@@ -617,7 +612,7 @@ export default function CadastroPage() {
                     <select
                       value={empresaSelect}
                       onChange={(e) => setEmpresaSelect(e.target.value)}
-                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
+                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 cursor-pointer"
                     >
                       <optgroup label="Empresas Parceiras do Grupo">
                         {companiesList.map((empNome) => (
@@ -637,8 +632,8 @@ export default function CadastroPage() {
                         required
                         value={customEmpresa}
                         onChange={(e) => setCustomEmpresa(e.target.value)}
-                        placeholder="Digite a Razão Social da Empresa Concedente *"
-                        className="w-full h-10 px-3 text-xs bg-white dark:bg-slate-900 border border-[#065373] dark:border-cyan-400 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] mt-2"
+                        placeholder="Digite a Razão Social da Empresa Concedente"
+                        className="w-full h-10 px-3 text-xs bg-white dark:bg-slate-900 border border-[#085078] dark:border-cyan-400 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] mt-2"
                       />
                     )}
                   </div>
@@ -660,7 +655,7 @@ export default function CadastroPage() {
                         <select
                           value={instituicao}
                           onChange={(e) => setInstituicao(e.target.value)}
-                          className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
+                          className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 cursor-pointer"
                         >
                           {availableInstitutions.map((inst) => (
                             <option key={inst} value={inst}>
@@ -686,7 +681,7 @@ export default function CadastroPage() {
               <button
                 type="submit"
                 disabled={isSubmittingAluno}
-                className="px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 dark:bg-cyan-500 dark:text-slate-950 dark:hover:bg-cyan-400 rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 text-xs font-medium text-white bg-[#085078] hover:bg-[#063f60] rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50"
               >
                 {isSubmittingAluno ? 'Cadastrando...' : 'Cadastrar Estudante'}
               </button>
@@ -715,7 +710,7 @@ export default function CadastroPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Código da Turma <span className="text-rose-500">*</span>
+                    Código da Turma
                   </label>
                   <input
                     type="text"
@@ -723,7 +718,7 @@ export default function CadastroPage() {
                     value={codigoTurma}
                     onChange={(e) => setCodigoTurma(e.target.value)}
                     placeholder="Ex: DS-2026.2-A"
-                    className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                    className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                   />
                 </div>
 
@@ -734,7 +729,7 @@ export default function CadastroPage() {
                   <select
                     value={periodoTurma}
                     onChange={(e) => setPeriodoTurma(e.target.value)}
-                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 cursor-pointer"
                   >
                     <option value="2026.2 - Manhã">2026.2 - Manhã</option>
                     <option value="2026.2 - Tarde">2026.2 - Tarde</option>
@@ -745,7 +740,7 @@ export default function CadastroPage() {
 
                 <div className="sm:col-span-2 space-y-1">
                   <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Nome do Curso <span className="text-rose-500">*</span>
+                    Nome do Curso
                   </label>
                   <input
                     type="text"
@@ -753,7 +748,7 @@ export default function CadastroPage() {
                     value={nomeCursoTurma}
                     onChange={(e) => setNomeCursoTurma(e.target.value)}
                     placeholder="Ex: Técnico em Desenvolvimento de Sistemas"
-                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
                   />
                 </div>
 
@@ -773,7 +768,7 @@ export default function CadastroPage() {
                     <select
                       value={instituicaoTurma}
                       onChange={(e) => setInstituicaoTurma(e.target.value)}
-                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
+                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 cursor-pointer"
                     >
                       {availableInstitutions.map((inst) => (
                         <option key={inst} value={inst}>
@@ -797,7 +792,7 @@ export default function CadastroPage() {
               <button
                 type="submit"
                 disabled={isSubmittingTurma}
-                className="px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 dark:bg-cyan-500 dark:text-slate-950 dark:hover:bg-cyan-400 rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 text-xs font-medium text-white bg-[#085078] hover:bg-[#063f60] rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50"
               >
                 {isSubmittingTurma ? 'Criando...' : 'Salvar Turma'}
               </button>
@@ -823,7 +818,7 @@ export default function CadastroPage() {
             </div>
 
             <div className="p-6 sm:p-8 space-y-4">
-              <div className="p-3.5 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 flex items-start gap-2.5">
+              <div className="p-3.5 rounded-lg bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 flex items-start gap-2.5">
                 <CalendarDays className="w-4 h-4 text-sky-600 dark:text-sky-400 mt-0.5 shrink-0" />
                 <p className="text-xs text-sky-900 dark:text-sky-300 font-medium">
                   Registre ou vincule um contrato / TCE a um estudante já cadastrado. O contrato ficará visível no dossiê e no portal do estudante.
@@ -833,13 +828,13 @@ export default function CadastroPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2 space-y-1">
                   <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Estudante <span className="text-rose-500">*</span>
+                    Estudante
                   </label>
                   <select
                     required
                     value={contratoAlunoId}
                     onChange={(e) => setContratoAlunoId(e.target.value)}
-                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 cursor-pointer"
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 cursor-pointer"
                   >
                     <option value="">Selecione o estudante...</option>
                     {allStudentsList.map((s) => (
@@ -852,7 +847,7 @@ export default function CadastroPage() {
 
                 <div className="sm:col-span-2 space-y-1">
                   <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Número do Contrato / TCE <span className="text-rose-500">*</span>
+                    Número do Contrato / TCE
                   </label>
                   <input
                     type="text"
@@ -860,40 +855,39 @@ export default function CadastroPage() {
                     value={contratoNumero}
                     onChange={(e) => setContratoNumero(e.target.value)}
                     placeholder="Ex: TCE-2026-042 ou APREND-2026-0199"
-                    className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400 font-medium"
+                    className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 font-medium"
                   />
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Data de Início <span className="text-rose-500">*</span>
+                    Data de Início
                   </label>
                   <input
                     type="date"
                     required
                     value={contratoInicio}
                     onChange={(e) => setContratoInicio(e.target.value)}
-                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400"
                   />
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Data de Término <span className="text-rose-500">*</span>
+                    Data de Término
                   </label>
                   <input
                     type="date"
                     required
                     value={contratoFim}
                     onChange={(e) => setContratoFim(e.target.value)}
-                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400"
                   />
                 </div>
 
                 <div className="sm:col-span-2 space-y-1">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                    <DollarSign className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                    <span>Bolsa-Auxílio Mensal (R$)</span>
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                    Bolsa-Auxílio Mensal (R$)
                   </label>
                   <input
                     type="text"
@@ -901,7 +895,7 @@ export default function CadastroPage() {
                     value={contratoBolsa}
                     onChange={(e) => setContratoBolsa(e.target.value)}
                     placeholder="Ex: 1650.00"
-                    className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#065373] dark:focus:ring-cyan-400"
+                    className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400"
                   />
                 </div>
               </div>
@@ -918,7 +912,7 @@ export default function CadastroPage() {
               <button
                 type="submit"
                 disabled={isSubmittingContrato}
-                className="px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 dark:bg-cyan-500 dark:text-slate-950 dark:hover:bg-cyan-400 rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 text-xs font-medium text-white bg-[#085078] hover:bg-[#063f60] rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50"
               >
                 {isSubmittingContrato ? 'Registrando...' : 'Salvar Contrato / TCE'}
               </button>

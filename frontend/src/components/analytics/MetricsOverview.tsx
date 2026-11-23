@@ -45,8 +45,8 @@ export default function MetricsOverview() {
       value: totalStudents,
       sub: `Distribuídos em ${turmas.length} turmas ativas`,
       icon: Users,
-      iconColor: 'text-[#065373] dark:text-cyan-400',
-      iconBg: 'bg-[#065373]/10 dark:bg-cyan-950/60',
+      iconColor: 'text-[#085078] dark:text-cyan-400',
+      iconBg: 'bg-[#085078]/10 dark:bg-cyan-950/60',
     },
   ];
 
@@ -57,13 +57,13 @@ export default function MetricsOverview() {
         return (
           <div
             key={idx}
-            className="p-5 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-900 flex flex-col justify-between transition-all duration-200 hover:shadow-md hover:border-slate-500 dark:hover:border-slate-600"
+            className="p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 flex flex-col justify-between transition-all duration-200 hover:shadow-md"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
                 {kpi.label}
               </span>
-              <div className={`p-2 rounded-xl ${kpi.iconBg} shadow-xs`}>
+              <div className={`p-2 rounded-lg ${kpi.iconBg} shadow-xs`}>
                 <Icon className={`w-5 h-5 ${kpi.iconColor}`} />
               </div>
             </div>

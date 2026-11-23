@@ -26,13 +26,13 @@ export default function BottomNav() {
           icon: LayoutGrid,
         },
         {
-          label: 'Documentos',
+          label: 'Aprendizes',
           href: '/coordenador/dossies',
           icon: FileText,
           hasBadge: false,
         },
         {
-          label: 'Enviar',
+          label: 'Cadastro',
           href: '/coordenador/cadastro',
           icon: UploadCloud,
         },
@@ -118,7 +118,7 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`relative flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all select-none ${
+              className={`relative flex flex-col items-center justify-center py-1.5 px-2 rounded-lg transition-all select-none ${
                 isActive
                   ? 'bg-[#085078]/10 dark:bg-[#085078]/30 text-[#085078] dark:text-cyan-400 font-semibold shadow-2xs'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 active:scale-95'

@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import MetricsOverview from '@/components/analytics/MetricsOverview';
 import TurmaRiskTable from '@/components/analytics/TurmaRiskTable';
 
 export default function AnalyticsPage() {
@@ -20,9 +19,6 @@ export default function AnalyticsPage() {
           Cadastrar Turma
         </Link>
       </div>
-
-      {/* Strategic KPIs Overview */}
-      <MetricsOverview />
 
       {/* Turmas Detailed Comparison & Risk Prevention Table */}
       <TurmaRiskTable />

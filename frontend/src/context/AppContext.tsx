@@ -257,6 +257,11 @@ interface AppContextType {
   addAuditEntry: (entry: Omit<AuditLog, 'id' | 'timestampUtc'>) => void;
   updateUserRole: (userId: string, newRole: UserRole) => void;
   addNewTurma: (turma: Turma) => void;
+  updateTurma: (
+    turmaId: string,
+    data: { codigo: string; nomeCurso: string; periodo: string }
+  ) => Promise<void>;
+  removeTurma: (turmaId: string) => Promise<void>;
   addNewEmpresa: (empresa: Empresa) => void;
   addNewSystemUser: (data: {
     nome: string;
@@ -1181,6 +1186,46 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const updateTurma = async (
+    turmaId: string,
+    data: { codigo: string; nomeCurso: string; periodo: string }
+  ): Promise<void> => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(turmaId);
+    if (isUuid) {
+      await turmasApi
+        .update(turmaId, {
+          codigo: data.codigo,
+          nome: data.nomeCurso,
+          semestre_referencia: data.periodo,
+        })
+        .catch(() => {});
+    }
+
+    setRawTurmas((prev) =>
+      prev.map((t) =>
+        t.id === turmaId
+          ? { ...t, codigo: data.codigo, nomeCurso: data.nomeCurso, periodo: data.periodo }
+          : t
+      )
+    );
+
+    setRawStudentsList((prev) =>
+      prev.map((s) =>
+        s.turmaId === turmaId
+          ? { ...s, turmaNome: `${data.codigo} — ${data.nomeCurso}`, curso: data.nomeCurso }
+          : s
+      )
+    );
+  };
+
+  const removeTurma = async (turmaId: string): Promise<void> => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(turmaId);
+    if (isUuid) {
+      await turmasApi.delete(turmaId).catch(() => {});
+    }
+    setRawTurmas((prev) => prev.filter((t) => t.id !== turmaId));
+  };
+
   const addNewStudent = (data: {
     id?: string;
     nome: string;
@@ -1810,6 +1855,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         updateUserRole,
         addNewSystemUser,
         addNewTurma,
+        updateTurma,
+        removeTurma,
         addNewEmpresa,
         addNewStudent,
         selectStudent,

@@ -23,6 +23,7 @@ class Instituicao(Base, UUIDPrimaryKeyMixin, TimestampMixin, TenantScopedMixin):
     razao_social: Mapped[str] = mapped_column(String(255), nullable=False)
     nome_fantasia: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     cnpj: Mapped[str] = mapped_column(String(18), nullable=False, index=True)
+    cidade: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     codigo_mec: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     ativo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
@@ -43,6 +44,7 @@ class Empresa(Base, UUIDPrimaryKeyMixin, TimestampMixin, TenantScopedMixin):
     razao_social: Mapped[str] = mapped_column(String(255), nullable=False)
     nome_fantasia: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     cnpj: Mapped[str] = mapped_column(String(18), nullable=False, index=True)
+    cidade: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     ramo_atividade: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     ativo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 

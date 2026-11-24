@@ -26,6 +26,7 @@ async def create_instituicao(
         razao_social=payload.razao_social,
         nome_fantasia=payload.nome_fantasia,
         cnpj=payload.cnpj,
+        cidade=payload.cidade,
         codigo_mec=payload.codigo_mec
     )
 

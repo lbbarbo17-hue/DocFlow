@@ -34,6 +34,7 @@ export default function Header() {
     currentRole,
     student,
     currentUserProfile,
+    currentCoordinatorUser,
     toastMessage,
     setToastMessage,
     theme,
@@ -85,7 +86,12 @@ export default function Header() {
       ).length
     : 0;
 
-  const userInitials = (currentUserProfile?.nome || student?.nome || 'DocFlow')
+  const displayName =
+    currentUserProfile?.nome ||
+    (currentRole === 'COORDENADOR' ? currentCoordinatorUser?.nome : student?.nome) ||
+    'DocFlow';
+
+  const userInitials = displayName
     .replace(new RegExp('^(Profª\\.|Prof\\.|Dr\\.|Dra\\.)\\s*'), '')
     .split(' ')
     .filter(Boolean)
@@ -100,7 +106,7 @@ export default function Header() {
         ? 'Jovem Aprendiz'
         : 'Estagiário'
       : currentRole === 'COORDENADOR'
-      ? 'Coordenação / RH'
+      ? 'Coordenador'
       : 'Super Administrador';
 
   const getNavItems = () => {
@@ -230,13 +236,13 @@ export default function Header() {
               />
             </button>
 
-            {/* Menu Dropdown do Perfil Enxuto (w-64, rounded-2xl, shadow-xl) */}
+            {/* Menu Dropdown do Perfil Enxuto (w-64, rounded-lg, shadow-xl) */}
             {isProfileMenuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-64 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute right-0 top-full mt-2 w-64 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                 {/* Cabeçalho do Dropdown: Nome Completo e Cargo/Perfil (sem instituição) */}
                 <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800/80">
                   <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
-                    {currentUserProfile?.nome || student?.nome || 'Beatriz Helena de Castro Ramos'}
+                    {displayName}
                   </p>
                   <p className="text-xs font-medium text-[#085078] dark:text-cyan-400 mt-0.5">
                     {roleBadgeLabel}

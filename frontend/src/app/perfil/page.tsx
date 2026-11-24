@@ -5,10 +5,6 @@ import { useApp } from '@/context/AppContext';
 import {
   Camera,
   Trash2,
-  User,
-  Mail,
-  Phone,
-  CreditCard,
   Lock,
   CheckCircle2,
   AlertCircle,
@@ -16,9 +12,9 @@ import {
   EyeOff,
   Building,
   GraduationCap,
-  Sparkles,
   Save,
   KeyRound,
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -337,9 +333,8 @@ export default function PerfilPage() {
                 <div className="grid sm:grid-cols-2 gap-5">
                   {/* Nome Completo */}
                   <div className="space-y-1.5 sm:col-span-2">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-[#085078] dark:text-cyan-400" />
-                      <span>Nome Completo *</span>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-200 block">
+                      Nome Completo
                     </label>
                     <input
                       type="text"
@@ -353,9 +348,8 @@ export default function PerfilPage() {
 
                   {/* E-mail */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-                      <Mail className="w-3.5 h-3.5 text-[#085078] dark:text-cyan-400" />
-                      <span>E-mail Corporativo / Institucional *</span>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-200 block">
+                      E-mail Corporativo / Institucional
                     </label>
                     <input
                       type="email"
@@ -369,9 +363,8 @@ export default function PerfilPage() {
 
                   {/* Telefone */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-                      <Phone className="w-3.5 h-3.5 text-[#085078] dark:text-cyan-400" />
-                      <span>Telefone / WhatsApp</span>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-200 block">
+                      Telefone / WhatsApp
                     </label>
                     <input
                       type="text"
@@ -385,9 +378,8 @@ export default function PerfilPage() {
 
                   {/* CPF */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-                      <CreditCard className="w-3.5 h-3.5 text-[#085078] dark:text-cyan-400" />
-                      <span>CPF (Protegido)</span>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-200 block">
+                      CPF (Protegido)
                     </label>
                     <input
                       type="text"
@@ -401,9 +393,8 @@ export default function PerfilPage() {
 
                   {/* Cargo / Função */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-[#085078] dark:text-cyan-400" />
-                      <span>Cargo / Atribuição Cadastral</span>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-200 block">
+                      Cargo / Atribuição Cadastral
                     </label>
                     <input
                       type="text"
@@ -461,7 +452,7 @@ export default function PerfilPage() {
                 {/* Senha Atual */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                    Senha Atual *
+                    Senha Atual
                   </label>
                   <div className="relative">
                     <input
@@ -485,7 +476,7 @@ export default function PerfilPage() {
                 {/* Nova Senha */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                    Nova Senha *
+                    Nova Senha
                   </label>
                   <div className="relative">
                     <input
@@ -509,7 +500,7 @@ export default function PerfilPage() {
                 {/* Confirmar Nova Senha */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                    Confirmar Nova Senha *
+                    Confirmar Nova Senha
                   </label>
                   <div className="relative">
                     <input

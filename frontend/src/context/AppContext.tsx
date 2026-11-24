@@ -7,6 +7,9 @@ import {
   Student,
   Turma,
   Empresa,
+  Instituicao,
+  DadosAprendiz,
+  DadosEstagiario,
   AuditLog,
   AuditAction,
   DocumentItem,
@@ -19,6 +22,7 @@ import {
   INITIAL_STUDENTS,
   INITIAL_TURMAS,
   INITIAL_EMPRESAS,
+  INITIAL_INSTITUICOES,
   INITIAL_AUDIT_LOGS,
   INITIAL_SYSTEM_USERS,
 } from '@/lib/mockData';
@@ -29,10 +33,14 @@ import {
   contratosApi,
   auditoriaApi,
   turmasApi,
+  instituicoesApi,
+  empresasApi,
   authApi,
   AlunoResponse,
   DocumentoResponse,
   ContratoResponse,
+  InstituicaoResponse,
+  EmpresaResponse,
   AuditLogBackendResponse,
   AuthUserResponse,
 } from '@/lib/api';
@@ -62,8 +70,12 @@ export function mapBackendAuditLogToItem(b: AuditLogBackendResponse): AuditLog {
   };
 }
 
-export function createDefaultStudentDocuments(alunoId: string, cpf: string): DocumentItem[] {
-  return [
+export function createDefaultStudentDocuments(
+  alunoId: string,
+  cpf: string,
+  tipoVinculo: TipoVinculo = 'APRENDIZ'
+): DocumentItem[] {
+  const baseDocs: DocumentItem[] = [
     {
       id: `doc-rg-${alunoId}`,
       tipo: 'RG',
@@ -94,11 +106,46 @@ export function createDefaultStudentDocuments(alunoId: string, cpf: string): Doc
       obrigatorio: true,
       status: 'PENDENTE',
     },
+  ];
+
+  if (tipoVinculo === 'ESTAGIARIO') {
+    return [
+      ...baseDocs,
+      {
+        id: `doc-mat-${alunoId}`,
+        tipo: 'COMPROVANTE_MATRICULA',
+        nomeExibicao: 'Declaração de Matrícula',
+        descricao: 'Declaração semestral oficial da instituição de ensino com período letivo atual.',
+        obrigatorio: true,
+        recorrente: true,
+        status: 'PENDENTE',
+      },
+      {
+        id: `doc-tce-${alunoId}`,
+        tipo: 'CONTRATO_TCE',
+        nomeExibicao: 'Termo de Compromisso de Estágio (TCE)',
+        descricao: 'Termo assinado com vigência, supervisor e dados da empresa e instituição de ensino.',
+        obrigatorio: true,
+        status: 'PENDENTE',
+      },
+      {
+        id: `doc-seg-${alunoId}`,
+        tipo: 'APOLICE_SEGURO',
+        nomeExibicao: 'Apólice de Seguro',
+        descricao: 'Apólice vigente de seguro contra acidentes pessoais para cobertura do estágio.',
+        obrigatorio: true,
+        status: 'PENDENTE',
+      },
+    ];
+  }
+
+  return [
+    ...baseDocs,
     {
       id: `doc-mat-${alunoId}`,
       tipo: 'COMPROVANTE_MATRICULA',
-      nomeExibicao: 'Comprovante de Matrícula / Frequência Escolar',
-      descricao: 'Declaração semestral oficial da instituição de ensino com período letivo atual.',
+      nomeExibicao: 'Frequência Escolar',
+      descricao: 'Comprovante de frequência escolar regular emitido pela instituição de ensino.',
       obrigatorio: true,
       recorrente: true,
       status: 'PENDENTE',
@@ -106,8 +153,8 @@ export function createDefaultStudentDocuments(alunoId: string, cpf: string): Doc
     {
       id: `doc-tce-${alunoId}`,
       tipo: 'CONTRATO_TCE',
-      nomeExibicao: 'Contrato de Aprendizagem Profissional (CTPS / Registro)',
-      descricao: 'Documento assinado com vigência e dados da empresa e instituição concedente.',
+      nomeExibicao: 'Contrato de Aprendizagem (CTPS)',
+      descricao: 'Contrato de aprendizagem profissional e registro em Carteira de Trabalho (CTPS).',
       obrigatorio: true,
       status: 'PENDENTE',
     },
@@ -117,8 +164,12 @@ export function createDefaultStudentDocuments(alunoId: string, cpf: string): Doc
 export function mapAlunoResponseToStudent(
   aluno: AlunoResponse,
   backendDocs: DocumentoResponse[] = [],
-  contratos: ContratoResponse[] = []
+  contratos: ContratoResponse[] = [],
+  instituicoesList: Instituicao[] = [],
+  empresasList: Empresa[] = [],
+  turmasList: Turma[] = []
 ): Student {
+  const tipoVinculo: TipoVinculo = aluno.tipo_vinculo === 'ESTAGIARIO' ? 'ESTAGIARIO' : 'APRENDIZ';
   const alunoContrato = contratos.find((c) => c.aluno_id === aluno.id && c.ativo);
   const contratoAtivoObj = alunoContrato
     ? {
@@ -130,7 +181,7 @@ export function mapAlunoResponseToStudent(
         ativo: alunoContrato.ativo,
       }
     : undefined;
-  const defaultDocs = createDefaultStudentDocuments(aluno.id, aluno.cpf);
+  const defaultDocs = createDefaultStudentDocuments(aluno.id, aluno.cpf, tipoVinculo);
   const alunoDocs = backendDocs.filter((d) => d.aluno_id === aluno.id);
 
   const mergedDocs = defaultDocs.map((doc) => {
@@ -154,6 +205,7 @@ export function mapAlunoResponseToStudent(
         ...doc,
         id: matched.id,
         status: st,
+        justificativaRecusa: matched.justificativa_recusa || undefined,
         nomeArquivoOriginal: cleanFileName,
         fileHashSha256: matched.file_hash,
         storageUuid: matched.storage_path,
@@ -173,6 +225,13 @@ export function mapAlunoResponseToStudent(
       ? Math.round(((approvedCount + inReviewCount) / essentialDocs.length) * 100)
       : 0;
 
+  const matchedInst = instituicoesList.find((i) => i.id === aluno.instituicao_id);
+  const matchedEmp = empresasList.find((e) => e.id === aluno.empresa_id);
+  const matchedTurma = turmasList.find((t) => t.id === aluno.turma_id);
+
+  const empresaNome = matchedEmp?.razaoSocial || 'TechCorp Soluções Digitais S.A.';
+  const instituicaoNome = matchedInst?.razaoSocial || 'ETEC Politécnica de São Paulo';
+
   const docsWithContractInfo = mergedDocs.map((d) => {
     if (d.tipo === 'CONTRATO_TCE') {
       return {
@@ -181,12 +240,33 @@ export function mapAlunoResponseToStudent(
         conteudoSensivelSimulado: {
           ...d.conteudoSensivelSimulado,
           valorBolsa: alunoContrato?.valor_bolsa ? `R$ ${alunoContrato.valor_bolsa}` : undefined,
-          empresaConcedente: 'TechCorp Soluções Digitais S.A.',
+          empresaConcedente: empresaNome,
         },
       };
     }
     return d;
   });
+
+  const dadosAprendiz: DadosAprendiz | undefined = aluno.dados_aprendiz
+    ? {
+        numeroCtps: aluno.dados_aprendiz.numero_ctps || undefined,
+        serieCtps: aluno.dados_aprendiz.serie_ctps || undefined,
+        cbo: aluno.dados_aprendiz.cbo || undefined,
+        cursoAprendizagem: aluno.dados_aprendiz.curso_aprendizagem || undefined,
+        numeroContratoAprendizagem: aluno.dados_aprendiz.numero_contrato_aprendizagem || undefined,
+      }
+    : undefined;
+
+  const dadosEstagiario: DadosEstagiario | undefined = aluno.dados_estagiario
+    ? {
+        numeroTce: aluno.dados_estagiario.numero_tce || undefined,
+        apoliceSeguro: aluno.dados_estagiario.apolice_seguro || undefined,
+        seguradora: aluno.dados_estagiario.seguradora || undefined,
+        supervisorEmpresa: aluno.dados_estagiario.supervisor_empresa || undefined,
+        cursoSuperiorTecnico: aluno.dados_estagiario.curso_superior_tecnico || undefined,
+        semestreAtual: aluno.dados_estagiario.semestre_atual || undefined,
+      }
+    : undefined;
 
   return {
     id: aluno.id,
@@ -194,13 +274,19 @@ export function mapAlunoResponseToStudent(
     cpf: aluno.cpf,
     email: aluno.email,
     matricula: aluno.matricula,
-    tipoVinculo: 'APRENDIZ',
+    tipoVinculo,
     dataAdmissao: new Date().toISOString().split('T')[0],
     turmaId: aluno.turma_id || 'turma-ds-01',
-    turmaNome: 'DS-2026.1 — Técnico em Desenvolvimento de Sistemas',
-    curso: 'Técnico em Desenvolvimento de Sistemas',
-    empresa: 'TechCorp Soluções Digitais S.A.',
-    instituicao: 'ETEC Politécnica de São Paulo',
+    turmaNome: matchedTurma
+      ? `${matchedTurma.codigo} — ${matchedTurma.nomeCurso}`
+      : 'DS-2026.1 — Técnico em Desenvolvimento de Sistemas',
+    curso: matchedTurma?.nomeCurso || dadosEstagiario?.cursoSuperiorTecnico || dadosAprendiz?.cursoAprendizagem || 'Técnico em Desenvolvimento de Sistemas',
+    empresa: empresaNome,
+    empresaId: aluno.empresa_id || undefined,
+    instituicao: instituicaoNome,
+    instituicaoId: aluno.instituicao_id || undefined,
+    dadosAprendiz,
+    dadosEstagiario,
     percentualConformidade: percentual,
     nivelRisco: percentual === 100 ? 'BAIXO' : percentual >= 60 ? 'MEDIO' : 'CRITICO',
     statusGeral: percentual === 100 ? 'REGULAR' : 'PENDENTE',
@@ -219,6 +305,7 @@ interface AppContextType {
   turmas: Turma[];
   allTurmas: Turma[];
   empresas: Empresa[];
+  instituicoes: Instituicao[];
   systemUsers: SystemUser[];
   auditLogs: AuditLog[];
   activeInstitution: string;
@@ -256,7 +343,25 @@ interface AppContextType {
   addAuditEntry: (entry: Omit<AuditLog, 'id' | 'timestampUtc'>) => void;
   updateUserRole: (userId: string, newRole: UserRole) => void;
   addNewTurma: (turma: Turma) => void;
+  updateTurma: (
+    turmaId: string,
+    data: { codigo: string; nomeCurso: string; periodo: string }
+  ) => Promise<void>;
+  removeTurma: (turmaId: string) => Promise<void>;
   addNewEmpresa: (empresa: Empresa) => void;
+  createEmpresaInline: (data: {
+    razaoSocial: string;
+    cnpj: string;
+    cidade?: string;
+    nomeFantasia?: string;
+  }) => Promise<Empresa>;
+  addNewInstituicao: (data: {
+    razaoSocial: string;
+    cnpj: string;
+    cidade?: string;
+    nomeFantasia?: string;
+    codigoMec?: string;
+  }) => Promise<Instituicao>;
   addNewSystemUser: (data: {
     nome: string;
     email: string;
@@ -278,7 +383,11 @@ interface AppContextType {
     turmaId: string;
     curso?: string;
     empresa?: string;
+    empresaId?: string;
     instituicao?: string;
+    instituicaoId?: string;
+    dadosAprendiz?: DadosAprendiz;
+    dadosEstagiario?: DadosEstagiario;
   }) => Student;
   selectStudent: (studentId: string) => void;
   setStudentDirect: (s: Student) => void;
@@ -292,10 +401,16 @@ interface AppContextType {
       nome?: string;
       email?: string;
       matricula?: string;
+      tipoVinculo?: TipoVinculo;
       empresa?: string;
+      empresaId?: string;
+      instituicao?: string;
+      instituicaoId?: string;
       dataAdmissao?: string;
       turmaId?: string;
       curso?: string;
+      dadosAprendiz?: DadosAprendiz;
+      dadosEstagiario?: DadosEstagiario;
       contrato?: {
         dataInicio?: string;
         dataFim?: string;
@@ -357,6 +472,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [superAdminInstitutionFilter, setSuperAdminInstitutionFilter] = useState<string>('ALL');
   const [activeCoordinatorUserId, setActiveCoordinatorUserId] = useState<string | null>(null);
   const [empresas, setEmpresas] = useState<Empresa[]>(INITIAL_EMPRESAS);
+  const [instituicoes, setInstituicoes] = useState<Instituicao[]>(INITIAL_INSTITUICOES);
   const [systemUsers, setSystemUsers] = useState<SystemUser[]>(INITIAL_SYSTEM_USERS);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
   const [isLgpdRedactionActive, setIsLgpdRedactionActive] = useState<boolean>(false);
@@ -376,28 +492,86 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     async function syncBackendData() {
       try {
-        const [alunosData, docsData, contratosData, auditData, turmasData, usersData] = await Promise.all([
+        const [alunosData, docsData, contratosData, auditData, turmasData, usersData, instData, empData] = await Promise.all([
           alunosApi.list().catch(() => []),
           documentosApi.listAll().catch(() => []),
           contratosApi.list().catch(() => []),
           auditoriaApi.list().catch(() => []),
           turmasApi.list().catch(() => []),
           authApi.listUsers().catch(() => []),
+          instituicoesApi.list().catch(() => []),
+          empresasApi.list().catch(() => []),
         ]);
 
         if (isCancelled) return;
 
-        if (usersData && usersData.length > 0) {
-          const mappedUsers: SystemUser[] = usersData.map((u: AuthUserResponse) => ({
-            id: u.id,
-            nome: u.nome,
-            email: u.email,
-            role: (u.perfil === 'ADMIN' ? 'SUPERADMIN' : u.perfil === 'COORDENADOR' || u.perfil === 'RH' ? 'COORDENADOR' : 'ESTUDANTE') as UserRole,
-            cargo: u.perfil === 'ADMIN' || u.perfil === 'SUPERADMIN' ? 'Super Administrador' : u.perfil === 'COORDENADOR' ? 'Coordenador Pedagógico' : 'Analista de RH',
-            status: u.ativo ? 'ATIVO' : 'INATIVO',
-            ultimoAcesso: 'Recente',
-            instituicao: 'ETEC Politécnica de São Paulo',
+        let mergedInsts: Instituicao[] = INITIAL_INSTITUICOES;
+        if (instData && instData.length > 0) {
+          const mappedInsts: Instituicao[] = instData.map((i: InstituicaoResponse) => ({
+            id: i.id,
+            razaoSocial: i.razao_social,
+            nomeFantasia: i.nome_fantasia || i.razao_social,
+            cnpj: i.cnpj,
+            cidade: i.cidade || undefined,
+            codigoMec: i.codigo_mec || undefined,
           }));
+          mergedInsts = [...mappedInsts];
+          setInstituicoes((prev) => {
+            const combined = [...mappedInsts];
+            prev.forEach((p) => {
+              if (!combined.some((c) => c.id === p.id || c.razaoSocial === p.razaoSocial)) {
+                combined.push(p);
+              }
+            });
+            return combined;
+          });
+        }
+
+        let mergedEmps: Empresa[] = INITIAL_EMPRESAS;
+        if (empData && empData.length > 0) {
+          const mappedEmps: Empresa[] = empData.map((e: EmpresaResponse) => ({
+            id: e.id,
+            razaoSocial: e.razao_social,
+            nomeFantasia: e.nome_fantasia || e.razao_social,
+            cnpj: e.cnpj,
+            ramoAtuacao: e.ramo_atividade || 'Conveniada',
+            contatoRh: 'RH Responsável',
+            emailRh: '',
+            cidade: e.cidade || undefined,
+            cidadeUf: e.cidade || undefined,
+          }));
+          mergedEmps = [...mappedEmps];
+          setEmpresas((prev) => {
+            const combined = [...mappedEmps];
+            prev.forEach((p) => {
+              if (!combined.some((c) => c.id === p.id || c.razaoSocial === p.razaoSocial)) {
+                combined.push(p);
+              }
+            });
+            return combined;
+          });
+        }
+
+        if (usersData && usersData.length > 0) {
+          const mappedUsers: SystemUser[] = usersData.map((u: AuthUserResponse) => {
+            const instObj = mergedInsts.find((i) => i.id === u.instituicao_id);
+            const empObj = mergedEmps.find((e) => e.id === u.empresa_id);
+            const isEmpresaCoord = Boolean(u.empresa_id) || (u.perfil === 'RH' && !u.instituicao_id);
+            return {
+              id: u.id,
+              nome: u.nome,
+              email: u.email,
+              role: (u.perfil === 'ADMIN' ? 'SUPERADMIN' : u.perfil === 'COORDENADOR' || u.perfil === 'RH' ? 'COORDENADOR' : 'ESTUDANTE') as UserRole,
+              cargo: u.perfil === 'ADMIN' || u.perfil === 'SUPERADMIN' ? 'Super Administrador' : u.perfil === 'COORDENADOR' ? 'Coordenador Pedagógico' : 'Analista de RH',
+              status: u.ativo ? 'ATIVO' : 'INATIVO',
+              ultimoAcesso: 'Recente',
+              affiliationType: isEmpresaCoord ? 'EMPRESA' : 'INSTITUICAO',
+              instituicao: instObj?.razaoSocial || 'ETEC Politécnica de São Paulo',
+              instituicaoId: u.instituicao_id || undefined,
+              empresa: empObj?.razaoSocial,
+              empresaId: u.empresa_id || undefined,
+            };
+          });
           setSystemUsers((prev) => {
             const combined = [...mappedUsers];
             prev.forEach((p) => {
@@ -442,6 +616,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           });
         }
 
+        let mergedTurmasList: Turma[] = INITIAL_TURMAS;
         if (turmasData && turmasData.length > 0) {
           const mappedTurmas: Turma[] = turmasData.map((t) => {
             const turmasAlunos = (alunosData || []).filter((a) => a.turma_id === t.id);
@@ -449,6 +624,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             const emRisco = turmasAlunos.filter((a) => a.status === 'EM_RISCO' || a.status === 'PENDENTE').length;
             const regulares = total - emRisco;
             const conformidade = total > 0 ? Math.round((regulares / total) * 100) : 100;
+            const matchedInst = mergedInsts.find((i) => i.id === t.instituicao_id);
             return {
               id: t.id,
               codigo: t.codigo,
@@ -458,10 +634,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               conformidadeMedia: conformidade,
               alunosEmRisco: emRisco,
               alunosRegulares: regulares,
-              instituicao: 'ETEC Politécnica de São Paulo',
+              instituicao: matchedInst?.razaoSocial || 'ETEC Politécnica de São Paulo',
             };
           });
 
+          mergedTurmasList = [...mappedTurmas];
           setRawTurmas((prev) => {
             const combined = [...mappedTurmas];
             prev.forEach((p) => {
@@ -475,7 +652,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
         if (alunosData && alunosData.length > 0) {
           const mappedStudents = alunosData.map((a) =>
-            mapAlunoResponseToStudent(a, docsData, contratosData)
+            mapAlunoResponseToStudent(
+              a,
+              docsData,
+              contratosData,
+              mergedInsts,
+              mergedEmps,
+              mergedTurmasList
+            )
           );
 
           setRawStudentsList((prev) => {
@@ -538,6 +722,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const availableInstitutions = useMemo(() => {
     const set = new Set<string>();
+    instituicoes.forEach((i) => i.razaoSocial && set.add(i.razaoSocial));
     rawStudentsList.forEach((s) => s.instituicao && set.add(s.instituicao));
     rawTurmas.forEach((t) => t.instituicao && set.add(t.instituicao));
     systemUsers.forEach((u) => {
@@ -546,7 +731,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
     });
     return Array.from(set).sort();
-  }, [rawStudentsList, rawTurmas, systemUsers]);
+  }, [instituicoes, rawStudentsList, rawTurmas, systemUsers]);
 
 
   const currentCoordinatorUser = useMemo(() => {
@@ -564,6 +749,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         email: 'coordenacao@docflow.edu.br',
         role: 'COORDENADOR' as UserRole,
         cargo: 'Coordenador Pedagógico / RH',
+        affiliationType: 'INSTITUICAO' as const,
         instituicao: activeInstitution,
         status: 'ATIVO' as const,
         ultimoAcesso: 'Hoje às 15:00',
@@ -581,8 +767,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       return rawStudentsList.filter((s) => s.instituicao === superAdminInstitutionFilter);
     }
+    if (currentCoordinatorUser.affiliationType === 'EMPRESA' && currentCoordinatorUser.empresa) {
+      return rawStudentsList.filter(
+        (s) =>
+          s.empresa === currentCoordinatorUser.empresa ||
+          (currentCoordinatorUser.empresaId && s.empresaId === currentCoordinatorUser.empresaId)
+      );
+    }
     return rawStudentsList.filter((s) => s.instituicao === activeInstitution);
-  }, [rawStudentsList, currentRole, superAdminInstitutionFilter, activeInstitution]);
+  }, [rawStudentsList, currentRole, superAdminInstitutionFilter, activeInstitution, currentCoordinatorUser]);
 
   const turmas = useMemo(() => {
     if (currentRole === 'SUPERADMIN') {
@@ -591,8 +784,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       return rawTurmas.filter((t) => t.instituicao === superAdminInstitutionFilter);
     }
+    if (currentCoordinatorUser.affiliationType === 'EMPRESA') {
+      return rawTurmas;
+    }
     return rawTurmas.filter((t) => t.instituicao === activeInstitution);
-  }, [rawTurmas, currentRole, superAdminInstitutionFilter, activeInstitution]);
+  }, [rawTurmas, currentRole, superAdminInstitutionFilter, activeInstitution, currentCoordinatorUser]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -677,6 +873,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           setEmpresas(parsed);
         }
       }
+      const savedInsts = localStorage.getItem('docflow_instituicoes');
+      if (savedInsts) {
+        const parsed = JSON.parse(savedInsts);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setInstituicoes(parsed);
+        }
+      }
       const savedRole = localStorage.getItem('docflow_current_role') as UserRole | null;
       if (savedRole && ['SUPERADMIN', 'COORDENADOR', 'ESTUDANTE'].includes(savedRole)) {
         setCurrentRole(savedRole);
@@ -722,6 +925,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('docflow_empresas', JSON.stringify(empresas));
     } catch {}
   }, [empresas]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current) return;
+    try {
+      localStorage.setItem('docflow_instituicoes', JSON.stringify(instituicoes));
+    } catch {}
+  }, [instituicoes]);
 
   useEffect(() => {
     if (!isHydratedRef.current) return;
@@ -1180,6 +1390,46 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const updateTurma = async (
+    turmaId: string,
+    data: { codigo: string; nomeCurso: string; periodo: string }
+  ): Promise<void> => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(turmaId);
+    if (isUuid) {
+      await turmasApi
+        .update(turmaId, {
+          codigo: data.codigo,
+          nome: data.nomeCurso,
+          semestre_referencia: data.periodo,
+        })
+        .catch(() => {});
+    }
+
+    setRawTurmas((prev) =>
+      prev.map((t) =>
+        t.id === turmaId
+          ? { ...t, codigo: data.codigo, nomeCurso: data.nomeCurso, periodo: data.periodo }
+          : t
+      )
+    );
+
+    setRawStudentsList((prev) =>
+      prev.map((s) =>
+        s.turmaId === turmaId
+          ? { ...s, turmaNome: `${data.codigo} — ${data.nomeCurso}`, curso: data.nomeCurso }
+          : s
+      )
+    );
+  };
+
+  const removeTurma = async (turmaId: string): Promise<void> => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(turmaId);
+    if (isUuid) {
+      await turmasApi.delete(turmaId).catch(() => {});
+    }
+    setRawTurmas((prev) => prev.filter((t) => t.id !== turmaId));
+  };
+
   const addNewStudent = (data: {
     id?: string;
     nome: string;
@@ -1192,13 +1442,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     turmaId: string;
     curso?: string;
     empresa?: string;
+    empresaId?: string;
     instituicao?: string;
+    instituicaoId?: string;
+    dadosAprendiz?: DadosAprendiz;
+    dadosEstagiario?: DadosEstagiario;
   }): Student => {
     const selectedTurma = rawTurmas.find((t) => t.id === data.turmaId);
     const assignedInstitution =
       data.instituicao ||
       selectedTurma?.instituicao ||
       (currentRole === 'COORDENADOR' ? activeInstitution : 'ETEC Politécnica de São Paulo');
+    const assignedInstObj = instituicoes.find(
+      (i) => i.id === data.instituicaoId || i.razaoSocial === assignedInstitution
+    );
+    const assignedEmpresa = data.empresa || 'Empresa Conveniada';
+    const assignedEmpObj = empresas.find(
+      (e) => e.id === data.empresaId || e.razaoSocial === assignedEmpresa
+    );
 
     const newStudentId = data.id || `std-${Date.now()}`;
     const newStudent: Student = {
@@ -1212,64 +1473,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       dataAdmissao: data.dataAdmissao || new Date().toISOString().split('T')[0],
       turmaId: data.turmaId,
       turmaNome: selectedTurma ? `${selectedTurma.codigo} — ${selectedTurma.nomeCurso}` : 'Turma Geral',
-      curso: data.curso || (selectedTurma ? selectedTurma.nomeCurso : 'Curso Técnico'),
-      empresa: data.empresa || 'Empresa Conveniada',
+      curso:
+        data.curso ||
+        (data.tipoVinculo === 'ESTAGIARIO'
+          ? data.dadosEstagiario?.cursoSuperiorTecnico
+          : data.dadosAprendiz?.cursoAprendizagem) ||
+        (selectedTurma ? selectedTurma.nomeCurso : 'Curso Técnico'),
+      empresa: assignedEmpresa,
+      empresaId: data.empresaId || assignedEmpObj?.id,
       instituicao: assignedInstitution,
+      instituicaoId: data.instituicaoId || assignedInstObj?.id,
+      dadosAprendiz: data.tipoVinculo === 'APRENDIZ' ? data.dadosAprendiz : undefined,
+      dadosEstagiario: data.tipoVinculo === 'ESTAGIARIO' ? data.dadosEstagiario : undefined,
       percentualConformidade: 0,
       nivelRisco: 'CRITICO',
       statusGeral: 'PENDENTE',
-      documentos: [
-        {
-          id: `doc-rg-${Date.now()}`,
-          tipo: 'RG',
-          nomeExibicao: 'Carteira de Identidade (RG)',
-          descricao: 'Frente e verso nítidos com foto visível e órgão expedidor legível.',
-          obrigatorio: true,
-          status: 'PENDENTE',
-          conteudoSensivelSimulado: {
-            cpfNumero: data.cpf,
-          },
-        },
-        {
-          id: `doc-cpf-${Date.now() + 1}`,
-          tipo: 'CPF',
-          nomeExibicao: 'Comprovante de Inscrição no CPF',
-          descricao: 'Comprovante oficial da Receita Federal com QR Code ou cartão com CPF regular.',
-          obrigatorio: true,
-          status: 'PENDENTE',
-          conteudoSensivelSimulado: {
-            cpfNumero: data.cpf,
-          },
-        },
-        {
-          id: `doc-res-${Date.now() + 2}`,
-          tipo: 'COMPROVANTE_RESIDENCIA',
-          nomeExibicao: 'Comprovante de Residência Atualizado',
-          descricao: 'Conta de consumo (água, luz, gás ou internet) emitida nos últimos 90 dias.',
-          obrigatorio: true,
-          status: 'PENDENTE',
-        },
-        {
-          id: `doc-mat-${Date.now() + 3}`,
-          tipo: 'COMPROVANTE_MATRICULA',
-          nomeExibicao: 'Comprovante de Matrícula / Frequência Escolar',
-          descricao: 'Declaração semestral oficial da instituição de ensino com período letivo atual.',
-          obrigatorio: true,
-          recorrente: true,
-          status: 'PENDENTE',
-        },
-        {
-          id: `doc-tce-${Date.now() + 4}`,
-          tipo: 'CONTRATO_TCE',
-          nomeExibicao:
-            data.tipoVinculo === 'APRENDIZ'
-              ? 'Contrato de Aprendizagem Profissional (CTPS / Registro)'
-              : 'Termo de Compromisso de Estágio (TCE)',
-          descricao: 'Documento assinado com vigência e dados da empresa e instituição concedente.',
-          obrigatorio: true,
-          status: 'PENDENTE',
-        },
-      ],
+      documentos: createDefaultStudentDocuments(newStudentId, data.cpf, data.tipoVinculo),
     };
 
     setRawStudentsList((prev) => [newStudent, ...prev]);
@@ -1321,10 +1540,73 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       sha256Hash: `HASH-EMPRESA-${empresa.id}`,
     });
     setToastMessage({
-      title: 'Empresa Cadastrada com Sucesso! 🏢',
+      title: 'Empresa Cadastrada com Sucesso!',
       desc: `${empresa.nomeFantasia || empresa.razaoSocial} foi adicionada ao catálogo de empresas conveniadas.`,
       type: 'success',
     });
+  };
+
+  const createEmpresaInline = async (data: {
+    razaoSocial: string;
+    cnpj: string;
+    cidade?: string;
+    nomeFantasia?: string;
+  }): Promise<Empresa> => {
+    let createdId = `emp-${Date.now()}`;
+    try {
+      const res = await empresasApi.create({
+        razao_social: data.razaoSocial,
+        nome_fantasia: data.nomeFantasia || data.razaoSocial,
+        cnpj: data.cnpj,
+        cidade: data.cidade,
+      });
+      if (res?.id) createdId = res.id;
+    } catch {}
+
+    const novaEmpresa: Empresa = {
+      id: createdId,
+      razaoSocial: data.razaoSocial,
+      nomeFantasia: data.nomeFantasia || data.razaoSocial,
+      cnpj: data.cnpj,
+      ramoAtuacao: 'Empresa Concedente',
+      contatoRh: '',
+      emailRh: '',
+      cidade: data.cidade,
+      cidadeUf: data.cidade,
+    };
+    setEmpresas((prev) => [novaEmpresa, ...prev]);
+    return novaEmpresa;
+  };
+
+  const addNewInstituicao = async (data: {
+    razaoSocial: string;
+    cnpj: string;
+    cidade?: string;
+    nomeFantasia?: string;
+    codigoMec?: string;
+  }): Promise<Instituicao> => {
+    let createdId = `inst-${Date.now()}`;
+    try {
+      const res = await instituicoesApi.create({
+        razao_social: data.razaoSocial,
+        nome_fantasia: data.nomeFantasia || data.razaoSocial,
+        cnpj: data.cnpj,
+        cidade: data.cidade,
+        codigo_mec: data.codigoMec,
+      });
+      if (res?.id) createdId = res.id;
+    } catch {}
+
+    const novaInst: Instituicao = {
+      id: createdId,
+      razaoSocial: data.razaoSocial,
+      nomeFantasia: data.nomeFantasia || data.razaoSocial,
+      cnpj: data.cnpj,
+      cidade: data.cidade,
+      codigoMec: data.codigoMec,
+    };
+    setInstituicoes((prev) => [novaInst, ...prev]);
+    return novaInst;
   };
 
   const selectStudent = (studentId: string) => {
@@ -1349,10 +1631,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       nome?: string;
       email?: string;
       matricula?: string;
+      tipoVinculo?: TipoVinculo;
       empresa?: string;
+      empresaId?: string;
+      instituicao?: string;
+      instituicaoId?: string;
       dataAdmissao?: string;
       turmaId?: string;
       curso?: string;
+      dadosAprendiz?: DadosAprendiz;
+      dadosEstagiario?: DadosEstagiario;
       contrato?: {
         dataInicio?: string;
         dataFim?: string;
@@ -1362,11 +1650,44 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   ): Promise<void> => {
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(studentId);
     if (isUuid) {
-      const apiPayload: { nome?: string; email?: string; matricula?: string } = {};
+      const apiPayload: {
+        nome?: string;
+        email?: string;
+        matricula?: string;
+        tipo_vinculo?: TipoVinculo;
+        instituicao_id?: string;
+        empresa_id?: string;
+        turma_id?: string;
+        dados_aprendiz?: Record<string, string | undefined>;
+        dados_estagiario?: Record<string, string | undefined>;
+      } = {};
       if (data.nome !== undefined) apiPayload.nome = data.nome;
       if (data.email !== undefined) apiPayload.email = data.email;
       if (data.matricula !== undefined) apiPayload.matricula = data.matricula;
-      await alunosApi.update(studentId, apiPayload);
+      if (data.tipoVinculo !== undefined) apiPayload.tipo_vinculo = data.tipoVinculo;
+      if (data.instituicaoId !== undefined) apiPayload.instituicao_id = data.instituicaoId;
+      if (data.empresaId !== undefined) apiPayload.empresa_id = data.empresaId;
+      if (data.turmaId !== undefined) apiPayload.turma_id = data.turmaId;
+      if (data.dadosAprendiz !== undefined) {
+        apiPayload.dados_aprendiz = {
+          numero_ctps: data.dadosAprendiz.numeroCtps,
+          serie_ctps: data.dadosAprendiz.serieCtps,
+          cbo: data.dadosAprendiz.cbo,
+          curso_aprendizagem: data.dadosAprendiz.cursoAprendizagem,
+          numero_contrato_aprendizagem: data.dadosAprendiz.numeroContratoAprendizagem,
+        };
+      }
+      if (data.dadosEstagiario !== undefined) {
+        apiPayload.dados_estagiario = {
+          numero_tce: data.dadosEstagiario.numeroTce,
+          apolice_seguro: data.dadosEstagiario.apoliceSeguro,
+          seguradora: data.dadosEstagiario.seguradora,
+          supervisor_empresa: data.dadosEstagiario.supervisorEmpresa,
+          curso_superior_tecnico: data.dadosEstagiario.cursoSuperiorTecnico,
+          semestre_atual: data.dadosEstagiario.semestreAtual,
+        };
+      }
+      await alunosApi.update(studentId, apiPayload).catch(() => {});
     }
 
     const currentStudentObj = rawStudentsList.find((s) => s.id === studentId);
@@ -1419,10 +1740,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           nome: data.nome ?? s.nome,
           email: data.email ?? s.email,
           matricula: data.matricula ?? s.matricula,
+          tipoVinculo: data.tipoVinculo ?? s.tipoVinculo,
           empresa: data.empresa ?? s.empresa,
+          empresaId: data.empresaId ?? s.empresaId,
+          instituicao: data.instituicao ?? s.instituicao,
+          instituicaoId: data.instituicaoId ?? s.instituicaoId,
           dataAdmissao: data.dataAdmissao ?? s.dataAdmissao,
           turmaId: data.turmaId ?? s.turmaId,
           curso: data.curso ?? s.curso,
+          dadosAprendiz: data.dadosAprendiz ?? s.dadosAprendiz,
+          dadosEstagiario: data.dadosEstagiario ?? s.dadosEstagiario,
           contratoAtivo: s.contratoAtivo ? {
             ...s.contratoAtivo,
             dataInicio: data.contrato?.dataInicio ?? s.contratoAtivo.dataInicio,
@@ -1775,6 +2102,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         turmas,
         allTurmas,
         empresas,
+        instituicoes,
         systemUsers,
         setSystemUsers,
         auditLogs,
@@ -1809,7 +2137,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         updateUserRole,
         addNewSystemUser,
         addNewTurma,
+        updateTurma,
+        removeTurma,
         addNewEmpresa,
+        createEmpresaInline,
+        addNewInstituicao,
         addNewStudent,
         selectStudent,
         setStudentDirect,

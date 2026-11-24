@@ -1,33 +1,120 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CheckCircle2,
   XCircle,
   FileText,
   Download,
-  ExternalLink,
   Eye,
   Loader2,
-  Copy,
-  Check,
-  ShieldCheck,
-  Clock,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
-import { Student, DocumentItem } from '@/lib/types';
+import { Student, DocumentItem, NivelRisco, StatusDocumento } from '@/lib/types';
 import { useApp } from '@/context/AppContext';
-import { getStatusBadgeConfig, getRiskBadgeConfig, formatBytes } from '@/lib/utils';
+import { formatBytes } from '@/lib/utils';
 import { documentosApi } from '@/lib/api';
-import ValidateModal from './ValidateModal';
 
 interface DossierViewerProps {
   student: Student;
   initialDocId?: string;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-export default function DossierViewer({ student, initialDocId }: DossierViewerProps) {
-  const { addAuditEntry, setToastMessage, currentRole } = useApp();
-  const [selectedDoc, setSelectedDoc] = useState<DocumentItem>(() => {
+function getStudentStatusBadge(risk: NivelRisco) {
+  switch (risk) {
+    case 'CRITICO':
+      return {
+        label: 'Crítico',
+        className: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20',
+      };
+    case 'MEDIO':
+      return {
+        label: 'Atenção',
+        className: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20',
+      };
+    case 'BAIXO':
+    default:
+      return {
+        label: 'Em Dia',
+        className: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20',
+      };
+  }
+}
+
+function getDocStatusBadge(status: StatusDocumento) {
+  switch (status) {
+    case 'APROVADO':
+      return {
+        label: 'Aprovado',
+        className: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20',
+      };
+    case 'EM_ANALISE':
+      return {
+        label: 'Em Análise',
+        className: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20',
+      };
+    case 'RECUSADO':
+      return {
+        label: 'Recusado',
+        className: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20',
+      };
+    case 'EXPIRADO':
+    case 'VENCENDO':
+      return {
+        label: 'Requer Renovação',
+        className: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20',
+      };
+    case 'PENDENTE':
+    default:
+      return {
+        label: 'Pendente',
+        className: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20',
+      };
+  }
+}
+
+function getShortDocName(doc: DocumentItem): string {
+  switch (doc.tipo) {
+    case 'RG':
+      return 'RG';
+    case 'CPF':
+      return 'CPF';
+    case 'COMPROVANTE_RESIDENCIA':
+      return 'Residência';
+    case 'COMPROVANTE_MATRICULA':
+      return doc.nomeExibicao.toLowerCase().includes('frequência') ? 'Frequência' : 'Matrícula';
+    case 'CONTRATO_TCE':
+      return doc.nomeExibicao.toLowerCase().includes('aprendizagem') ? 'Contrato' : 'TCE';
+    case 'DOC_RESPONSAVEL':
+      return 'Responsável';
+    case 'TITULO_ELEITOR':
+      return 'Título de Eleitor';
+    case 'CERTIFICADO_RESERVISTA':
+      return 'Reservista';
+    case 'CARTEIRA_TRABALHO':
+      return 'CTPS';
+    case 'DADOS_BANCARIOS':
+      return 'Dados Bancários';
+    case 'APOLICE_SEGURO':
+      return 'Apólice';
+    default:
+      return doc.nomeExibicao.length > 22
+        ? `${doc.nomeExibicao.slice(0, 20)}...`
+        : doc.nomeExibicao;
+  }
+}
+
+export default function DossierViewer({
+  student,
+  initialDocId,
+  onEdit,
+  onDelete,
+}: DossierViewerProps) {
+  const { addAuditEntry, setToastMessage, currentRole, evaluateDocument } = useApp();
+  const [selectedDoc, setSelectedDoc] = useState<DocumentItem | undefined>(() => {
     if (initialDocId) {
       const found = student.documentos.find((d) => d.id === initialDocId);
       if (found) return found;
@@ -35,7 +122,7 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
     return student.documentos[0];
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (initialDocId) {
       const target = student.documentos.find((d) => d.id === initialDocId);
       if (target) {
@@ -49,12 +136,21 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
     });
   }, [student, initialDocId]);
 
-  const [validateModalState, setValidateModalState] = useState<{
-    doc: DocumentItem;
-    action: 'APROVADO' | 'RECUSADO';
-  } | null>(null);
+  const [isRejecting, setIsRejecting] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
   const [isOpeningFile, setIsOpeningFile] = useState(false);
-  const [copiedHash, setCopiedHash] = useState(false);
+
+  useEffect(() => {
+    setIsRejecting(false);
+    setRejectionReason('');
+  }, [student.id, selectedDoc?.id]);
+
+  const handleConfirmReject = () => {
+    if (!selectedDoc || !rejectionReason.trim()) return;
+    evaluateDocument(student.id, selectedDoc.id, 'RECUSADO', rejectionReason.trim());
+    setIsRejecting(false);
+    setRejectionReason('');
+  };
 
   const handleViewDocumentFile = async (doc: DocumentItem) => {
     setIsOpeningFile(true);
@@ -71,36 +167,14 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
       }
     } catch {
       setToastMessage({
-        title: 'Visualização Segura',
-        desc: 'Documento registrado sob custódia digital e hash SHA-256.',
+        title: 'Arquivo Indisponível',
+        desc: 'Não foi possível abrir o arquivo digital deste documento.',
         type: 'info',
       });
     } finally {
       setIsOpeningFile(false);
     }
   };
-
-  const handleCopyHash = (hash: string) => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(hash);
-      setCopiedHash(true);
-      setTimeout(() => setCopiedHash(false), 2000);
-      setToastMessage({
-        title: 'Hash Copiado',
-        desc: 'Assinatura criptográfica SHA-256 copiada para a área de transferência.',
-        type: 'info',
-      });
-    }
-  };
-
-  const riskBadge = getRiskBadgeConfig(student.nivelRisco);
-  const statusBadge = getStatusBadgeConfig(selectedDoc.status);
-  const isCtpsOrContract =
-    selectedDoc.tipo === 'CARTEIRA_TRABALHO' ||
-    selectedDoc.tipo === 'CONTRATO_TCE' ||
-    selectedDoc.nomeExibicao.toLowerCase().includes('ctps') ||
-    selectedDoc.nomeExibicao.toLowerCase().includes('registro') ||
-    selectedDoc.nomeExibicao.toLowerCase().includes('contrato');
 
   const handleBulkDownload = () => {
     addAuditEntry({
@@ -123,351 +197,396 @@ export default function DossierViewer({ student, initialDocId }: DossierViewerPr
     });
   };
 
-  return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border-[1.5px] border-slate-400 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col h-full">
-      {/* Dossier Header */}
-      <div className="p-4 sm:p-5 border-b border-slate-300 dark:border-b dark:border-slate-700 bg-slate-50/90 dark:bg-slate-900">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                {student.nome}
-              </h2>
-              <span className={`text-[11px] px-2 py-0.5 rounded-md font-semibold border ${riskBadge.bg}`}>
-                {riskBadge.label}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-              <p className="text-xs text-slate-600 dark:text-slate-300 font-semibold">
-                {student.empresa}
-              </p>
-              {student.contratoAtivo && (
-                <span className="font-mono bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-cyan-300 border border-sky-300 dark:border-sky-800 px-2 py-0.5 rounded text-[10px] font-bold">
-                  {student.contratoAtivo.numeroContrato}
-                </span>
-              )}
-            </div>
-          </div>
+  const studentBadge = getStudentStatusBadge(student.nivelRisco);
+  const docBadge = selectedDoc ? getDocStatusBadge(selectedDoc.status) : null;
 
-          <div className="flex items-center gap-2 self-start sm:self-auto">
+  const isCtpsOrContract = selectedDoc
+    ? selectedDoc.tipo === 'CARTEIRA_TRABALHO' ||
+      selectedDoc.tipo === 'CONTRATO_TCE' ||
+      selectedDoc.nomeExibicao.toLowerCase().includes('ctps') ||
+      selectedDoc.nomeExibicao.toLowerCase().includes('registro') ||
+      selectedDoc.nomeExibicao.toLowerCase().includes('contrato')
+    : false;
+
+  const subtitleParts = [
+    student.instituicao,
+    student.empresa,
+    student.contratoAtivo?.numeroContrato || (student.matricula ? `Matrícula ${student.matricula}` : ''),
+  ].filter(Boolean);
+
+  const isAprendiz = student.tipoVinculo === 'APRENDIZ';
+
+  return (
+    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+      {/* 1. Cabeçalho do Aprendiz (dentro do card principal) */}
+      <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white truncate">
+              {student.nome}
+            </h2>
+            <span
+              className={`text-xs px-2.5 py-0.5 rounded-md font-medium ${
+                isAprendiz
+                  ? 'bg-[#085078]/10 text-[#085078] dark:bg-cyan-500/10 dark:text-cyan-400 border border-[#085078]/20 dark:border-cyan-500/20'
+                  : 'bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20'
+              }`}
+            >
+              {isAprendiz ? 'Aprendiz' : 'Estagiário'}
+            </span>
+            <span className={`text-xs px-2.5 py-0.5 rounded-md font-medium ${studentBadge.className}`}>
+              {studentBadge.label}
+            </span>
+          </div>
+          {subtitleParts.length > 0 && (
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate">
+              {subtitleParts.join(' • ')}
+            </p>
+          )}
+        </div>
+
+        {/* Grupo único de ações alinhadas */}
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={handleBulkDownload}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+            <span>Exportar Dossiê</span>
+          </button>
+
+          {onEdit && (
             <button
               type="button"
-              onClick={handleBulkDownload}
-              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs"
+              onClick={onEdit}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer"
             >
-              <Download className="w-3.5 h-3.5 text-slate-500 dark:text-slate-300" />
-              <span>Exportar Dossiê</span>
+              <Pencil className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+              <span>Editar</span>
             </button>
-          </div>
+          )}
+
+          {onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              title="Excluir aprendiz"
+              aria-label="Excluir aprendiz"
+              className="p-2 rounded-lg text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Main Grid: Document List (Left) + Document Details (Right) */}
-      <div className="grid grid-cols-1 md:grid-cols-12 flex-1 min-h-[500px]">
-        {/* Document List */}
-        <div className="md:col-span-4 border-r border-slate-300 dark:border-r dark:border-slate-700 p-3 space-y-1.5 bg-slate-50/50 dark:bg-slate-950/20">
-          <div className="text-[11px] font-extrabold text-slate-700 dark:text-slate-200 uppercase tracking-wider px-2 py-1">
-            Documentos ({student.documentos.length})
+      {/* 2. Navegação dos Documentos em Abas Horizontais */}
+      <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/50 flex items-center gap-2 overflow-x-auto scrollbar-none">
+        {student.documentos.map((doc) => {
+          const isSelected = selectedDoc?.id === doc.id;
+          const dotColor =
+            doc.status === 'APROVADO'
+              ? isSelected
+                ? 'bg-emerald-400'
+                : 'bg-emerald-500'
+              : doc.status === 'EM_ANALISE' || doc.status === 'VENCENDO'
+              ? isSelected
+                ? 'bg-amber-400'
+                : 'bg-amber-500'
+              : isSelected
+              ? 'bg-rose-400'
+              : 'bg-rose-500';
+
+          return (
+            <button
+              key={doc.id}
+              type="button"
+              onClick={() => setSelectedDoc(doc)}
+              title={doc.nomeExibicao}
+              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer border ${
+                isSelected
+                  ? 'bg-[#085078] text-white border-[#085078] shadow-xs'
+                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
+              <span>{getShortDocName(doc)}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 3. Área de Análise do Documento Selecionado */}
+      {selectedDoc && docBadge ? (
+        <div className="p-5 sm:p-6 space-y-5">
+          {/* (1) Cabeçalho do documento selecionado */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              {selectedDoc.nomeExibicao}
+            </h3>
+            <span className={`text-xs font-medium px-2.5 py-0.5 rounded-md ${docBadge.className}`}>
+              {docBadge.label}
+            </span>
           </div>
 
-          {student.documentos.map((doc) => {
-            const isSelected = selectedDoc.id === doc.id;
-            const b = getStatusBadgeConfig(doc.status);
+          {/* (2) Card compacto do arquivo anexado (apenas UM botão Visualizar Arquivo) */}
+          {selectedDoc.status !== 'PENDENTE' ? (
+            <div className="p-4 bg-slate-50/70 dark:bg-slate-800/40 rounded-lg border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-lg bg-slate-200/70 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 shrink-0">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                    {selectedDoc.nomeArquivoOriginal || `${selectedDoc.nomeExibicao}.pdf`}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {selectedDoc.tamanhoBytes ? formatBytes(selectedDoc.tamanhoBytes) : 'Arquivo anexado'}
+                  </p>
+                </div>
+              </div>
 
-            return (
               <button
-                key={doc.id}
                 type="button"
-                onClick={() => setSelectedDoc(doc)}
-                title={`${doc.nomeExibicao} (${b.label})`}
-                className={`w-full text-left p-2.5 rounded-xl border-[1.5px] transition-all duration-200 flex items-center justify-between gap-2.5 cursor-pointer ${
-                  isSelected
-                    ? 'bg-white dark:bg-slate-800 border-[#065373] dark:border-cyan-400 shadow-sm ring-1 ring-[#065373]'
-                    : 'bg-white dark:bg-slate-900 border-slate-400 dark:border-slate-700 hover:border-slate-500 dark:hover:border-slate-600 shadow-2xs hover:shadow-xs'
-                }`}
+                disabled={isOpeningFile}
+                onClick={() => handleViewDocumentFile(selectedDoc)}
+                className="bg-[#085078] hover:bg-[#063f60] text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer shadow-sm disabled:opacity-50"
               >
-                <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                  <FileText className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
-                  <span className="text-xs font-semibold text-slate-950 dark:text-white leading-snug">
-                    {doc.nomeExibicao}
-                  </span>
-                </div>
-
-                <span
-                  title={b.label}
-                  className={`w-2.5 h-2.5 rounded-full shrink-0 ${b.dot} ring-2 ring-slate-100 dark:ring-slate-800`}
-                />
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Selected Document Inspection & Actions */}
-        <div className="md:col-span-8 p-5 flex flex-col justify-between space-y-4">
-          <div className="space-y-4">
-            {/* Top Toolbar for Selected Doc */}
-            <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-b dark:border-slate-800">
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  {selectedDoc.nomeExibicao}
-                </h3>
-                <span className={`text-[10px] px-2 py-0.5 rounded font-medium border ${statusBadge.bg}`}>
-                  {statusBadge.label}
-                </span>
-              </div>
-
-              {/* Approval Actions */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <button
-                  type="button"
-                  disabled={selectedDoc.status === 'PENDENTE' || isOpeningFile}
-                  onClick={() => handleViewDocumentFile(selectedDoc)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs ${
-                    selectedDoc.status === 'PENDENTE'
-                      ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed border border-slate-200 dark:border-slate-700'
-                      : 'bg-[#065373] hover:bg-[#05435c] text-white'
-                  }`}
-                  title={
-                    selectedDoc.status === 'PENDENTE'
-                      ? 'Documento ainda não enviado pelo aluno'
-                      : 'Abrir arquivo digital'
-                  }
-                >
-                  {isOpeningFile ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  )}
-                  <span>Visualizar Arquivo</span>
-                </button>
-
-                {selectedDoc.status === 'APROVADO' ? (
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                      <span>Documento Aprovado</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setValidateModalState({ doc: selectedDoc, action: 'RECUSADO' })}
-                      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900 transition-colors"
-                      title="Reverter aprovação e recusar com justificativa"
-                    >
-                      Alterar para Recusado
-                    </button>
-                  </div>
-                ) : selectedDoc.status === 'RECUSADO' ? (
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 border border-rose-300 dark:border-rose-800">
-                      <XCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
-                      <span>Documento Recusado</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setValidateModalState({ doc: selectedDoc, action: 'APROVADO' })}
-                      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 transition-colors"
-                    >
-                      Reavaliar e Aprovar
-                    </button>
-                  </div>
+                {isOpeningFile ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      disabled={selectedDoc.status === 'PENDENTE'}
-                      onClick={() => setValidateModalState({ doc: selectedDoc, action: 'APROVADO' })}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-2xs hover:shadow-xs ${
-                        selectedDoc.status === 'PENDENTE'
-                          ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-200 dark:border-slate-700'
-                          : 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer'
-                      }`}
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Aprovar</span>
-                    </button>
-                    <button
-                      type="button"
-                      disabled={selectedDoc.status === 'PENDENTE'}
-                      onClick={() => setValidateModalState({ doc: selectedDoc, action: 'RECUSADO' })}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-2xs hover:shadow-xs ${
-                        selectedDoc.status === 'PENDENTE'
-                          ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-200 dark:border-slate-700'
-                          : 'bg-rose-600 hover:bg-rose-700 text-white cursor-pointer'
-                      }`}
-                    >
-                      <XCircle className="w-3.5 h-3.5" />
-                      <span>Recusar</span>
-                    </button>
-                  </div>
+                  <Eye className="w-3.5 h-3.5" />
                 )}
-              </div>
+                <span>Visualizar Arquivo</span>
+              </button>
             </div>
+          ) : (
+            <div className="p-4 bg-slate-50/70 dark:bg-slate-800/40 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 text-center">
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Documento Pendente de Envio
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                O aprendiz ainda não enviou este comprovante no portal.
+              </p>
+            </div>
+          )}
 
-            {/* Document Metadata Details Card */}
-            <div className="bg-slate-50/60 dark:bg-slate-800/60 rounded-xl border border-slate-200/80 dark:border-slate-700/60 p-4 space-y-4 text-xs shadow-2xs">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                  <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Titular</span>
-                  <p className="font-bold text-slate-950 dark:text-white">{student.nome}</p>
-                </div>
-
-                <div>
-                  <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">CPF</span>
-                  <p className="font-mono font-bold text-slate-950 dark:text-white">{student.cpf}</p>
-                </div>
-
-                {isCtpsOrContract && student.contratoAtivo && (
-                  <div>
-                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Nº do Contrato</span>
-                    <p className="font-mono font-bold text-slate-950 dark:text-white">{student.contratoAtivo.numeroContrato}</p>
-                  </div>
-                )}
-
-                {isCtpsOrContract && student.contratoAtivo && (
-                  <div>
-                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Vigência Contratual</span>
-                    <p className="font-semibold text-slate-950 dark:text-white">
-                      {student.contratoAtivo.dataInicio} até {student.contratoAtivo.dataFim}
-                    </p>
-                  </div>
-                )}
-
-                {isCtpsOrContract && student.contratoAtivo?.valorBolsa && (
-                  <div>
-                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">
-                      {student.tipoVinculo === 'APRENDIZ' ? 'Salário / Bolsa' : 'Bolsa-Auxílio'}
-                    </span>
-                    <p className="font-bold text-emerald-700 dark:text-emerald-400">
-                      R$ {typeof student.contratoAtivo.valorBolsa === 'number'
-                        ? student.contratoAtivo.valorBolsa.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                        : student.contratoAtivo.valorBolsa}
-                    </p>
-                  </div>
-                )}
-
-                {selectedDoc.conteudoSensivelSimulado?.rgNumero && (
-                  <div>
-                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">RG</span>
-                    <p className="font-mono font-bold text-slate-950 dark:text-white">{selectedDoc.conteudoSensivelSimulado.rgNumero}</p>
-                  </div>
-                )}
-
-                {selectedDoc.conteudoSensivelSimulado?.rgFiliacaoMae && (
-                  <div>
-                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Filiação</span>
-                    <p className="font-semibold text-slate-950 dark:text-white">{selectedDoc.conteudoSensivelSimulado.rgFiliacaoMae}</p>
-                  </div>
-                )}
-
-                {selectedDoc.conteudoSensivelSimulado?.enderecoCompleto && (
-                  <div className="sm:col-span-2">
-                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Endereço</span>
-                    <p className="font-semibold text-slate-950 dark:text-white">{selectedDoc.conteudoSensivelSimulado.enderecoCompleto}</p>
-                  </div>
-                )}
-
-                {selectedDoc.conteudoSensivelSimulado?.semestreAtual && (
-                  <div>
-                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block mb-0.5">Semestre Letivo</span>
-                    <p className="font-bold text-slate-950 dark:text-white">{selectedDoc.conteudoSensivelSimulado.semestreAtual}</p>
-                  </div>
-                )}
+          {/* (3) Grid limpo com os dados de conferência e campos específicos da modalidade */}
+          <div className="bg-slate-50/50 dark:bg-slate-800/30 rounded-lg border border-slate-200 dark:border-slate-800 p-4 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                  Titular
+                </span>
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                  {student.nome}
+                </p>
               </div>
 
-              {/* Expiration warning note if applicable */}
-              {selectedDoc.validadeAte && (
-                <div className="p-2.5 bg-amber-50 dark:bg-[#78350f] border border-amber-200 dark:border dark:border-amber-600 rounded-lg text-amber-950 dark:text-white text-[11px] flex items-center justify-between">
-                  <span>Validade: <strong>{selectedDoc.validadeAte}</strong></span>
-                  <span className="font-bold">
-                    {selectedDoc.diasParaVencer && selectedDoc.diasParaVencer > 0
-                      ? `${selectedDoc.diasParaVencer} dias restantes`
-                      : 'Vencido'}
+              <div>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                  CPF
+                </span>
+                <p className="text-sm font-mono font-semibold text-slate-900 dark:text-white">
+                  {student.cpf}
+                </p>
+              </div>
+
+              <div>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                  Instituição de Ensino
+                </span>
+                <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                  {student.instituicao || 'Não informada'}
+                </p>
+              </div>
+
+              <div>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                  Empresa Concedente
+                </span>
+                <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                  {student.empresa || 'Não informada'}
+                </p>
+              </div>
+
+              {isAprendiz ? (
+                <>
+                  <div>
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                      CTPS / Série
+                    </span>
+                    <p className="text-xs font-mono font-semibold text-slate-900 dark:text-white">
+                      {student.dadosAprendiz?.numeroCtps || 'Não informado'}
+                      {student.dadosAprendiz?.serieCtps
+                        ? ` • Série ${student.dadosAprendiz.serieCtps}`
+                        : ''}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                      CBO / Contrato Aprendizagem
+                    </span>
+                    <p className="text-xs font-mono font-semibold text-slate-900 dark:text-white">
+                      {student.dadosAprendiz?.cbo || '—'} •{' '}
+                      {student.dadosAprendiz?.numeroContratoAprendizagem ||
+                        student.contratoAtivo?.numeroContrato ||
+                        'Não informado'}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                      Número do TCE
+                    </span>
+                    <p className="text-xs font-mono font-semibold text-slate-900 dark:text-white">
+                      {student.dadosEstagiario?.numeroTce ||
+                        student.contratoAtivo?.numeroContrato ||
+                        'Não informado'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                      Apólice de Seguro / Seguradora
+                    </span>
+                    <p className="text-xs font-semibold text-slate-900 dark:text-white">
+                      <span className="font-mono">
+                        {student.dadosEstagiario?.apoliceSeguro || 'Não informada'}
+                      </span>
+                      {student.dadosEstagiario?.seguradora
+                        ? ` (${student.dadosEstagiario.seguradora})`
+                        : ''}
+                    </p>
+                  </div>
+                  {(student.dadosEstagiario?.supervisorEmpresa ||
+                    student.dadosEstagiario?.semestreAtual) && (
+                    <>
+                      <div>
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                          Supervisor na Empresa
+                        </span>
+                        <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                          {student.dadosEstagiario?.supervisorEmpresa || 'Não informado'}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                          Curso / Semestre
+                        </span>
+                        <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                          {student.dadosEstagiario?.cursoSuperiorTecnico || student.curso}
+                          {student.dadosEstagiario?.semestreAtual
+                            ? ` • ${student.dadosEstagiario.semestreAtual}`
+                            : ''}
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+
+              {isCtpsOrContract && student.contratoAtivo && (
+                <div>
+                  <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                    Vigência Contratual
                   </span>
+                  <p className="text-xs font-semibold text-slate-900 dark:text-white">
+                    {student.contratoAtivo.dataInicio} até {student.contratoAtivo.dataFim}
+                  </p>
                 </div>
               )}
             </div>
 
-            {selectedDoc.status !== 'PENDENTE' ? (
-              <div className="p-4 bg-sky-50/60 dark:bg-slate-800/80 rounded-xl border border-sky-200/80 dark:border-slate-700 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-[#065373]/10 dark:bg-cyan-500/10 flex items-center justify-center text-[#065373] dark:text-cyan-400">
-                      <FileText className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-xs text-slate-900 dark:text-white">
-                        {selectedDoc.nomeArquivoOriginal || `${selectedDoc.nomeExibicao}.pdf`}
-                      </p>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                        {selectedDoc.tamanhoBytes ? formatBytes(selectedDoc.tamanhoBytes) : 'Arquivo enviado'} • Custódia Digital Verificada
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    disabled={isOpeningFile}
-                    onClick={() => handleViewDocumentFile(selectedDoc)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#065373] hover:bg-[#05435c] text-white transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
-                  >
-                    {isOpeningFile ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Eye className="w-3.5 h-3.5" />
-                    )}
-                    <span>Abrir Documento</span>
-                  </button>
-                </div>
-
-                {selectedDoc.fileHashSha256 && (
-                  <div className="p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 text-[10px] font-mono">
-                    <div className="flex items-center gap-1.5 truncate">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                      <span className="text-slate-500 dark:text-slate-400">SHA-256:</span>
-                      <span className="text-slate-800 dark:text-slate-200 truncate">
-                        {selectedDoc.fileHashSha256}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleCopyHash(selectedDoc.fileHashSha256 || '')}
-                      className="p-1 rounded text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors shrink-0"
-                      title="Copiar Hash SHA-256"
-                    >
-                      {copiedHash ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-600" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 text-center space-y-1">
-                <Clock className="w-5 h-5 text-amber-500 mx-auto" />
-                <p className="font-bold text-xs text-slate-800 dark:text-slate-200">
-                  Documento Pendente de Envio
-                </p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  O aprendiz ainda não realizou o upload deste comprovante no Portal do Estudante.
-                </p>
+            {selectedDoc.justificativaRecusa && selectedDoc.status === 'RECUSADO' && (
+              <div className="border-l-4 border-l-rose-500 bg-rose-500/5 dark:bg-rose-500/10 rounded-r-lg p-3 mt-2 text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
+                <strong className="font-bold text-rose-600 dark:text-rose-400">
+                  Motivo da recusa:{' '}
+                </strong>
+                <span>{selectedDoc.justificativaRecusa}</span>
               </div>
             )}
           </div>
-        </div>
-      </div>
 
-      {/* Validate Modal */}
-      {validateModalState && (
-        <ValidateModal
-          student={student}
-          document={validateModalState.doc}
-          initialAction={validateModalState.action}
-          onClose={() => setValidateModalState(null)}
-        />
+          {/* (4) Área inline de justificativa obrigatória + barra de decisão */}
+          <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+            {isRejecting && (
+              <div className="border border-rose-500/30 bg-rose-500/5 rounded-lg p-4 mb-4 space-y-3 animate-fadeIn">
+                <label
+                  htmlFor="rejection-reason"
+                  className="block text-xs font-semibold text-slate-800 dark:text-slate-200"
+                >
+                  Motivo da recusa
+                </label>
+                <textarea
+                  id="rejection-reason"
+                  rows={3}
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Descreva o que precisa ser corrigido neste documento..."
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 text-base sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-rose-500 focus:outline-none transition-colors"
+                />
+                <div className="flex items-center justify-end gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsRejecting(false);
+                      setRejectionReason('');
+                    }}
+                    className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!rejectionReason.trim()}
+                    onClick={handleConfirmReject}
+                    className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Confirmar Recusa
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <button
+                type="button"
+                disabled={
+                  isRejecting ||
+                  selectedDoc.status === 'PENDENTE' ||
+                  selectedDoc.status === 'RECUSADO'
+                }
+                onClick={() => setIsRejecting(true)}
+                className="px-4 py-2.5 rounded-lg text-xs font-medium bg-rose-600 hover:bg-rose-700 text-white transition-colors shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+              >
+                <XCircle className="w-3.5 h-3.5" />
+                <span>Recusar Documento</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={selectedDoc.status === 'PENDENTE' || selectedDoc.status === 'APROVADO'}
+                onClick={() => {
+                  setIsRejecting(false);
+                  setRejectionReason('');
+                  evaluateDocument(student.id, selectedDoc.id, 'APROVADO');
+                }}
+                className="px-4 py-2.5 rounded-lg text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white transition-colors shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Aprovar Documento</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="p-12 text-center text-xs text-slate-500 dark:text-slate-400">
+          Nenhum documento disponível para este aprendiz.
+        </div>
       )}
     </div>
   );
 }
-

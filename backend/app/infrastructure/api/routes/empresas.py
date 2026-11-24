@@ -26,6 +26,7 @@ async def create_empresa(
         razao_social=payload.razao_social,
         nome_fantasia=payload.nome_fantasia,
         cnpj=payload.cnpj,
+        cidade=payload.cidade,
         ramo_atividade=payload.ramo_atividade
     )
 

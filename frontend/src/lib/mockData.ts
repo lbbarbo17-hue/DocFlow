@@ -1,4 +1,31 @@
-import { Student, Turma, Empresa, AuditLog, SystemUser } from './types';
+import { Student, Turma, Empresa, Instituicao, AuditLog, SystemUser } from './types';
+
+export const INITIAL_INSTITUICOES: Instituicao[] = [
+  {
+    id: 'inst-01',
+    razaoSocial: 'ETEC Politécnica de São Paulo',
+    nomeFantasia: 'ETEC Politécnica',
+    cnpj: '62.823.257/0001-09',
+    cidade: 'São Paulo/SP',
+    codigoMec: '35004810',
+  },
+  {
+    id: 'inst-02',
+    razaoSocial: 'SENAI Roberto Simonsen',
+    nomeFantasia: 'SENAI Brás',
+    cnpj: '03.774.819/0001-02',
+    cidade: 'São Paulo/SP',
+    codigoMec: '35012944',
+  },
+  {
+    id: 'inst-03',
+    razaoSocial: 'FATEC São Paulo',
+    nomeFantasia: 'FATEC-SP',
+    cnpj: '62.823.257/0050-97',
+    cidade: 'São Paulo/SP',
+    codigoMec: '35000019',
+  },
+];
 
 export const INITIAL_EMPRESAS: Empresa[] = [
   {
@@ -9,6 +36,7 @@ export const INITIAL_EMPRESAS: Empresa[] = [
     ramoAtuacao: 'Tecnologia da Informação',
     contatoRh: 'Mariana Duarte',
     emailRh: 'rh@techcorp.com.br',
+    cidade: 'São Paulo/SP',
     cidadeUf: 'São Paulo/SP',
   },
   {
@@ -19,6 +47,7 @@ export const INITIAL_EMPRESAS: Empresa[] = [
     ramoAtuacao: 'Consultoria e Software',
     contatoRh: 'Fernando Costa',
     emailRh: 'talentos@inovatech.com.br',
+    cidade: 'São Paulo/SP',
     cidadeUf: 'São Paulo/SP',
   },
   {
@@ -29,6 +58,7 @@ export const INITIAL_EMPRESAS: Empresa[] = [
     ramoAtuacao: 'Logística',
     contatoRh: 'Camila Peixoto',
     emailRh: 'rh@alphalog.com.br',
+    cidade: 'Campinas/SP',
     cidadeUf: 'Campinas/SP',
   },
   {
@@ -39,6 +69,7 @@ export const INITIAL_EMPRESAS: Empresa[] = [
     ramoAtuacao: 'Engenharia',
     contatoRh: 'Rodrigo Lima',
     emailRh: 'contato@nexuseng.com.br',
+    cidade: 'São Bernardo do Campo/SP',
     cidadeUf: 'São Bernardo do Campo/SP',
   },
 ];

@@ -19,6 +19,18 @@ class Usuario(Base, UUIDPrimaryKeyMixin, TimestampMixin, TenantScopedMixin):
         nullable=False,
         index=True
     )
+    instituicao_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("instituicoes.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True
+    )
+    empresa_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("empresas.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True
+    )
     email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     nome: Mapped[str] = mapped_column(String(255), nullable=False)
     perfil: Mapped[PerfilUsuario] = mapped_column(

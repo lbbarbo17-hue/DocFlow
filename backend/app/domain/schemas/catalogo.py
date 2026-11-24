@@ -8,6 +8,7 @@ class InstituicaoBase(BaseModel):
     razao_social: str = Field(min_length=2, max_length=255)
     nome_fantasia: Optional[str] = Field(default=None, max_length=255)
     cnpj: str = Field(min_length=14, max_length=18)
+    cidade: Optional[str] = Field(default=None, max_length=120)
     codigo_mec: Optional[str] = Field(default=None, max_length=50)
 
     @field_validator("cnpj", mode="before")
@@ -24,6 +25,7 @@ class InstituicaoUpdate(BaseModel):
     razao_social: Optional[str] = Field(default=None, min_length=2, max_length=255)
     nome_fantasia: Optional[str] = Field(default=None, max_length=255)
     cnpj: Optional[str] = Field(default=None, min_length=14, max_length=18)
+    cidade: Optional[str] = Field(default=None, max_length=120)
     codigo_mec: Optional[str] = Field(default=None, max_length=50)
     ativo: Optional[bool] = None
 
@@ -47,6 +49,7 @@ class EmpresaBase(BaseModel):
     razao_social: str = Field(min_length=2, max_length=255)
     nome_fantasia: Optional[str] = Field(default=None, max_length=255)
     cnpj: str = Field(min_length=14, max_length=18)
+    cidade: Optional[str] = Field(default=None, max_length=120)
     ramo_atividade: Optional[str] = Field(default=None, max_length=100)
 
     @field_validator("cnpj", mode="before")
@@ -63,6 +66,7 @@ class EmpresaUpdate(BaseModel):
     razao_social: Optional[str] = Field(default=None, min_length=2, max_length=255)
     nome_fantasia: Optional[str] = Field(default=None, max_length=255)
     cnpj: Optional[str] = Field(default=None, min_length=14, max_length=18)
+    cidade: Optional[str] = Field(default=None, max_length=120)
     ramo_atividade: Optional[str] = Field(default=None, max_length=100)
     ativo: Optional[bool] = None
 

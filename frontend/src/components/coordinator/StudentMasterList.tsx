@@ -581,9 +581,20 @@ export default function StudentMasterList({
           <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
             {s.nome}
           </p>
-          <span className={`text-[11px] font-medium px-2 py-0.5 rounded-md shrink-0 ${badge.className}`}>
-            {badge.label}
-          </span>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span
+              className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md ${
+                s.tipoVinculo === 'APRENDIZ'
+                  ? 'bg-[#085078]/10 text-[#085078] dark:bg-cyan-500/10 dark:text-cyan-400 border border-[#085078]/20 dark:border-cyan-500/20'
+                  : 'bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20'
+              }`}
+            >
+              {s.tipoVinculo === 'APRENDIZ' ? 'Aprendiz' : 'Estagiário'}
+            </span>
+            <span className={`text-[11px] font-medium px-2 py-0.5 rounded-md ${badge.className}`}>
+              {badge.label}
+            </span>
+          </div>
         </div>
 
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate">

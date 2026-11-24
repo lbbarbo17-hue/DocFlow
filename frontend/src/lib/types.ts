@@ -63,6 +63,23 @@ export interface DocumentItem {
   };
 }
 
+export interface DadosAprendiz {
+  numeroCtps?: string;
+  serieCtps?: string;
+  cbo?: string;
+  cursoAprendizagem?: string;
+  numeroContratoAprendizagem?: string;
+}
+
+export interface DadosEstagiario {
+  numeroTce?: string;
+  apoliceSeguro?: string;
+  seguradora?: string;
+  supervisorEmpresa?: string;
+  cursoSuperiorTecnico?: string;
+  semestreAtual?: string;
+}
+
 export interface Student {
   id: string;
   nome: string;
@@ -81,12 +98,16 @@ export interface Student {
   turmaNome: string;
   curso: string;
   empresa: string;
+  empresaId?: string;
   instituicao?: string;
+  instituicaoId?: string;
   avatarUrl?: string;
   documentos: DocumentItem[];
   percentualConformidade: number;
   nivelRisco: NivelRisco;
   statusGeral: 'REGULAR' | 'PENDENTE' | 'ALERTA_CRITICO';
+  dadosAprendiz?: DadosAprendiz;
+  dadosEstagiario?: DadosEstagiario;
   contratoAtivo?: {
     id: string;
     numeroContrato: string;
@@ -95,6 +116,15 @@ export interface Student {
     valorBolsa?: string | number | null;
     ativo: boolean;
   };
+}
+
+export interface Instituicao {
+  id: string;
+  razaoSocial: string;
+  nomeFantasia?: string;
+  cnpj: string;
+  cidade?: string;
+  codigoMec?: string;
 }
 
 export interface Turma {
@@ -118,6 +148,7 @@ export interface Empresa {
   contatoRh: string;
   emailRh: string;
   telefone?: string;
+  cidade?: string;
   cidadeUf?: string;
 }
 
@@ -130,7 +161,11 @@ export interface SystemUser {
   cargo: string;
   status: 'ATIVO' | 'INATIVO';
   ultimoAcesso: string;
+  affiliationType?: 'INSTITUICAO' | 'EMPRESA';
   instituicao?: string;
+  instituicaoId?: string;
+  empresa?: string;
+  empresaId?: string;
   avatarUrl?: string;
   telefone?: string;
   cpf?: string;

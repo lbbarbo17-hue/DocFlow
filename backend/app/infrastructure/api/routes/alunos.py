@@ -3,8 +3,9 @@ import csv
 import io
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, status, Response
+from app.domain.enums import TipoVinculo, TipoDocumento
 from app.domain.schemas.aluno import AlunoCreate, AlunoUpdate, AlunoRead
-from app.infrastructure.database.models.aluno import Aluno
+from app.infrastructure.database.models.aluno import Aluno, DadosAprendiz, DadosEstagiario
 from app.infrastructure.repositories.aluno_repository import SQLAlchemyAlunoRepository
 from app.infrastructure.repositories.usuario_repository import SQLAlchemyUsuarioRepository
 from app.infrastructure.api.dependencies import get_current_tenant_id, get_aluno_repository, get_storage_service, get_usuario_repository
@@ -12,6 +13,24 @@ from app.application.services.file_validator import compute_file_hash_and_size
 from app.application.services.storage_service import R2StorageService
 
 router = APIRouter(prefix="/alunos", tags=["Alunos"])
+
+
+def get_required_documents_by_vinculo(tipo_vinculo: TipoVinculo) -> List[dict]:
+    base_docs = [
+        {"tipo": TipoDocumento.RG.value, "nome": "RG"},
+        {"tipo": TipoDocumento.CPF.value, "nome": "CPF"},
+        {"tipo": TipoDocumento.COMPROVANTE_RESIDENCIA.value, "nome": "Comprovante de Residência"},
+    ]
+    if tipo_vinculo == TipoVinculo.ESTAGIARIO:
+        return base_docs + [
+            {"tipo": TipoDocumento.COMPROVANTE_MATRICULA.value, "nome": "Declaração de Matrícula"},
+            {"tipo": TipoDocumento.TERMO_COMPROMISSO_ESTAGIO.value, "nome": "Termo de Compromisso de Estágio (TCE)"},
+            {"tipo": TipoDocumento.APOLICE_SEGURO.value, "nome": "Apólice de Seguro"},
+        ]
+    return base_docs + [
+        {"tipo": TipoDocumento.COMPROVANTE_MATRICULA.value, "nome": "Frequência Escolar"},
+        {"tipo": TipoDocumento.CONTRATO_APRENDIZAGEM.value, "nome": "Contrato de Aprendizagem (CTPS)"},
+    ]
 
 @router.post("", response_model=AlunoRead, status_code=status.HTTP_201_CREATED)
 async def create_aluno(
@@ -54,11 +73,19 @@ async def create_aluno(
         cpf=aluno_in.cpf,
         email=aluno_in.email,
         matricula=aluno_in.matricula,
+        tipo_vinculo=aluno_in.tipo_vinculo,
         status=aluno_in.status,
         instituicao_id=aluno_in.instituicao_id,
         empresa_id=aluno_in.empresa_id,
         turma_id=aluno_in.turma_id
     )
+
+    if aluno_in.tipo_vinculo == TipoVinculo.APRENDIZ:
+        ap_data = aluno_in.dados_aprendiz.model_dump() if aluno_in.dados_aprendiz else {}
+        novo_aluno.dados_aprendiz = DadosAprendiz(tenant_id=tenant_id, **ap_data)
+    elif aluno_in.tipo_vinculo == TipoVinculo.ESTAGIARIO:
+        est_data = aluno_in.dados_estagiario.model_dump() if aluno_in.dados_estagiario else {}
+        novo_aluno.dados_estagiario = DadosEstagiario(tenant_id=tenant_id, **est_data)
 
     aluno_criado = await repo.create(novo_aluno)
     return aluno_criado
@@ -114,6 +141,26 @@ async def get_aluno(
         )
     return aluno
 
+@router.get("/{aluno_id}/documentos-obrigatorios", status_code=status.HTTP_200_OK)
+async def get_aluno_required_documents(
+    aluno_id: uuid.UUID,
+    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    repo: SQLAlchemyAlunoRepository = Depends(get_aluno_repository)
+):
+    aluno = await repo.get_by_id(entity_id=aluno_id, tenant_id=tenant_id)
+    if not aluno:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Aluno nao encontrado."
+        )
+    vinculo = getattr(aluno, "tipo_vinculo", None) or TipoVinculo.APRENDIZ
+    return {
+        "aluno_id": str(aluno.id),
+        "tipo_vinculo": vinculo.value if hasattr(vinculo, "value") else str(vinculo),
+        "documentos": get_required_documents_by_vinculo(vinculo),
+    }
+
+
 @router.patch("/{aluno_id}", response_model=AlunoRead, status_code=status.HTTP_200_OK)
 async def update_aluno(
     aluno_id: uuid.UUID,
@@ -129,8 +176,25 @@ async def update_aluno(
         )
 
     update_data = aluno_in.model_dump(exclude_unset=True)
+    dados_aprendiz_in = update_data.pop("dados_aprendiz", None)
+    dados_estagiario_in = update_data.pop("dados_estagiario", None)
+
     for field, value in update_data.items():
         setattr(aluno, field, value)
+
+    if dados_aprendiz_in is not None:
+        if aluno.dados_aprendiz is not None:
+            for k, v in dados_aprendiz_in.items():
+                setattr(aluno.dados_aprendiz, k, v)
+        else:
+            aluno.dados_aprendiz = DadosAprendiz(tenant_id=tenant_id, **dados_aprendiz_in)
+
+    if dados_estagiario_in is not None:
+        if aluno.dados_estagiario is not None:
+            for k, v in dados_estagiario_in.items():
+                setattr(aluno.dados_estagiario, k, v)
+        else:
+            aluno.dados_estagiario = DadosEstagiario(tenant_id=tenant_id, **dados_estagiario_in)
 
     aluno_atualizado = await repo.update(aluno)
     return aluno_atualizado

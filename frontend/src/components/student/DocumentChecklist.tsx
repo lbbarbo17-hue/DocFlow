@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import {
   Upload,
-  AlertCircle,
   FileText,
   Eye,
   Calendar,
@@ -26,11 +26,14 @@ export default function DocumentChecklist() {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedDocs, setExpandedDocs] = useState<Record<string, boolean>>({});
 
-  const toggleDoc = (id: string) => {
-    setExpandedDocs((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+  const toggleDoc = (id: string, defaultExpanded = false) => {
+    setExpandedDocs((prev) => {
+      const current = prev[id] !== undefined ? prev[id] : defaultExpanded;
+      return {
+        ...prev,
+        [id]: !current,
+      };
+    });
   };
 
   const getStatusBorder = (status: StatusDocumento) => {
@@ -166,7 +169,8 @@ export default function DocumentChecklist() {
             const isApproved = doc.status === 'APROVADO';
             const isInReview = doc.status === 'EM_ANALISE';
             const isRejected = doc.status === 'RECUSADO';
-            const isExpanded = !!expandedDocs[doc.id];
+            const isExpanded =
+              expandedDocs[doc.id] !== undefined ? expandedDocs[doc.id] : isRejected;
             const statusBorder = getStatusBorder(doc.status);
 
             // Badge de status correspondente
@@ -207,11 +211,11 @@ export default function DocumentChecklist() {
                 <div
                   role="button"
                   tabIndex={0}
-                  onClick={() => toggleDoc(doc.id)}
+                  onClick={() => toggleDoc(doc.id, isRejected)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      toggleDoc(doc.id);
+                      toggleDoc(doc.id, isRejected);
                     }
                   }}
                   aria-expanded={isExpanded}
@@ -374,16 +378,23 @@ export default function DocumentChecklist() {
                         )}
                       </div>
 
-                      {/* Motivo de recusa ou observações da instituição (caso exista) */}
-                      {doc.justificativaRecusa && (
-                        <div className="p-3 bg-rose-50/90 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/70 rounded-lg text-xs space-y-1">
-                          <div className="flex items-center gap-1.5 font-bold text-rose-700 dark:text-rose-300">
-                            <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
-                            <span>Motivo da recusa / Correção necessária:</span>
-                          </div>
-                          <p className="text-rose-700 dark:text-rose-300 pl-5.5 leading-relaxed">
-                            {doc.justificativaRecusa}
+                      {/* Motivo da recusa (quando Recusado e com justificativa salva) */}
+                      {isRejected && doc.justificativaRecusa && (
+                        <div className="border-l-4 border-l-rose-500 bg-rose-500/5 dark:bg-rose-500/10 rounded-r-lg p-3 mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
+                            <strong className="font-bold text-rose-600 dark:text-rose-400">
+                              Motivo da recusa:{' '}
+                            </strong>
+                            <span>{doc.justificativaRecusa}</span>
                           </p>
+
+                          <Link
+                            href={`/estudante/enviar?doc=${doc.id}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-[#085078] hover:bg-[#063f60] text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors shrink-0 self-start sm:self-center inline-flex items-center justify-center"
+                          >
+                            Reenviar Documento
+                          </Link>
                         </div>
                       )}
 

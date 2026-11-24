@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import {
   UploadCloud,
   Upload,
@@ -75,12 +76,18 @@ const SUPPLEMENTARY_DOCUMENT_OPTIONS = [
   },
 ];
 
-export default function AdicionarDocumentoPage() {
+function AdicionarDocumentoContent() {
   const { student, uploadStudentDocument, addNewDocumentToStudent } = useApp();
+  const searchParams = useSearchParams();
+  const docParam = searchParams.get('doc');
 
   // Modo de seleção: existente no checklist ou complementar
   const [selectedDocId, setSelectedDocId] = useState<string>(
-    student.documentos.find((d) => d.status !== 'APROVADO')?.id || student.documentos[0]?.id || ''
+    docParam ||
+      student.documentos.find((d) => d.status === 'RECUSADO')?.id ||
+      student.documentos.find((d) => d.status !== 'APROVADO')?.id ||
+      student.documentos[0]?.id ||
+      ''
   );
   const [isSupplementary, setIsSupplementary] = useState<boolean>(false);
   const [selectedSupplementaryIndex, setSelectedSupplementaryIndex] = useState<number>(0);
@@ -110,6 +117,25 @@ export default function AdicionarDocumentoPage() {
   );
 
   const currentSupplementary = applicableSupplementaryOptions[selectedSupplementaryIndex] || applicableSupplementaryOptions[0];
+
+  useEffect(() => {
+    if (!docParam) return;
+    const matchedDoc = student.documentos.find((d) => d.id === docParam);
+    if (matchedDoc) {
+      if (matchedDoc.obrigatorio) {
+        setIsSupplementary(false);
+        setSelectedDocId(matchedDoc.id);
+      } else {
+        const suppIdx = applicableSupplementaryOptions.findIndex(
+          (opt) => opt.nomeExibicao === matchedDoc.nomeExibicao || opt.tipo === matchedDoc.tipo
+        );
+        if (suppIdx >= 0) {
+          setIsSupplementary(true);
+          setSelectedSupplementaryIndex(suppIdx);
+        }
+      }
+    }
+  }, [docParam, student.documentos, applicableSupplementaryOptions]);
 
   useEffect(() => {
     return () => {
@@ -427,6 +453,17 @@ export default function AdicionarDocumentoPage() {
                             <span>{badgeLabel}</span>
                           </span>
                         </div>
+
+                        {isRejected && doc.justificativaRecusa && (
+                          <div className="border-l-4 border-l-rose-500 bg-rose-500/5 dark:bg-rose-500/10 rounded-r-lg p-3 mt-2">
+                            <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
+                              <strong className="font-bold text-rose-600 dark:text-rose-400">
+                                Motivo da recusa:{' '}
+                              </strong>
+                              <span>{doc.justificativaRecusa}</span>
+                            </p>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -513,6 +550,17 @@ export default function AdicionarDocumentoPage() {
                             <span>{badgeLabel}</span>
                           </span>
                         </div>
+
+                        {isRejected && existingDoc?.justificativaRecusa && (
+                          <div className="border-l-4 border-l-rose-500 bg-rose-500/5 dark:bg-rose-500/10 rounded-r-lg p-3 mt-2">
+                            <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
+                              <strong className="font-bold text-rose-600 dark:text-rose-400">
+                                Motivo da recusa:{' '}
+                              </strong>
+                              <span>{existingDoc.justificativaRecusa}</span>
+                            </p>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -784,5 +832,20 @@ export default function AdicionarDocumentoPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdicionarDocumentoPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-12 text-center flex flex-col items-center justify-center space-y-2 text-slate-600 dark:text-slate-300 font-medium">
+          <Loader2 className="w-6 h-6 animate-spin text-[#085078] dark:text-cyan-400" />
+          <span className="text-xs">Carregando formulário de envio...</span>
+        </div>
+      }
+    >
+      <AdicionarDocumentoContent />
+    </Suspense>
   );
 }

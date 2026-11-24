@@ -30,8 +30,9 @@ export default function ExpirationAlert({ documents, onUploadClick }: Expiration
 
   const pendingMandatoryDocs = documents.filter((d) => d.obrigatorio && d.status === 'PENDENTE');
 
-  // Seleciona o documento mais urgente
-  const primaryDoc = urgentDocs[0] || pendingMandatoryDocs[0] || documents[0];
+  // Seleciona o documento mais urgente (priorizando documentos recusados)
+  const rejectedDoc = documents.find((d) => d.status === 'RECUSADO');
+  const primaryDoc = rejectedDoc || urgentDocs[0] || pendingMandatoryDocs[0] || documents[0];
 
   // Formatação amigável do prazo limite
   const deadlineDateStr = primaryDoc?.validadeAte
@@ -75,12 +76,22 @@ export default function ExpirationAlert({ documents, onUploadClick }: Expiration
               </h3>
 
               <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 leading-relaxed font-normal">
-                {primaryDoc.status === 'RECUSADO'
-                  ? primaryDoc.justificativaRecusa ||
+                {primaryDoc.status === 'RECUSADO' ? (
+                  primaryDoc.justificativaRecusa ? (
+                    <>
+                      <strong className="font-bold text-rose-600 dark:text-rose-400">
+                        Motivo da recusa:{' '}
+                      </strong>
+                      <span>{primaryDoc.justificativaRecusa}</span>
+                    </>
+                  ) : (
                     'Documento recusado na análise da coordenação pedagógica. É necessário enviar uma nova via com assinatura legível.'
-                  : primaryDoc.status === 'EXPIRADO'
-                  ? 'O prazo de validade deste termo expirou. Regularize o documento para não interromper os lançamentos da bolsa-auxílio.'
-                  : 'A renovação periódica deste termo é obrigatória para manter a conformidade do seu contrato de estágio/aprendizagem.'}
+                  )
+                ) : primaryDoc.status === 'EXPIRADO' ? (
+                  'O prazo de validade deste termo expirou. Regularize o documento para não interromper os lançamentos da bolsa-auxílio.'
+                ) : (
+                  'A renovação periódica deste termo é obrigatória para manter a conformidade do seu contrato de estágio/aprendizagem.'
+                )}
               </p>
             </div>
           </div>

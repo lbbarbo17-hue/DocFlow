@@ -166,6 +166,17 @@ export default function UploadModal({ document, onClose }: UploadModalProps) {
 
         {/* Modal Scrollable Body */}
         <div className="p-4 sm:p-6 space-y-5 overflow-y-auto flex-1">
+          {document.status === 'RECUSADO' && document.justificativaRecusa && (
+            <div className="border-l-4 border-l-rose-500 bg-rose-500/5 dark:bg-rose-500/10 rounded-r-lg p-3">
+              <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
+                <strong className="font-bold text-rose-600 dark:text-rose-400">
+                  Motivo da recusa:{' '}
+                </strong>
+                <span>{document.justificativaRecusa}</span>
+              </p>
+            </div>
+          )}
+
           {/* Document Requirement Guidelines */}
           <div className="p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-lg border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 flex items-start gap-2.5">
             <Info className="w-4 h-4 text-[#085078] dark:text-cyan-400 shrink-0 mt-0.5" />

@@ -156,6 +156,17 @@ export default function StudentHealthCard({ onUploadClick }: StudentHealthCardPr
                         </span>
                       )}
                     </div>
+
+                    {isRejected && doc.justificativaRecusa && (
+                      <div className="border-l-4 border-l-rose-500 bg-rose-500/5 dark:bg-rose-500/10 rounded-r-lg p-3 mt-2">
+                        <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
+                          <strong className="font-bold text-rose-600 dark:text-rose-400">
+                            Motivo da recusa:{' '}
+                          </strong>
+                          <span>{doc.justificativaRecusa}</span>
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Botão alinhado perfeitamente à direita */}

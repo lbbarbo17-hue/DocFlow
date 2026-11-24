@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, ArrowUpDown, ChevronDown, ChevronRight, Layers, Pencil, Trash2, X, Loader2, AlertTriangle } from 'lucide-react';
+import { Search, X, Loader2, AlertTriangle } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { getRiskBadgeConfig, cn, scrollToTop } from '@/lib/utils';
+import { cn, scrollToTop } from '@/lib/utils';
 import { TipoVinculo } from '@/lib/types';
 import DossierViewer from './DossierViewer';
 
@@ -43,8 +43,6 @@ export default function StudentMasterList({
     initialStudentId || initialDocId ? 'DOSSIER' : 'LIST'
   );
 
-  const [collapsedTurmas, setCollapsedTurmas] = useState<Record<string, boolean>>({});
-
   const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<EditFormState>({
     nome: '',
@@ -63,13 +61,6 @@ export default function StudentMasterList({
 
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const toggleTurmaCollapse = (turmaId: string) => {
-    setCollapsedTurmas((prev) => ({
-      ...prev,
-      [turmaId]: !prev[turmaId],
-    }));
-  };
 
   useEffect(() => {
     if (initialStudentId) {
@@ -124,22 +115,6 @@ export default function StudentMasterList({
       return 0;
     });
   }, [studentsList, searchTerm, selectedTurma, selectedRisk, sortBy]);
-
-  const groupedByTurma = useMemo(() => {
-    const map = new Map<string, typeof processedStudents>();
-
-    turmas.forEach((t) => {
-      map.set(t.id, []);
-    });
-
-    processedStudents.forEach((student) => {
-      const existing = map.get(student.turmaId) || [];
-      existing.push(student);
-      map.set(student.turmaId, existing);
-    });
-
-    return map;
-  }, [turmas, processedStudents]);
 
   const activeStudent =
     studentsList.find((s) => s.id === activeStudentId) || processedStudents[0] || studentsList[0];
@@ -418,87 +393,62 @@ export default function StudentMasterList({
         </div>
       )}
 
-      <div className="bg-white dark:bg-slate-900 p-5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
-        <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+      {/* 1. Barra de Filtros Única e Enxuta */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 mb-6 flex flex-col sm:flex-row gap-3 shadow-sm">
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Buscar por nome, matrícula ou empresa..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3.5 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800 text-slate-950 dark:text-white placeholder:text-slate-400 font-medium focus:outline-none focus:border-[#085078] transition-all"
+            className="w-full h-9 pl-9 pr-3 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#085078] transition-colors"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0">
+          <select
+            value={selectedTurma}
+            onChange={(e) => setSelectedTurma(e.target.value)}
+            aria-label="Filtrar por turma"
+            className="h-9 px-3 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium focus:outline-none focus:border-[#085078] cursor-pointer"
+          >
+            <option value="ALL">Todas as Turmas</option>
+            {turmas.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.codigo}
+              </option>
+            ))}
+          </select>
+
           <select
             value={selectedRisk}
             onChange={(e) => setSelectedRisk(e.target.value)}
-            className="text-xs py-1.5 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-semibold focus:outline-none focus:border-[#085078] cursor-pointer shadow-2xs"
+            aria-label="Filtrar por status"
+            className="h-9 px-3 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium focus:outline-none focus:border-[#085078] cursor-pointer"
           >
-            <option value="ALL">Todos os Riscos</option>
-            <option value="CRITICO">Risco Crítico</option>
-            <option value="MEDIO">Atenção / Médio</option>
-            <option value="BAIXO">Regular / Baixo</option>
+            <option value="ALL">Todos os Status</option>
+            <option value="CRITICO">Crítico</option>
+            <option value="MEDIO">Atenção</option>
+            <option value="BAIXO">Em Dia</option>
           </select>
 
-          <div className="flex items-center gap-1 bg-slate-50/60 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 shadow-2xs">
-            <ArrowUpDown className="w-3 h-3 text-slate-500 dark:text-slate-400 shrink-0" />
-            <select
-              value={sortBy}
-              onChange={(e) =>
-                setSortBy(
-                  e.target.value as 'URGENCIA' | 'CONFORMIDADE_ASC' | 'CONFORMIDADE_DESC' | 'NOME'
-                )
-              }
-              className="text-xs bg-transparent border-none focus:outline-none text-slate-800 dark:text-slate-100 font-semibold cursor-pointer"
-            >
-              <option value="URGENCIA">Urgência</option>
-              <option value="CONFORMIDADE_ASC">Menor Conformidade</option>
-              <option value="CONFORMIDADE_DESC">Maior Conformidade</option>
-              <option value="NOME">Nome (A - Z)</option>
-            </select>
-          </div>
+          <select
+            value={sortBy}
+            onChange={(e) =>
+              setSortBy(
+                e.target.value as 'URGENCIA' | 'CONFORMIDADE_ASC' | 'CONFORMIDADE_DESC' | 'NOME'
+              )
+            }
+            aria-label="Ordenar por"
+            className="h-9 px-3 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium focus:outline-none focus:border-[#085078] cursor-pointer"
+          >
+            <option value="URGENCIA">Ordenar por: Urgência</option>
+            <option value="CONFORMIDADE_ASC">Ordenar por: Menor Conformidade</option>
+            <option value="CONFORMIDADE_DESC">Ordenar por: Maior Conformidade</option>
+            <option value="NOME">Ordenar por: Nome (A - Z)</option>
+          </select>
         </div>
-      </div>
-
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-        <button
-          type="button"
-          onClick={() => setSelectedTurma('ALL')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
-            selectedTurma === 'ALL'
-              ? 'bg-[#085078] text-white shadow-xs'
-              : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800 shadow-2xs'
-          }`}
-        >
-          Todas as Turmas ({studentsList.length})
-        </button>
-
-        {turmas.map((t) => {
-          const count = studentsList.filter((s) => s.turmaId === t.id).length;
-          const isSelected = selectedTurma === t.id;
-
-          return (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setSelectedTurma(t.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1.5 ${
-                isSelected
-                  ? 'bg-[#085078] text-white shadow-xs'
-                  : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800 shadow-2xs'
-              }`}
-            >
-              <span>{t.codigo}</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-md font-mono font-bold ${
-                isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
-              }`}>
-                {count}
-              </span>
-            </button>
-          );
-        })}
       </div>
 
       <div className="flex lg:hidden bg-slate-100 dark:bg-slate-800/80 p-1 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xs">
@@ -535,64 +485,23 @@ export default function StudentMasterList({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        <div className={cn('lg:col-span-4 space-y-3 max-h-[750px] overflow-y-auto pr-1', mobileTab !== 'LIST' && 'hidden lg:block')}>
+        {/* 2. Coluna Esquerda: Lista Plana de Aprendizes */}
+        <div className={cn('lg:col-span-4 space-y-2.5 max-h-[750px] overflow-y-auto pr-1', mobileTab !== 'LIST' && 'hidden lg:block')}>
           {processedStudents.length === 0 ? (
-            <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-medium text-xs">
-              Nenhum estudante encontrado.
-            </div>
-          ) : selectedTurma !== 'ALL' ? (
-            <div className="space-y-2">
-              {processedStudents.map((s) => renderStudentCard(s))}
+            <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-medium text-xs">
+              Nenhum aprendiz encontrado.
             </div>
           ) : (
-            Array.from(groupedByTurma.entries()).map(([turmaId, studentsInTurma]) => {
-              if (studentsInTurma.length === 0) return null;
-              const turmaObj = turmas.find((t) => t.id === turmaId);
-              const isCollapsed = Boolean(collapsedTurmas[turmaId]);
-
-              return (
-                <div
-                  key={turmaId}
-                  className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm"
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggleTurmaCollapse(turmaId)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center justify-between text-left cursor-pointer border-b border-slate-300 dark:border-b dark:border-slate-700"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Layers className="w-3.5 h-3.5 text-[#085078] dark:text-cyan-400 shrink-0" />
-                      <span className="font-bold text-xs text-slate-950 dark:text-white truncate">
-                        {turmaObj?.codigo || 'Turma'}
-                      </span>
-                      <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 truncate hidden sm:inline">
-                        • {turmaObj?.nomeCurso}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-200/80 dark:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-600">
-                        {studentsInTurma.length}
-                      </span>
-                      {isCollapsed ? (
-                        <ChevronRight className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                      )}
-                    </div>
-                  </button>
-
-                  {!isCollapsed && (
-                    <div className="p-2.5 space-y-2.5 bg-slate-50/60 dark:bg-slate-950/30">
-                      {studentsInTurma.map((s) => renderStudentCard(s))}
-                    </div>
-                  )}
-                </div>
-              );
-            })
+            <>
+              {processedStudents.map((s) => renderStudentCard(s))}
+              <p className="text-center text-xs text-slate-500 dark:text-slate-400 pt-2">
+                {processedStudents.length} {processedStudents.length === 1 ? 'aprendiz listado' : 'aprendizes listados'}
+              </p>
+            </>
           )}
         </div>
 
+        {/* 3. Coluna Direita: Painel do Dossiê Simplificado */}
         <div className={cn('lg:col-span-8', mobileTab !== 'DOSSIER' && 'hidden lg:block')}>
           <button
             type="button"
@@ -603,32 +512,15 @@ export default function StudentMasterList({
           </button>
 
           {activeStudent ? (
-            <div className="space-y-3">
-              {currentRole === 'COORDENADOR' && (
-                <div className="flex items-center justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => openEditModal(activeStudent)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-[#085078] hover:text-[#085078] dark:hover:border-cyan-400 dark:hover:text-cyan-400 transition-all shadow-2xs cursor-pointer"
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setDeleteConfirmId(activeStudent.id)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-rose-600 dark:text-rose-400 hover:border-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all shadow-2xs cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    Excluir
-                  </button>
-                </div>
-              )}
-              <DossierViewer student={activeStudent} initialDocId={activeDocId} />
-            </div>
+            <DossierViewer
+              student={activeStudent}
+              initialDocId={activeDocId}
+              onEdit={currentRole === 'COORDENADOR' ? () => openEditModal(activeStudent) : undefined}
+              onDelete={currentRole === 'COORDENADOR' ? () => setDeleteConfirmId(activeStudent.id) : undefined}
+            />
           ) : (
             <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 font-medium text-xs shadow-sm">
-              Selecione um estudante para visualizar o dossiê.
+              Selecione um aprendiz para visualizar o dossiê.
             </div>
           )}
         </div>
@@ -638,19 +530,26 @@ export default function StudentMasterList({
 
   function renderStudentCard(s: typeof processedStudents[0]) {
     const isSelected = s.id === activeStudent?.id;
-    const riskBadge = getRiskBadgeConfig(s.nivelRisco);
+    const badge =
+      s.nivelRisco === 'CRITICO'
+        ? {
+            label: 'Crítico',
+            className: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20',
+          }
+        : s.nivelRisco === 'MEDIO'
+        ? {
+            label: 'Atenção',
+            className: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20',
+          }
+        : {
+            label: 'Em Dia',
+            className: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20',
+          };
 
-    const hasReview = s.documentos.filter((d) => d.status === 'EM_ANALISE').length;
-    const hasExpired = s.documentos.filter((d) => d.status === 'EXPIRADO').length;
-    const hasRejected = s.documentos.filter((d) => d.status === 'RECUSADO').length;
-    const hasExpiring = s.documentos.filter(
-      (d) =>
-        d.recorrente &&
-        d.status === 'APROVADO' &&
-        d.diasParaVencer !== undefined &&
-        d.diasParaVencer <= 30 &&
-        d.diasParaVencer > 0
-    ).length;
+    const turmaCodigo =
+      turmas.find((t) => t.id === s.turmaId)?.codigo ||
+      s.turmaNome?.split('—')[0]?.trim() ||
+      'Sem Turma';
 
     return (
       <div
@@ -663,60 +562,26 @@ export default function StudentMasterList({
             scrollToTop('instant');
           }
         }}
-        className={`p-3.5 rounded-lg border cursor-pointer transition-all duration-200 ${
+        className={cn(
+          'rounded-lg p-3.5 border transition-colors cursor-pointer',
           isSelected
-            ? 'bg-white dark:bg-slate-900 border-[#085078] shadow-sm ring-1 ring-[#085078]'
-            : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 border-slate-200 dark:border-slate-800 text-slate-950 dark:text-slate-100 shadow-2xs hover:shadow-sm'
-        }`}
+            ? 'border-[#085078] dark:border-cyan-500/60 bg-slate-100/80 dark:bg-slate-800/80'
+            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+        )}
       >
-        <div className="flex items-start justify-between gap-2">
-          <div className="truncate">
-            <p className="font-bold text-xs text-slate-950 dark:text-white truncate">
-              {s.nome}
-            </p>
-            {s.empresa && (
-              <p className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 truncate mt-0.5">
-                {s.empresa}
-              </p>
-            )}
-            {s.instituicao && currentRole === 'SUPERADMIN' && (
-              <p className="text-[10px] font-semibold text-purple-700 dark:text-purple-300 truncate mt-0.5 flex items-center gap-1">
-                <span>🏢 {s.instituicao}</span>
-              </p>
-            )}
-          </div>
-
-          <span
-            className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border shrink-0 ${riskBadge.bg}`}
-          >
-            {riskBadge.label}
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+            {s.nome}
+          </p>
+          <span className={`text-[11px] font-medium px-2 py-0.5 rounded-md shrink-0 ${badge.className}`}>
+            {badge.label}
           </span>
         </div>
 
-        {(hasExpired > 0 || hasRejected > 0 || hasReview > 0 || hasExpiring > 0) && (
-          <div className="mt-2.5 flex flex-wrap gap-1.5">
-            {hasExpired > 0 && (
-              <span className="text-[10px] font-semibold text-rose-900 dark:text-white bg-rose-100 dark:bg-[#7f1d1d] border border-rose-300 dark:border-red-600 px-2 py-0.5 rounded-md shadow-2xs">
-                {hasExpired} expirado
-              </span>
-            )}
-            {hasRejected > 0 && (
-              <span className="text-[10px] font-semibold text-rose-900 dark:text-white bg-rose-100 dark:bg-[#7f1d1d] border border-rose-300 dark:border-red-600 px-2 py-0.5 rounded-md shadow-2xs">
-                {hasRejected} recusado
-              </span>
-            )}
-            {hasReview > 0 && (
-              <span className="text-[10px] font-semibold text-sky-900 dark:text-white bg-sky-100 dark:bg-[#0c4a6e] border border-sky-300 dark:border-sky-500 px-2 py-0.5 rounded-md shadow-2xs">
-                {hasReview} em análise
-              </span>
-            )}
-            {hasExpiring > 0 && (
-              <span className="text-[10px] font-semibold text-amber-950 dark:text-white bg-amber-100 dark:bg-[#78350f] border border-amber-300 dark:border-amber-500 px-2 py-0.5 rounded-md shadow-2xs">
-                {hasExpiring} a vencer
-              </span>
-            )}
-          </div>
-        )}
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate">
+          {turmaCodigo}
+          {s.empresa ? ` • ${s.empresa}` : ''}
+        </p>
       </div>
     );
   }

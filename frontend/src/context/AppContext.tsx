@@ -154,6 +154,7 @@ export function mapAlunoResponseToStudent(
         ...doc,
         id: matched.id,
         status: st,
+        justificativaRecusa: matched.justificativa_recusa || undefined,
         nomeArquivoOriginal: cleanFileName,
         fileHashSha256: matched.file_hash,
         storageUuid: matched.storage_path,

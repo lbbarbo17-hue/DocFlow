@@ -10,7 +10,10 @@ export default function CoordinatorHeader() {
   const coordinatorName =
     currentUserProfile?.nome || currentCoordinatorUser?.nome || 'Coordenador Acadêmico';
   const cargo = currentCoordinatorUser?.cargo || 'Coordenador';
-  const instituicao = activeInstitution || 'Instituição Conveniada';
+  const instituicao =
+    currentCoordinatorUser?.affiliationType === 'EMPRESA' && currentCoordinatorUser?.empresa
+      ? currentCoordinatorUser.empresa
+      : activeInstitution || 'Instituição Conveniada';
   const registro = currentCoordinatorUser?.id
     ? `ID #${currentCoordinatorUser.id.toUpperCase()}`
     : null;

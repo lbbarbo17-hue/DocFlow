@@ -37,6 +37,8 @@ export interface AuthUserResponse {
   nome: string;
   perfil: string;
   tenant_id: string;
+  instituicao_id?: string | null;
+  empresa_id?: string | null;
   avatar_path?: string | null;
   ativo: boolean;
 }
@@ -87,6 +89,23 @@ export interface ConformidadeResponse {
   taxa_conformidade_percentual?: number;
 }
 
+export interface DadosAprendizApi {
+  numero_ctps?: string | null;
+  serie_ctps?: string | null;
+  cbo?: string | null;
+  curso_aprendizagem?: string | null;
+  numero_contrato_aprendizagem?: string | null;
+}
+
+export interface DadosEstagiarioApi {
+  numero_tce?: string | null;
+  apolice_seguro?: string | null;
+  seguradora?: string | null;
+  supervisor_empresa?: string | null;
+  curso_superior_tecnico?: string | null;
+  semestre_atual?: string | null;
+}
+
 export interface AlunoResponse {
   id: string;
   tenant_id: string;
@@ -94,11 +113,36 @@ export interface AlunoResponse {
   cpf: string;
   email: string;
   matricula: string;
+  tipo_vinculo?: 'APRENDIZ' | 'ESTAGIARIO';
   status: string;
   turma_id?: string | null;
   instituicao_id?: string | null;
   empresa_id?: string | null;
   avatar_path?: string | null;
+  dados_aprendiz?: DadosAprendizApi | null;
+  dados_estagiario?: DadosEstagiarioApi | null;
+  ativo: boolean;
+}
+
+export interface InstituicaoResponse {
+  id: string;
+  tenant_id: string;
+  razao_social: string;
+  nome_fantasia?: string | null;
+  cnpj: string;
+  cidade?: string | null;
+  codigo_mec?: string | null;
+  ativo: boolean;
+}
+
+export interface EmpresaResponse {
+  id: string;
+  tenant_id: string;
+  razao_social: string;
+  nome_fantasia?: string | null;
+  cnpj: string;
+  cidade?: string | null;
+  ramo_atividade?: string | null;
   ativo: boolean;
 }
 
@@ -318,6 +362,42 @@ export const turmasApi = {
   },
 };
 
+export const instituicoesApi = {
+  list: async (skip = 0, limit = 100): Promise<InstituicaoResponse[]> => {
+    return apiRequest<InstituicaoResponse[]>(`/instituicoes?skip=${skip}&limit=${limit}`);
+  },
+  create: async (payload: {
+    razao_social: string;
+    nome_fantasia?: string;
+    cnpj: string;
+    cidade?: string;
+    codigo_mec?: string;
+  }): Promise<InstituicaoResponse> => {
+    return apiRequest<InstituicaoResponse>('/instituicoes', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+};
+
+export const empresasApi = {
+  list: async (skip = 0, limit = 100): Promise<EmpresaResponse[]> => {
+    return apiRequest<EmpresaResponse[]>(`/empresas?skip=${skip}&limit=${limit}`);
+  },
+  create: async (payload: {
+    razao_social: string;
+    nome_fantasia?: string;
+    cnpj: string;
+    cidade?: string;
+    ramo_atividade?: string;
+  }): Promise<EmpresaResponse> => {
+    return apiRequest<EmpresaResponse>('/empresas', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+};
+
 export const alunosApi = {
   list: async (skip = 0, limit = 100): Promise<AlunoResponse[]> => {
     return apiRequest<AlunoResponse[]>(`/alunos?skip=${skip}&limit=${limit}`);
@@ -330,10 +410,13 @@ export const alunosApi = {
     cpf: string;
     email: string;
     matricula: string;
+    tipo_vinculo?: 'APRENDIZ' | 'ESTAGIARIO';
     status?: string;
     turma_id?: string;
     instituicao_id?: string;
     empresa_id?: string;
+    dados_aprendiz?: DadosAprendizApi;
+    dados_estagiario?: DadosEstagiarioApi;
   }): Promise<AlunoResponse> => {
     return apiRequest<AlunoResponse>('/alunos', {
       method: 'POST',
@@ -357,7 +440,13 @@ export const alunosApi = {
       nome?: string;
       email?: string;
       matricula?: string;
+      tipo_vinculo?: 'APRENDIZ' | 'ESTAGIARIO';
       status?: string;
+      instituicao_id?: string;
+      empresa_id?: string;
+      turma_id?: string;
+      dados_aprendiz?: DadosAprendizApi;
+      dados_estagiario?: DadosEstagiarioApi;
     }
   ): Promise<AlunoResponse> => {
     return apiRequest<AlunoResponse>(`/alunos/${alunoId}`, {

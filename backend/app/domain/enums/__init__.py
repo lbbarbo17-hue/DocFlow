@@ -4,6 +4,10 @@ class TipoTenant(str, enum.Enum):
     INSTITUICAO = "INSTITUICAO"
     EMPRESA = "EMPRESA"
 
+class TipoVinculo(str, enum.Enum):
+    APRENDIZ = "APRENDIZ"
+    ESTAGIARIO = "ESTAGIARIO"
+
 class PerfilUsuario(str, enum.Enum):
     ADMIN = "ADMIN"
     COORDENADOR = "COORDENADOR"
@@ -30,6 +34,7 @@ class TipoDocumento(str, enum.Enum):
     COMPROVANTE_MATRICULA = "COMPROVANTE_MATRICULA"
     CONTRATO_APRENDIZAGEM = "CONTRATO_APRENDIZAGEM"
     TERMO_COMPROMISSO_ESTAGIO = "TERMO_COMPROMISSO_ESTAGIO"
+    APOLICE_SEGURO = "APOLICE_SEGURO"
     OUTROS = "OUTROS"
 
 class AcaoAuditoria(str, enum.Enum):

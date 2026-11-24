@@ -85,7 +85,7 @@ function getShortDocName(doc: DocumentItem): string {
     case 'COMPROVANTE_RESIDENCIA':
       return 'Residência';
     case 'COMPROVANTE_MATRICULA':
-      return 'Matrícula';
+      return doc.nomeExibicao.toLowerCase().includes('frequência') ? 'Frequência' : 'Matrícula';
     case 'CONTRATO_TCE':
       return doc.nomeExibicao.toLowerCase().includes('aprendizagem') ? 'Contrato' : 'TCE';
     case 'DOC_RESPONSAVEL':
@@ -209,19 +209,31 @@ export default function DossierViewer({
     : false;
 
   const subtitleParts = [
+    student.instituicao,
     student.empresa,
     student.contratoAtivo?.numeroContrato || (student.matricula ? `Matrícula ${student.matricula}` : ''),
   ].filter(Boolean);
+
+  const isAprendiz = student.tipoVinculo === 'APRENDIZ';
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
       {/* 1. Cabeçalho do Aprendiz (dentro do card principal) */}
       <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="min-w-0">
-          <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
             <h2 className="text-lg font-bold text-slate-900 dark:text-white truncate">
               {student.nome}
             </h2>
+            <span
+              className={`text-xs px-2.5 py-0.5 rounded-md font-medium ${
+                isAprendiz
+                  ? 'bg-[#085078]/10 text-[#085078] dark:bg-cyan-500/10 dark:text-cyan-400 border border-[#085078]/20 dark:border-cyan-500/20'
+                  : 'bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20'
+              }`}
+            >
+              {isAprendiz ? 'Aprendiz' : 'Estagiário'}
+            </span>
             <span className={`text-xs px-2.5 py-0.5 rounded-md font-medium ${studentBadge.className}`}>
               {studentBadge.label}
             </span>
@@ -360,8 +372,8 @@ export default function DossierViewer({
             </div>
           )}
 
-          {/* (3) Grid limpo com os dados de conferência (Titular e CPF) */}
-          <div className="bg-slate-50/50 dark:bg-slate-800/30 rounded-lg border border-slate-200 dark:border-slate-800 p-4 space-y-3">
+          {/* (3) Grid limpo com os dados de conferência e campos específicos da modalidade */}
+          <div className="bg-slate-50/50 dark:bg-slate-800/30 rounded-lg border border-slate-200 dark:border-slate-800 p-4 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
@@ -381,25 +393,110 @@ export default function DossierViewer({
                 </p>
               </div>
 
-              {isCtpsOrContract && student.contratoAtivo && (
+              <div>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                  Instituição de Ensino
+                </span>
+                <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                  {student.instituicao || 'Não informada'}
+                </p>
+              </div>
+
+              <div>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                  Empresa Concedente
+                </span>
+                <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                  {student.empresa || 'Não informada'}
+                </p>
+              </div>
+
+              {isAprendiz ? (
                 <>
                   <div>
                     <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
-                      Nº do Contrato
+                      CTPS / Série
                     </span>
-                    <p className="text-sm font-mono font-semibold text-slate-900 dark:text-white">
-                      {student.contratoAtivo.numeroContrato}
+                    <p className="text-xs font-mono font-semibold text-slate-900 dark:text-white">
+                      {student.dadosAprendiz?.numeroCtps || 'Não informado'}
+                      {student.dadosAprendiz?.serieCtps
+                        ? ` • Série ${student.dadosAprendiz.serieCtps}`
+                        : ''}
                     </p>
                   </div>
                   <div>
                     <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
-                      Vigência Contratual
+                      CBO / Contrato Aprendizagem
                     </span>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                      {student.contratoAtivo.dataInicio} até {student.contratoAtivo.dataFim}
+                    <p className="text-xs font-mono font-semibold text-slate-900 dark:text-white">
+                      {student.dadosAprendiz?.cbo || '—'} •{' '}
+                      {student.dadosAprendiz?.numeroContratoAprendizagem ||
+                        student.contratoAtivo?.numeroContrato ||
+                        'Não informado'}
                     </p>
                   </div>
                 </>
+              ) : (
+                <>
+                  <div>
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                      Número do TCE
+                    </span>
+                    <p className="text-xs font-mono font-semibold text-slate-900 dark:text-white">
+                      {student.dadosEstagiario?.numeroTce ||
+                        student.contratoAtivo?.numeroContrato ||
+                        'Não informado'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                      Apólice de Seguro / Seguradora
+                    </span>
+                    <p className="text-xs font-semibold text-slate-900 dark:text-white">
+                      <span className="font-mono">
+                        {student.dadosEstagiario?.apoliceSeguro || 'Não informada'}
+                      </span>
+                      {student.dadosEstagiario?.seguradora
+                        ? ` (${student.dadosEstagiario.seguradora})`
+                        : ''}
+                    </p>
+                  </div>
+                  {(student.dadosEstagiario?.supervisorEmpresa ||
+                    student.dadosEstagiario?.semestreAtual) && (
+                    <>
+                      <div>
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                          Supervisor na Empresa
+                        </span>
+                        <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                          {student.dadosEstagiario?.supervisorEmpresa || 'Não informado'}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                          Curso / Semestre
+                        </span>
+                        <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                          {student.dadosEstagiario?.cursoSuperiorTecnico || student.curso}
+                          {student.dadosEstagiario?.semestreAtual
+                            ? ` • ${student.dadosEstagiario.semestreAtual}`
+                            : ''}
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+
+              {isCtpsOrContract && student.contratoAtivo && (
+                <div>
+                  <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-0.5">
+                    Vigência Contratual
+                  </span>
+                  <p className="text-xs font-semibold text-slate-900 dark:text-white">
+                    {student.contratoAtivo.dataInicio} até {student.contratoAtivo.dataFim}
+                  </p>
+                </div>
               )}
             </div>
 

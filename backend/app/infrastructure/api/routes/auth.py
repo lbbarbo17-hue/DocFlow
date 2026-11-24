@@ -44,6 +44,8 @@ async def register(
 
     novo_usuario = Usuario(
         tenant_id=user_in.tenant_id,
+        instituicao_id=user_in.instituicao_id,
+        empresa_id=user_in.empresa_id,
         email=user_in.email,
         nome=user_in.nome,
         perfil=user_in.perfil,

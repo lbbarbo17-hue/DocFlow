@@ -10,6 +10,7 @@ import DossierViewer from './DossierViewer';
 interface StudentMasterListProps {
   initialStudentId?: string;
   initialDocId?: string;
+  initialTurmaId?: string;
 }
 
 interface EditFormState {
@@ -29,10 +30,11 @@ interface EditFormState {
 export default function StudentMasterList({
   initialStudentId,
   initialDocId,
+  initialTurmaId,
 }: StudentMasterListProps) {
   const { studentsList, turmas, currentRole, updateStudent, removeStudent, setToastMessage } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTurma, setSelectedTurma] = useState<string>('ALL');
+  const [selectedTurma, setSelectedTurma] = useState<string>(initialTurmaId || 'ALL');
   const [selectedRisk, setSelectedRisk] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState<'URGENCIA' | 'CONFORMIDADE_ASC' | 'CONFORMIDADE_DESC' | 'NOME'>('URGENCIA');
   const [activeStudentId, setActiveStudentId] = useState<string>(
@@ -73,6 +75,12 @@ export default function StudentMasterList({
       setActiveDocId(initialDocId);
     }
   }, [initialDocId]);
+
+  useEffect(() => {
+    if (initialTurmaId) {
+      setSelectedTurma(initialTurmaId);
+    }
+  }, [initialTurmaId]);
 
   const processedStudents = useMemo(() => {
     const filtered = studentsList.filter((s) => {

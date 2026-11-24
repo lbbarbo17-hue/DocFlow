@@ -298,6 +298,24 @@ export const turmasApi = {
       body: JSON.stringify(payload),
     });
   },
+  update: async (
+    turmaId: string,
+    payload: {
+      codigo?: string;
+      nome?: string;
+      semestre_referencia?: string;
+    }
+  ): Promise<TurmaResponse> => {
+    return apiRequest<TurmaResponse>(`/turmas/${turmaId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  },
+  delete: async (turmaId: string): Promise<void> => {
+    await apiRequest<void>(`/turmas/${turmaId}`, {
+      method: 'DELETE',
+    });
+  },
 };
 
 export const alunosApi = {

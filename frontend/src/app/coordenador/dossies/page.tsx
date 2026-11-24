@@ -11,6 +11,7 @@ function DossiesContent() {
 
   const studentParam = searchParams.get('student') || undefined;
   const docParam = searchParams.get('doc') || undefined;
+  const turmaParam = searchParams.get('turma') || undefined;
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -32,6 +33,7 @@ function DossiesContent() {
       <StudentMasterList
         initialStudentId={studentParam}
         initialDocId={docParam}
+        initialTurmaId={turmaParam}
       />
     </div>
   );

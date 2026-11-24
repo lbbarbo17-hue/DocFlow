@@ -2,25 +2,12 @@
 
 import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Eye, EyeOff, Copy, Check } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { TipoVinculo } from '@/lib/types';
-import Link from 'next/link';
 import { alunosApi, contratosApi, authApi, getTenantId } from '@/lib/api';
 import { scrollToTop } from '@/lib/utils';
-import {
-  UserPlus,
-  FolderPlus,
-  Building2,
-  Check,
-  CalendarDays,
-  KeyRound,
-  Eye,
-  EyeOff,
-  GraduationCap,
-  Briefcase,
-  Mail,
-  FileSignature,
-} from 'lucide-react';
 
 const formatCPF = (val: string) => {
   const digits = val.replace(/\D/g, '').slice(0, 11);
@@ -29,6 +16,15 @@ const formatCPF = (val: string) => {
     .replace(/(\d{3})(\d)/, '$1.$2')
     .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 };
+
+function formatShortDate(dateStr?: string): string {
+  if (!dateStr) return 'Recente';
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return dateStr;
+}
 
 const DEFAULT_EMPRESAS_GRUPO = [
   'TechCorp Soluções Digitais S.A.',
@@ -63,6 +59,7 @@ export default function CadastroPage() {
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'ALUNO' | 'TURMA' | 'CONTRATO'>('ALUNO');
+  const [copiedCred, setCopiedCred] = useState(false);
 
   const companiesList = useMemo(() => {
     const set = new Set<string>(DEFAULT_EMPRESAS_GRUPO);
@@ -76,7 +73,7 @@ export default function CadastroPage() {
     if (turmas.length > 0) return turmas;
     return DEFAULT_TURMAS.map((dt) => ({
       ...dt,
-      periodo: '2026.1 - Manhã',
+      periodo: '2026.1 • Manhã',
       instituicao: activeInstitution,
       totalAlunos: 0,
       alunosEmRisco: 0,
@@ -90,47 +87,32 @@ export default function CadastroPage() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [showSenha, setShowSenha] = useState(false);
-
-  const calculatePasswordStrength = (pass: string) => {
-    if (!pass) return 0;
-    let score = 0;
-    if (pass.length >= 6) score += 1;
-    if (/[A-Z]/.test(pass)) score += 1;
-    if (/[0-9]/.test(pass)) score += 1;
-    if (/[^A-Za-z0-9]/.test(pass)) score += 1;
-    return score;
-  };
-
-  const passStrength = calculatePasswordStrength(senha);
-  const strengthLabels = [
-    { label: 'Muito Curta', color: 'bg-slate-700 text-slate-400', emoji: '😴' },
-    { label: 'Fraca', color: 'bg-rose-500 text-rose-500', emoji: '⚠️' },
-    { label: 'Média', color: 'bg-amber-500 text-amber-500', emoji: '🤔' },
-    { label: 'Forte', color: 'bg-sky-500 text-sky-500', emoji: '🔥' },
-    { label: 'Segura', color: 'bg-emerald-500 text-emerald-500', emoji: '🛡️' },
-  ];
   const [matricula, setMatricula] = useState('');
   const [tipoVinculo, setTipoVinculo] = useState<TipoVinculo>('APRENDIZ');
   const [turmaSelect, setTurmaSelect] = useState<string>(availableTurmasList[0]?.id || 'turma-ds-01');
   const [customTurma, setCustomTurma] = useState<string>('');
-  const [curso, setCurso] = useState(availableTurmasList[0]?.nomeCurso || 'Técnico em Desenvolvimento de Sistemas');
-  const [empresaSelect, setEmpresaSelect] = useState<string>(companiesList[0] || 'TechCorp Soluções Digitais S.A.');
+  const [curso, setCurso] = useState(
+    availableTurmasList[0]?.nomeCurso || 'Técnico em Desenvolvimento de Sistemas'
+  );
+  const [empresaSelect, setEmpresaSelect] = useState<string>(
+    companiesList[0] || 'TechCorp Soluções Digitais S.A.'
+  );
   const [customEmpresa, setCustomEmpresa] = useState<string>('');
   const [instituicao, setInstituicao] = useState(activeInstitution);
   const [instituicaoTurma, setInstituicaoTurma] = useState(activeInstitution);
-  const [dataAdmissao, setDataAdmissao] = useState(
-    new Date().toISOString().split('T')[0]
-  );
+  const [dataAdmissao, setDataAdmissao] = useState(new Date().toISOString().split('T')[0]);
   const [isSubmittingAluno, setIsSubmittingAluno] = useState(false);
 
   const [codigoTurma, setCodigoTurma] = useState('');
   const [nomeCursoTurma, setNomeCursoTurma] = useState('');
-  const [periodoTurma, setPeriodoTurma] = useState('2026.2 - Manhã');
+  const [periodoTurma, setPeriodoTurma] = useState('2026.2 • Manhã');
   const [isSubmittingTurma, setIsSubmittingTurma] = useState(false);
 
   const [contratoAlunoId, setContratoAlunoId] = useState<string>('');
   const [contratoNumero, setContratoNumero] = useState<string>('');
-  const [contratoInicio, setContratoInicio] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [contratoInicio, setContratoInicio] = useState<string>(
+    new Date().toISOString().split('T')[0]
+  );
   const [contratoFim, setContratoFim] = useState<string>('2026-12-15');
   const [contratoBolsa, setContratoBolsa] = useState<string>('1650');
   const [isSubmittingContrato, setIsSubmittingContrato] = useState(false);
@@ -142,6 +124,15 @@ export default function CadastroPage() {
       if (selected) {
         setCurso(selected.nomeCurso);
       }
+    }
+  };
+
+  const handleCopyCredential = () => {
+    const credential = senha.trim() || 'DocFlow@2026';
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(credential);
+      setCopiedCred(true);
+      setTimeout(() => setCopiedCred(false), 2000);
     }
   };
 
@@ -157,21 +148,18 @@ export default function CadastroPage() {
     }
 
     const finalTurmaId =
-      turmaSelect === '__CUSTOM_TURMA__'
-        ? `turma-custom-${Date.now()}`
-        : turmaSelect;
+      turmaSelect === '__CUSTOM_TURMA__' ? `turma-custom-${Date.now()}` : turmaSelect;
 
     const finalCurso =
-      turmaSelect === '__CUSTOM_TURMA__'
-        ? customTurma.trim() || 'Curso Técnico'
-        : curso;
+      turmaSelect === '__CUSTOM_TURMA__' ? customTurma.trim() || 'Curso Técnico' : curso;
 
     const finalEmpresa =
       empresaSelect === '__CUSTOM__'
         ? customEmpresa.trim() || 'Empresa Concedente'
         : empresaSelect;
 
-    const cleanEmail = email.trim() || `${nome.toLowerCase().replace(/\s+/g, '.')}@aluno.com.br`;
+    const cleanEmail =
+      email.trim() || `${nome.toLowerCase().replace(/\s+/g, '.')}@aluno.com.br`;
     const studentPassword = senha.trim() || 'DocFlow@2026';
 
     setIsSubmittingAluno(true);
@@ -186,8 +174,7 @@ export default function CadastroPage() {
         perfil: 'ESTUDANTE',
         senha: studentPassword,
       });
-    } catch {
-    }
+    } catch {}
 
     let createdBackendId: string | undefined = undefined;
     try {
@@ -211,8 +198,7 @@ export default function CadastroPage() {
           })
           .catch(() => {});
       }
-    } catch {
-    }
+    } catch {}
 
     const created = addNewStudent({
       id: createdBackendId,
@@ -224,7 +210,12 @@ export default function CadastroPage() {
       turmaId: finalTurmaId,
       curso: finalCurso,
       empresa: finalEmpresa,
-      instituicao: tipoVinculo === 'APRENDIZ' ? (currentRole === 'COORDENADOR' ? activeInstitution : instituicao) : undefined,
+      instituicao:
+        tipoVinculo === 'APRENDIZ'
+          ? currentRole === 'COORDENADOR'
+            ? activeInstitution
+            : instituicao
+          : undefined,
       dataAdmissao,
     });
 
@@ -313,9 +304,29 @@ export default function CadastroPage() {
     setIsSubmittingContrato(false);
   };
 
+  const selectedTurmaObj = availableTurmasList.find((t) => t.id === turmaSelect);
+  const previewTurmaLabel =
+    turmaSelect === '__CUSTOM_TURMA__'
+      ? customTurma.trim() || 'Turma personalizada'
+      : selectedTurmaObj
+      ? `${selectedTurmaObj.codigo} — ${selectedTurmaObj.nomeCurso}`
+      : curso;
+
+  const selectedContratoStudent = allStudentsList.find((s) => s.id === contratoAlunoId);
+  const recentStudents = allStudentsList.slice(0, 3);
+
+  const tabs = [
+    { id: 'ALUNO' as const, label: 'Estudante' },
+    { id: 'TURMA' as const, label: 'Turma' },
+    { id: 'CONTRATO' as const, label: 'Contrato / TCE' },
+  ];
+
+  const inputClass =
+    'w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#085078] dark:focus:border-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-colors';
+
   return (
-    <div className="max-w-4xl mx-auto py-4 px-4 sm:px-6 animate-fadeIn space-y-6">
-      {/* Card Banner Padrão */}
+    <div className="space-y-6 animate-fadeIn">
+      {/* 1. Card Banner Superior (mesma largura total das demais páginas) */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6 mb-6 flex items-center justify-between shadow-sm">
         <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
           Central de Cadastros
@@ -329,112 +340,69 @@ export default function CadastroPage() {
         </Link>
       </div>
 
-      <div className="flex justify-center">
-        <div className="inline-flex bg-slate-100 dark:bg-slate-800/60 p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm max-w-xl w-full">
+      {/* 2. Navegação por Abas Horizontal Limpa e Alinhada à Esquerda */}
+      <div className="flex items-center gap-6 border-b border-slate-200 dark:border-slate-800 overflow-x-auto">
+        {tabs.map((tab) => (
           <button
+            key={tab.id}
             type="button"
             onClick={() => {
-              setActiveTab('ALUNO');
+              setActiveTab(tab.id);
               scrollToTop('instant');
             }}
-            className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
-              activeTab === 'ALUNO'
-                ? 'bg-white dark:bg-slate-900 text-[#085078] dark:text-cyan-400 shadow-xs border border-slate-200 dark:border-slate-700'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+            className={`pb-3 text-sm transition-all shrink-0 cursor-pointer border-b-2 -mb-px ${
+              activeTab === tab.id
+                ? 'border-[#085078] text-[#085078] dark:text-cyan-400 dark:border-cyan-400 font-bold'
+                : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-medium'
             }`}
           >
-            <UserPlus className="w-4 h-4 text-[#085078] dark:text-cyan-400" />
-            <span>Estudante</span>
+            {tab.label}
           </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('TURMA');
-              scrollToTop('instant');
-            }}
-            className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
-              activeTab === 'TURMA'
-                ? 'bg-white dark:bg-slate-900 text-[#085078] dark:text-cyan-400 shadow-xs border border-slate-200 dark:border-slate-700'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
-            }`}
-          >
-            <FolderPlus className="w-4 h-4 text-[#085078] dark:text-cyan-400" />
-            <span>Turma</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('CONTRATO');
-              scrollToTop('instant');
-            }}
-            className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
-              activeTab === 'CONTRATO'
-                ? 'bg-white dark:bg-slate-900 text-[#085078] dark:text-cyan-400 shadow-xs border border-slate-200 dark:border-slate-700'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
-            }`}
-          >
-            <FileSignature className="w-4 h-4 text-[#085078] dark:text-cyan-400" />
-            <span>Contrato / TCE</span>
-          </button>
-        </div>
+        ))}
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        {activeTab === 'ALUNO' && (
-          <form onSubmit={handleAlunoSubmit}>
-            <div className="px-6 sm:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
+      {/* 3. Grid Equilibrado em 2 Colunas (2/3 Formulário + 1/3 Prévia & Recentes) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        {/* COLUNA PRINCIPAL: Formulário de Cadastro */}
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+          {activeTab === 'ALUNO' && (
+            <form onSubmit={handleAlunoSubmit}>
+              <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-base font-bold text-slate-900 dark:text-white">
                   Novo Estudante
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Cadastre um jovem aprendiz ou estagiário com credencial de acesso
-                </p>
-              </div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800/60">
-                <Check className="w-3 h-3" />
-                <span>Ativo</span>
-              </span>
-            </div>
+                </h2>
 
-            <div className="p-6 sm:p-8 space-y-6">
-              <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-200/80 dark:border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setTipoVinculo('APRENDIZ')}
-                  className={`py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                    tipoVinculo === 'APRENDIZ'
-                      ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-300 dark:border-slate-700'
-                      : 'text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white'
-                  }`}
-                >
-                  <GraduationCap className="w-4 h-4 text-[#085078] dark:text-cyan-400" />
-                  <span>Jovem Aprendiz</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTipoVinculo('ESTAGIARIO')}
-                  className={`py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                    tipoVinculo === 'ESTAGIARIO'
-                      ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-xs border border-slate-300 dark:border-slate-700'
-                      : 'text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white'
-                  }`}
-                >
-                  <Briefcase className="w-4 h-4 text-[#085078] dark:text-cyan-400" />
-                  <span>Estágio (TCE)</span>
-                </button>
+                {/* Seletor compacto de modalidade */}
+                <div className="inline-flex p-1 bg-slate-100 dark:bg-slate-800/70 rounded-lg border border-slate-200 dark:border-slate-700/60">
+                  <button
+                    type="button"
+                    onClick={() => setTipoVinculo('APRENDIZ')}
+                    className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer ${
+                      tipoVinculo === 'APRENDIZ'
+                        ? 'bg-[#085078] text-white shadow-xs'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    Jovem Aprendiz
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTipoVinculo('ESTAGIARIO')}
+                    className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer ${
+                      tipoVinculo === 'ESTAGIARIO'
+                        ? 'bg-[#085078] text-white shadow-xs'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    Estágio (TCE)
+                  </button>
+                </div>
               </div>
 
-              <div className="space-y-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                  1. Dados Pessoais & Acesso
-                </span>
-
+              <div className="p-6 space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2 space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
                       Nome Completo
                     </label>
                     <input
@@ -442,13 +410,13 @@ export default function CadastroPage() {
                       required
                       value={nome}
                       onChange={(e) => setNome(e.target.value)}
-                      placeholder="Nome do estudante"
-                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                      placeholder="Nome completo do estudante"
+                      className={inputClass}
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
                       CPF
                     </label>
                     <input
@@ -458,12 +426,12 @@ export default function CadastroPage() {
                       onChange={(e) => setCpf(formatCPF(e.target.value))}
                       placeholder="000.000.000-00"
                       maxLength={14}
-                      className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                      className={`${inputClass} font-mono`}
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
                       Matrícula
                     </label>
                     <input
@@ -472,30 +440,27 @@ export default function CadastroPage() {
                       value={matricula}
                       onChange={(e) => setMatricula(e.target.value)}
                       placeholder="Ex: 2026-DS-0199"
-                      className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
+                      className={`${inputClass} font-mono`}
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      E-mail Institucional ou Pessoal
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                      E-mail
                     </label>
-                    <div className="relative">
-                      <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="email@exemplo.com"
-                        className="w-full h-10 pl-9 pr-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                      />
-                    </div>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="email@exemplo.com"
+                      className={inputClass}
+                    />
                   </div>
 
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                        Senha de Acesso ao Portal
+                        Senha de Acesso
                       </label>
                       <button
                         type="button"
@@ -506,75 +471,31 @@ export default function CadastroPage() {
                         <span>{showSenha ? 'Ocultar' : 'Exibir'}</span>
                       </button>
                     </div>
-                    <div className="relative">
-                      <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <input
-                        type={showSenha ? 'text' : 'password'}
-                        value={senha}
-                        onChange={(e) => setSenha(e.target.value)}
-                        placeholder="Padrão: DocFlow@2026"
-                        className="w-full h-10 pl-9 pr-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all font-mono"
-                      />
-                    </div>
-                    {senha.length > 0 && (
-                      <div className="pt-1.5 space-y-1">
-                        <div className="flex items-center justify-between text-[10px] font-mono">
-                          <span className="text-slate-500 dark:text-slate-400">Força da Senha:</span>
-                          <span className="font-bold flex items-center gap-1">
-                            <span>{strengthLabels[passStrength].emoji}</span>
-                            <span className={strengthLabels[passStrength].color.split(' ')[1]}>
-                              {strengthLabels[passStrength].label}
-                            </span>
-                          </span>
-                        </div>
-                        <div className="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden flex gap-0.5">
-                          {[1, 2, 3, 4].map((step) => (
-                            <div
-                              key={step}
-                              className={`h-full flex-1 transition-all duration-300 ${
-                                passStrength >= step
-                                  ? passStrength === 1
-                                    ? 'bg-rose-500'
-                                    : passStrength === 2
-                                    ? 'bg-amber-500'
-                                    : passStrength === 3
-                                    ? 'bg-sky-400'
-                                    : 'bg-emerald-400'
-                                  : 'bg-slate-200 dark:bg-slate-700'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    <input
+                      type={showSenha ? 'text' : 'password'}
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value)}
+                      placeholder="Padrão: DocFlow@2026"
+                      className={`${inputClass} font-mono`}
+                    />
                   </div>
-                </div>
-              </div>
 
-              <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                  2. Dados Acadêmicos & Concessão
-                </span>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
                       Turma / Curso
                     </label>
                     <select
                       value={turmaSelect}
                       onChange={(e) => handleTurmaChange(e.target.value)}
-                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 cursor-pointer"
+                      className={`${inputClass} cursor-pointer`}
                     >
-                      <optgroup label="Turmas Disponíveis">
-                        {availableTurmasList.map((t) => (
-                          <option key={t.id} value={t.id}>
-                            {t.codigo} — {t.nomeCurso}
-                          </option>
-                        ))}
-                      </optgroup>
+                      {availableTurmasList.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.codigo} — {t.nomeCurso}
+                        </option>
+                      ))}
                       <option value="__CUSTOM_TURMA__">
-                        + Informar Outra Turma / Curso (Digitação Livre)
+                        + Informar outra turma / curso
                       </option>
                     </select>
 
@@ -587,43 +508,39 @@ export default function CadastroPage() {
                           setCustomTurma(e.target.value);
                           setCurso(e.target.value);
                         }}
-                        placeholder="Código e Nome da Turma (Ex: DS-2026 / Redes)"
-                        className="w-full h-10 px-3 text-xs bg-white dark:bg-slate-900 border border-[#085078] dark:border-cyan-400 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] mt-2"
+                        placeholder="Código e nome da turma"
+                        className={`${inputClass} mt-2`}
                       />
                     )}
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      Data de Admissão / Início
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                      Data de Início
                     </label>
                     <input
                       type="date"
                       value={dataAdmissao}
                       onChange={(e) => setDataAdmissao(e.target.value)}
-                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400"
+                      className={inputClass}
                     />
                   </div>
 
-                  <div className="sm:col-span-2 space-y-1">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                  <div className={tipoVinculo === 'APRENDIZ' ? 'space-y-1' : 'sm:col-span-2 space-y-1'}>
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
                       Empresa Concedente
                     </label>
                     <select
                       value={empresaSelect}
                       onChange={(e) => setEmpresaSelect(e.target.value)}
-                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 cursor-pointer"
+                      className={`${inputClass} cursor-pointer`}
                     >
-                      <optgroup label="Empresas Parceiras do Grupo">
-                        {companiesList.map((empNome) => (
-                          <option key={empNome} value={empNome}>
-                            {empNome}
-                          </option>
-                        ))}
-                      </optgroup>
-                      <option value="__CUSTOM__">
-                        + Informar Outra Empresa Concedente (Digitação Livre)
-                      </option>
+                      {companiesList.map((empNome) => (
+                        <option key={empNome} value={empNome}>
+                          {empNome}
+                        </option>
+                      ))}
+                      <option value="__CUSTOM__">+ Informar outra empresa</option>
                     </select>
 
                     {empresaSelect === '__CUSTOM__' && (
@@ -632,30 +549,29 @@ export default function CadastroPage() {
                         required
                         value={customEmpresa}
                         onChange={(e) => setCustomEmpresa(e.target.value)}
-                        placeholder="Digite a Razão Social da Empresa Concedente"
-                        className="w-full h-10 px-3 text-xs bg-white dark:bg-slate-900 border border-[#085078] dark:border-cyan-400 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] mt-2"
+                        placeholder="Razão social da empresa"
+                        className={`${inputClass} mt-2`}
                       />
                     )}
                   </div>
 
                   {tipoVinculo === 'APRENDIZ' && (
-                    <div className="sm:col-span-2 space-y-1">
-                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
                         Instituição de Ensino
                       </label>
                       {currentRole === 'COORDENADOR' ? (
-                        <div className="h-10 px-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-between text-xs text-slate-700 dark:text-slate-300">
-                          <div className="flex items-center gap-2">
-                            <Building2 className="w-4 h-4 text-slate-400" />
-                            <span className="font-medium">{activeInstitution}</span>
-                          </div>
-                          <span className="text-[10px] text-slate-400">Sua Instituição</span>
-                        </div>
+                        <input
+                          type="text"
+                          readOnly
+                          value={activeInstitution}
+                          className="w-full h-10 px-3 text-xs bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 cursor-default"
+                        />
                       ) : (
                         <select
                           value={instituicao}
                           onChange={(e) => setInstituicao(e.target.value)}
-                          className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 cursor-pointer"
+                          className={`${inputClass} cursor-pointer`}
                         >
                           {availableInstitutions.map((inst) => (
                             <option key={inst} value={inst}>
@@ -668,257 +584,379 @@ export default function CadastroPage() {
                   )}
                 </div>
               </div>
-            </div>
 
-            <div className="px-6 sm:px-8 py-4 bg-slate-50/80 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => router.push('/coordenador/dossies')}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmittingAluno}
-                className="px-5 py-2.5 text-xs font-medium text-white bg-[#085078] hover:bg-[#063f60] rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50"
-              >
-                {isSubmittingAluno ? 'Cadastrando...' : 'Cadastrar Estudante'}
-              </button>
-            </div>
-          </form>
-        )}
-
-        {activeTab === 'TURMA' && (
-          <form onSubmit={handleTurmaSubmit}>
-            <div className="px-6 sm:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
-                  Nova Turma
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Crie uma turma para agrupar e monitorar aprendizes
-                </p>
+              <div className="px-6 py-4 bg-slate-50/70 dark:bg-slate-800/40 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push('/coordenador/dossies')}
+                  className="px-4 py-2 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingAluno}
+                  className="px-5 py-2.5 text-xs font-medium text-white bg-[#085078] hover:bg-[#063f60] rounded-lg shadow-sm transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmittingAluno ? 'Cadastrando...' : 'Cadastrar Estudante'}
+                </button>
               </div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
-                <Check className="w-3 h-3" />
-                <span>Ativa</span>
-              </span>
-            </div>
+            </form>
+          )}
 
-            <div className="p-6 sm:p-8 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Código da Turma
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={codigoTurma}
-                    onChange={(e) => setCodigoTurma(e.target.value)}
-                    placeholder="Ex: DS-2026.2-A"
-                    className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                  />
-                </div>
+          {activeTab === 'TURMA' && (
+            <form onSubmit={handleTurmaSubmit}>
+              <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+                <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                  Nova Turma
+                </h2>
+              </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Turno / Período
-                  </label>
-                  <select
-                    value={periodoTurma}
-                    onChange={(e) => setPeriodoTurma(e.target.value)}
-                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 cursor-pointer"
-                  >
-                    <option value="2026.2 - Manhã">2026.2 - Manhã</option>
-                    <option value="2026.2 - Tarde">2026.2 - Tarde</option>
-                    <option value="2026.2 - Noite">2026.2 - Noite</option>
-                    <option value="2026.2 - Integral">2026.2 - Integral</option>
-                  </select>
-                </div>
+              <div className="p-6 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                      Código da Turma
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={codigoTurma}
+                      onChange={(e) => setCodigoTurma(e.target.value)}
+                      placeholder="Ex: DS-2026.2-A"
+                      className={`${inputClass} font-mono`}
+                    />
+                  </div>
 
-                <div className="sm:col-span-2 space-y-1">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Nome do Curso
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={nomeCursoTurma}
-                    onChange={(e) => setNomeCursoTurma(e.target.value)}
-                    placeholder="Ex: Técnico em Desenvolvimento de Sistemas"
-                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 focus:bg-white dark:focus:bg-slate-900 transition-all"
-                  />
-                </div>
-
-                <div className="sm:col-span-2 space-y-1">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Instituição de Ensino
-                  </label>
-                  {currentRole === 'COORDENADOR' ? (
-                    <div className="h-10 px-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-between text-xs text-slate-700 dark:text-slate-300">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="w-4 h-4 text-slate-400" />
-                        <span className="font-medium">{activeInstitution}</span>
-                      </div>
-                      <span className="text-[10px] text-slate-400">Sua Instituição</span>
-                    </div>
-                  ) : (
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                      Turno / Período
+                    </label>
                     <select
-                      value={instituicaoTurma}
-                      onChange={(e) => setInstituicaoTurma(e.target.value)}
-                      className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 cursor-pointer"
+                      value={periodoTurma}
+                      onChange={(e) => setPeriodoTurma(e.target.value)}
+                      className={`${inputClass} cursor-pointer`}
                     >
-                      {availableInstitutions.map((inst) => (
-                        <option key={inst} value={inst}>
-                          {inst}
+                      <option value="2026.2 • Manhã">2026.2 • Manhã</option>
+                      <option value="2026.2 • Tarde">2026.2 • Tarde</option>
+                      <option value="2026.2 • Noite">2026.2 • Noite</option>
+                      <option value="2026.2 • Integral">2026.2 • Integral</option>
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-2 space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                      Nome do Curso
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={nomeCursoTurma}
+                      onChange={(e) => setNomeCursoTurma(e.target.value)}
+                      placeholder="Ex: Técnico em Desenvolvimento de Sistemas"
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2 space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                      Instituição de Ensino
+                    </label>
+                    {currentRole === 'COORDENADOR' ? (
+                      <input
+                        type="text"
+                        readOnly
+                        value={activeInstitution}
+                        className="w-full h-10 px-3 text-xs bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 cursor-default"
+                      />
+                    ) : (
+                      <select
+                        value={instituicaoTurma}
+                        onChange={(e) => setInstituicaoTurma(e.target.value)}
+                        className={`${inputClass} cursor-pointer`}
+                      >
+                        {availableInstitutions.map((inst) => (
+                          <option key={inst} value={inst}>
+                            {inst}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-6 py-4 bg-slate-50/70 dark:bg-slate-800/40 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push('/analytics')}
+                  className="px-4 py-2 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingTurma}
+                  className="px-5 py-2.5 text-xs font-medium text-white bg-[#085078] hover:bg-[#063f60] rounded-lg shadow-sm transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmittingTurma ? 'Salvando...' : 'Salvar Turma'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {activeTab === 'CONTRATO' && (
+            <form onSubmit={handleContratoSubmit}>
+              <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+                <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                  Novo Contrato / Termo de Compromisso (TCE)
+                </h2>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="sm:col-span-2 space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                      Estudante
+                    </label>
+                    <select
+                      required
+                      value={contratoAlunoId}
+                      onChange={(e) => setContratoAlunoId(e.target.value)}
+                      className={`${inputClass} cursor-pointer`}
+                    >
+                      <option value="">Selecione o estudante...</option>
+                      {allStudentsList.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.nome} — {s.matricula}
                         </option>
                       ))}
                     </select>
-                  )}
+                  </div>
+
+                  <div className="sm:col-span-2 space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                      Número do Contrato / TCE
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={contratoNumero}
+                      onChange={(e) => setContratoNumero(e.target.value)}
+                      placeholder="Ex: TCE-2026-042 ou APREND-2026-0199"
+                      className={`${inputClass} font-mono`}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                      Data de Início
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={contratoInicio}
+                      onChange={(e) => setContratoInicio(e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                      Data de Término
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={contratoFim}
+                      onChange={(e) => setContratoFim(e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2 space-y-1">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                      Bolsa-Auxílio Mensal (R$)
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={contratoBolsa}
+                      onChange={(e) => setContratoBolsa(e.target.value)}
+                      placeholder="Ex: 1650.00"
+                      className={`${inputClass} font-mono`}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="px-6 sm:px-8 py-4 bg-slate-50/80 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => router.push('/analytics')}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmittingTurma}
-                className="px-5 py-2.5 text-xs font-medium text-white bg-[#085078] hover:bg-[#063f60] rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50"
-              >
-                {isSubmittingTurma ? 'Criando...' : 'Salvar Turma'}
-              </button>
-            </div>
-          </form>
-        )}
-
-        {activeTab === 'CONTRATO' && (
-          <form onSubmit={handleContratoSubmit}>
-            <div className="px-6 sm:px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
-                  Novo Contrato / Termo de Compromisso (TCE)
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Vincule um contrato com vigência e bolsa-auxílio a um estudante
-                </p>
+              <div className="px-6 py-4 bg-slate-50/70 dark:bg-slate-800/40 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push('/coordenador/dossies')}
+                  className="px-4 py-2 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingContrato}
+                  className="px-5 py-2.5 text-xs font-medium text-white bg-[#085078] hover:bg-[#063f60] rounded-lg shadow-sm transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmittingContrato ? 'Registrando...' : 'Salvar Contrato / TCE'}
+                </button>
               </div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-800/60">
-                <Check className="w-3 h-3" />
-                <span>Contrato</span>
-              </span>
-            </div>
+            </form>
+          )}
+        </div>
 
-            <div className="p-6 sm:p-8 space-y-4">
-              <div className="p-3.5 rounded-lg bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 flex items-start gap-2.5">
-                <CalendarDays className="w-4 h-4 text-sky-600 dark:text-sky-400 mt-0.5 shrink-0" />
-                <p className="text-xs text-sky-900 dark:text-sky-300 font-medium">
-                  Registre ou vincule um contrato / TCE a um estudante já cadastrado. O contrato ficará visível no dossiê e no portal do estudante.
-                </p>
-              </div>
+        {/* COLUNA LATERAL: Prévia do Cadastro + Últimos Cadastros */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Card Superior: Prévia do Cadastro */}
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-3">
+              Prévia do Cadastro
+            </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2 space-y-1">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Estudante
-                  </label>
-                  <select
-                    required
-                    value={contratoAlunoId}
-                    onChange={(e) => setContratoAlunoId(e.target.value)}
-                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 cursor-pointer"
-                  >
-                    <option value="">Selecione o estudante...</option>
-                    {allStudentsList.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.nome} — {s.matricula}
-                      </option>
-                    ))}
-                  </select>
+            {activeTab === 'ALUNO' && (
+              <div className="space-y-3 text-xs">
+                <div>
+                  <span className="text-slate-500 dark:text-slate-400 block">Nome</span>
+                  <p className="font-semibold text-slate-900 dark:text-white mt-0.5 truncate">
+                    {nome.trim() || 'Aguardando preenchimento'}
+                  </p>
                 </div>
 
-                <div className="sm:col-span-2 space-y-1">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Número do Contrato / TCE
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={contratoNumero}
-                    onChange={(e) => setContratoNumero(e.target.value)}
-                    placeholder="Ex: TCE-2026-042 ou APREND-2026-0199"
-                    className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400 font-medium"
-                  />
+                <div>
+                  <span className="text-slate-500 dark:text-slate-400 block">Modalidade</span>
+                  <p className="font-medium text-slate-800 dark:text-slate-200 mt-0.5">
+                    {tipoVinculo === 'APRENDIZ' ? 'Jovem Aprendiz' : 'Estágio (TCE)'}
+                  </p>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Data de Início
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={contratoInicio}
-                    onChange={(e) => setContratoInicio(e.target.value)}
-                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400"
-                  />
+                <div>
+                  <span className="text-slate-500 dark:text-slate-400 block">Turma</span>
+                  <p className="font-medium text-slate-800 dark:text-slate-200 mt-0.5">
+                    {previewTurmaLabel}
+                  </p>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Data de Término
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={contratoFim}
-                    onChange={(e) => setContratoFim(e.target.value)}
-                    className="w-full h-10 px-3 text-xs bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400"
-                  />
-                </div>
-
-                <div className="sm:col-span-2 space-y-1">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300 block">
-                    Bolsa-Auxílio Mensal (R$)
-                  </label>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    value={contratoBolsa}
-                    onChange={(e) => setContratoBolsa(e.target.value)}
-                    placeholder="Ex: 1650.00"
-                    className="w-full h-10 px-3 text-xs font-mono bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#085078] dark:focus:ring-cyan-400"
-                  />
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
+                  <span className="text-slate-500 dark:text-slate-400 block mb-1.5">
+                    Credencial de Acesso Inicial
+                  </span>
+                  <div className="flex items-center justify-between gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-lg">
+                    <span className="font-mono font-semibold text-slate-900 dark:text-white truncate">
+                      {senha.trim() || 'DocFlow@2026'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCopyCredential}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700 transition-colors cursor-pointer shrink-0"
+                      title="Copiar senha inicial"
+                    >
+                      {copiedCred ? (
+                        <>
+                          <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                          <span>Copiado</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3" />
+                          <span>Copiar</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            <div className="px-6 sm:px-8 py-4 bg-slate-50/80 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => router.push('/coordenador/dossies')}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmittingContrato}
-                className="px-5 py-2.5 text-xs font-medium text-white bg-[#085078] hover:bg-[#063f60] rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50"
-              >
-                {isSubmittingContrato ? 'Registrando...' : 'Salvar Contrato / TCE'}
-              </button>
-            </div>
-          </form>
-        )}
+            {activeTab === 'TURMA' && (
+              <div className="space-y-3 text-xs">
+                <div>
+                  <span className="text-slate-500 dark:text-slate-400 block">Código</span>
+                  <p className="font-mono font-semibold text-slate-900 dark:text-white mt-0.5">
+                    {codigoTurma.trim() || 'A definir'}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-slate-500 dark:text-slate-400 block">Curso</span>
+                  <p className="font-medium text-slate-800 dark:text-slate-200 mt-0.5">
+                    {nomeCursoTurma.trim() || 'Aguardando preenchimento'}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-slate-500 dark:text-slate-400 block">Período</span>
+                  <p className="font-medium text-slate-800 dark:text-slate-200 mt-0.5">
+                    {periodoTurma}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'CONTRATO' && (
+              <div className="space-y-3 text-xs">
+                <div>
+                  <span className="text-slate-500 dark:text-slate-400 block">Estudante</span>
+                  <p className="font-semibold text-slate-900 dark:text-white mt-0.5 truncate">
+                    {selectedContratoStudent?.nome || 'Selecione um estudante'}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-slate-500 dark:text-slate-400 block">Número</span>
+                  <p className="font-mono font-medium text-slate-800 dark:text-slate-200 mt-0.5">
+                    {contratoNumero.trim() || 'A definir'}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-slate-500 dark:text-slate-400 block">Vigência</span>
+                  <p className="font-medium text-slate-800 dark:text-slate-200 mt-0.5">
+                    {formatShortDate(contratoInicio)} até {formatShortDate(contratoFim)}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Card Inferior: Últimos Cadastros */}
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-3">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-3">
+              Últimos Cadastros
+            </h3>
+
+            {recentStudents.length === 0 ? (
+              <p className="text-xs text-slate-500 dark:text-slate-400 py-4 text-center">
+                Nenhum cadastro recente.
+              </p>
+            ) : (
+              <div className="space-y-2.5">
+                {recentStudents.map((s) => {
+                  const turmaCode =
+                    turmas.find((t) => t.id === s.turmaId)?.codigo ||
+                    s.turmaNome?.split('—')[0]?.trim() ||
+                    s.curso ||
+                    'Sem Turma';
+
+                  return (
+                    <Link
+                      key={s.id}
+                      href={`/coordenador/dossies?student=${s.id}`}
+                      className="block border border-slate-200 dark:border-slate-800 rounded-lg p-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
+                    >
+                      <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">
+                        {s.nome}
+                      </p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                        {turmaCode} • {formatShortDate(s.dataAdmissao)}
+                      </p>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

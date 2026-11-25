@@ -41,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${jakarta.variable} ${jetbrains.variable} ${outfit.variable}`}
+      className={`${jakarta.variable} ${jetbrains.variable} ${outfit.variable} scroll-smooth`}
       suppressHydrationWarning
     >
       <body

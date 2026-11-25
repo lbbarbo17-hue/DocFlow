@@ -121,6 +121,16 @@ export const INITIAL_SYSTEM_USERS: SystemUser[] = [
     ultimoAcesso: 'Agora mesmo',
     instituicao: 'Todas as Instituições (Global)',
   },
+  {
+    id: 'da641786-101e-4123-a6da-5c6b418fccd8',
+    nome: 'Prof. Marcelo Fernandes de Souza',
+    email: 'marcelo.souza@etec.sp.gov.br',
+    role: 'COORDENADOR',
+    cargo: 'Coordenador Pedagógico',
+    status: 'ATIVO',
+    ultimoAcesso: 'Agora mesmo',
+    instituicao: 'ETEC Politécnica de São Paulo',
+  },
 ];
 
 export const CURRENT_STUDENT: Student = {
@@ -146,6 +156,29 @@ export const CURRENT_STUDENT: Student = {
   documentos: [],
 };
 
-export const INITIAL_STUDENTS: Student[] = [];
+export const INITIAL_STUDENTS: Student[] = [
+  {
+    id: 'e0ccdeda-3b09-42f3-ad24-40e2bf9eae05',
+    nome: 'Beatriz Helena de Castro Ramos',
+    cpf: '123.456.789-00',
+    email: 'beatriz.ramos@aluno.etec.sp.gov.br',
+    matricula: 'SP2026-0042',
+    tipoVinculo: 'APRENDIZ',
+    dataNascimento: '2006-05-14',
+    idade: 19,
+    menorDeIdade: false,
+    genero: 'F',
+    dataAdmissao: '2026-02-01',
+    turmaId: 'turma-ds-01',
+    turmaNome: 'Técnico em Desenvolvimento de Sistemas',
+    curso: 'Técnico em Desenvolvimento de Sistemas',
+    empresa: 'TechCorp Soluções Digitais S.A.',
+    instituicao: 'ETEC Politécnica de São Paulo',
+    percentualConformidade: 100,
+    nivelRisco: 'BAIXO',
+    statusGeral: 'REGULAR',
+    documentos: [],
+  },
+];
 
 export const INITIAL_AUDIT_LOGS: AuditLog[] = [];

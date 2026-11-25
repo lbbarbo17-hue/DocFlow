@@ -2065,10 +2065,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       emailClean.includes('estag')
     ) {
       setCurrentRole('ESTUDANTE');
+      const fallbackStudent: Student = {
+        ...CURRENT_STUDENT,
+        id: 'std-fallback',
+        nome: emailClean.split('@')[0],
+        email: emailClean,
+        instituicao: 'ETEC Politécnica de São Paulo',
+        turmaNome: 'Técnico em Desenvolvimento de Sistemas',
+        curso: 'Técnico em Desenvolvimento de Sistemas',
+      };
+      setStudent(fallbackStudent);
       try {
         localStorage.setItem('docflow_current_role', 'ESTUDANTE');
       } catch {}
-      return { role: 'ESTUDANTE', route: '/estudante' };
+      return { role: 'ESTUDANTE', route: '/estudante', user: fallbackStudent };
     }
 
     if (
@@ -2078,17 +2088,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       emailClean.includes('diretor')
     ) {
       setCurrentRole('SUPERADMIN');
+      const fallbackAdmin: SystemUser = {
+        id: 'usr-admin-fallback',
+        nome: 'Super Administrador',
+        email: emailClean,
+        role: 'SUPERADMIN',
+        cargo: 'Super Administrador do Sistema',
+        status: 'ATIVO',
+        ultimoAcesso: 'Agora mesmo',
+        instituicao: 'Todas as Instituições (Global)',
+      };
       try {
         localStorage.setItem('docflow_current_role', 'SUPERADMIN');
       } catch {}
-      return { role: 'SUPERADMIN', route: '/admin' };
+      return { role: 'SUPERADMIN', route: '/admin', user: fallbackAdmin };
     }
 
     setCurrentRole('COORDENADOR');
+    const fallbackCoord: SystemUser = {
+      id: 'usr-coord-fallback',
+      nome: emailClean.split('@')[0].replace('.', ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+      email: emailClean,
+      role: 'COORDENADOR',
+      cargo: 'Coordenador Pedagógico',
+      status: 'ATIVO',
+      ultimoAcesso: 'Agora mesmo',
+      instituicao: 'ETEC Politécnica de São Paulo',
+    };
     try {
       localStorage.setItem('docflow_current_role', 'COORDENADOR');
+      localStorage.setItem('docflow_active_institution', 'ETEC Politécnica de São Paulo');
     } catch {}
-    return { role: 'COORDENADOR', route: '/coordenador' };
+    return { role: 'COORDENADOR', route: '/coordenador', user: fallbackCoord };
   };
 
   return (
